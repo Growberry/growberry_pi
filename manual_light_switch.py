@@ -17,7 +17,7 @@ import RPi.GPIO as GPIO
 #####################################################################
 
 GPIO.setmode(GPIO.BCM)
-#GPIO.cleanup()
+GPIO.cleanup()
 GPIO.setwarnings(True)
 GPIO.setup(17,GPIO.OUT)
 GPIO.setup(27,GPIO.OUT)
@@ -32,7 +32,10 @@ GPIO.setup(18,GPIO.OUT)
 
 def main():
     color= (light_chose())
+    print("result of light_chose function:  %s"%(color))
     behavior = (onoff(color))
+    print("result of behavior function:  %s"%(behavior))
+    
     if color == "red":
         red(behavior)
     elif color == "green":
@@ -44,7 +47,7 @@ def main():
         red(behavior)
         green(behavior)
         yellow(behavior)
-
+    else: print("sum-ting-wong")
 
 
 
@@ -53,7 +56,7 @@ def light_chose():
     light=str(raw_input("Which light would you like to modify? (red/green/yellow/all)"))
     if light not in color_options:
         print('Sorry, that color choice is not recognized.  Please try again.')
-        light_chose()
+        return light_chose()
     else: return light
 
 
@@ -64,7 +67,7 @@ def onoff(color):
     print(choice)
     if choice[0] not in behavior_options:
         print("Sorry, that behavior choice is not recognized.  Please try again.")
-        onoff(color)
+        return onoff(color)
     else: return choice
 
 
