@@ -94,8 +94,8 @@ class LED:
         self.pin = int(pin)         #this is the GPIO pin number (will depend on GPIO config)
         self.color = color
         self.power = power          #enter power in miliamps
-        self.state = None
-        LED.dictionary[name] = self
+        self.state = None           #was going to use conditional loop if I could have got backgrounding to work
+        LED.dictionary[name] = self #auto adds every instance of LED to the dictionary
 
     def on(self):
         self.state = "on"
@@ -113,13 +113,13 @@ class LED:
             repeat= int(args[0])
         except: repeat = 1
         try:
-                speed = float(args[1])
+                speed = (float(args[1]))/2
         except: speed = .5
         print repeat
         print speed
         print("%s LED is"%self.color + bcolors.BOLD + bcolors.PURPLE + " blinking." + bcolors.END)
         while repeat > 0:
-            print 'repeat: '+ str(repeat)
+            #print 'repeat: '+ str(repeat)
             GPIO.output(self.pin,GPIO.HIGH)
             time.sleep(speed)
             GPIO.output(self.pin,GPIO.LOW)
@@ -176,8 +176,6 @@ def activitycode(choices):
             behavior_choice_index = entered_code.index(argument)+1
             #print(argument, entered_code[behavior_choice_index])
             if entered_code[behavior_choice_index] == "on":
-                #print argument
-                #print choices[argument]
                 choices[argument].on()
             elif entered_code[behavior_choice_index] == "off":
                 choices[argument].off()
@@ -187,7 +185,7 @@ def activitycode(choices):
                 try:blinkspeed = entered_code[behavior_choice_index + 2]
                 except: blinkspeed = None
                 #background the call of LED.blink
-                b1= Thread(target = choices[argument].blink(blinkrepeat,blinkspeed))
+                b1= Thread(target = choices[argument].blink, args = (blinkrepeat,blinkspeed))
                 #choices[argument].blink(blinkrepeat,blinkspeed)
                 b1.start()
         elif argument == "exit":
@@ -198,6 +196,7 @@ def activitycode(choices):
 ##############################################################################
 
 main()
+
 
 """
 
