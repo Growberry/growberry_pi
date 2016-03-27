@@ -77,10 +77,12 @@ class bcolors:                          #these are the color codes
 
 
 class LED:
-    def __init__(self,pin,color,power):
+    dictionary  = {}
+    def __init__(self,pin,name,color,power):
         self.pin = int(pin)
         self.color = color
         self.power = power          #enter power in miliamps
+        LED.dictionary[name] = self
 
     def on(self):
         print("%s LED is"%self.color + bcolors.BOLD + bcolors.GREEN + " on." + bcolors.END)
@@ -98,12 +100,14 @@ class LED:
 
 
 #####################################################################
-greenLED= LED(17,"green", 20)
-redLED= LED(27,"red", 20)
-yellowLED= LED(18,"yellow", 20)
+greenLED= LED(17,"greenLED","green", 20)
+redLED= LED(27,"redLED","red", 20)
+yellowLED= LED(18,"yellowLED","yellow", 20)
 
-
-
+#list of LED names to check for in activation code
+behaviors = ['on','off','blink']
+#x= redLED
+leds = ["redLED","greenLED","yellowLED"]
 #####################################################################
 #                     Put code below this
 #####################################################################
@@ -122,8 +126,9 @@ def main():
     print('----------------------------')
     print('  WELCOME TO THE LIGHTSHOW  ')
     print('----------------------------')
+    print LED.dictionary
     while True:
-        result = activitycode(['yes','maybe']) 
+        result = activitycode(LED.dictionary) 
         if result == False:
             print "[--system--] powering down."
             redLED.blink()
@@ -134,13 +139,22 @@ def main():
             break
 
 
-########################  activitycode()  ###########################
+########################  activityentered_code()  ###########################
 def activitycode(choices):
-    code = [str(x) for x in raw_input('\n[--system--] enter code for LED behavior: LEDname on/off/blink..\n>>>').split()]
-    for argument in code:
+    entered_code = [str(x) for x in raw_input('\n[--system--] enter code for LED behavior: LEDname on/off/blink..\n>>>').split()]
+    for argument in entered_code:
         if argument in choices:
-            behavior_choice = code.index(argument)+1
-            print behavior_choice
+            behavior_choice_index = entered_code.index(argument)+1
+            print(argument, entered_code[behavior_choice_index])
+            if entered_code[behavior_choice_index] == "on":
+                print argument
+                print choices[argument]
+                choices[argument].on()
+            elif entered_code[behavior_choice_index] == "off":
+                choices[argument].off()
+            elif entered_code[behavior_choice_index] == "blink":
+                choices[argument].blink()
+
         elif argument == "exit":
             return False
 
