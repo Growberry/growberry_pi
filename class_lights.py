@@ -9,7 +9,7 @@
 
 
 ###########################  Imports here  ##########################
-
+from threading import Thread
 import time
 import os
 from time import sleep
@@ -51,8 +51,17 @@ GPIO.setup(18,GPIO.OUT)
 #####################################################################
 #                           Classes
 #####################################################################
-
 class bcolors:                          #these are the color codes
+    """
+    Toggle switch for printing in color. Once activated, everything following is in color X
+
+    This color class is completely unecessary, but it makes the output cooler, and doesn't really cause any harm
+    if you remove it, you'll have to remove all uses of it in the functions
+                        example:
+    print(bcolors.YELLOW + "Warning" + bcolors.END)
+    this prints "Warning" in yellow, then turns off colors, so everything printed after END will be normal
+    """
+
     PURPLE = '\033[95m'                 #purple
     BLUE = '\033[94m'                   #blue
     GREEN = '\033[92m'                  #green
@@ -69,34 +78,53 @@ class bcolors:                          #these are the color codes
         self.END = ''
         self.BOLD = ''
 
-#example:
-#print(bcolors.YELLOW + "Warning" + bcolors.END)
-#  this prints "Warning" in yellow, then turns off colors, so everything printed after END will be normal
 
 
-
-
+##########################  LED class  #############################
 class LED:
-    dictionary  = {}
+    """
+    Turns GPIO pins from LOW(off) to HIGH(on) and back again
+
+    this class pretty much works for any device connected to a single GPIO pin
+    as instances of LED are created, their names are added as keys in the LED.dictionary
+    """
+    dictionary  = {}                #a dictionary will all created LED instances' names as keys
+    #state = None
     def __init__(self,pin,name,color,power):
-        self.pin = int(pin)
+        self.pin = int(pin)         #this is the GPIO pin number (will depend on GPIO config)
         self.color = color
         self.power = power          #enter power in miliamps
+        self.state = None
         LED.dictionary[name] = self
 
     def on(self):
+        self.state = "on"
         print("%s LED is"%self.color + bcolors.BOLD + bcolors.GREEN + " on." + bcolors.END)
         GPIO.output(self.pin,GPIO.HIGH)
-        time.sleep(2) 
     def off(self):
+        self.state = "off"
         GPIO.output(self.pin,GPIO.LOW)
         print("%s LED is"%self.color + bcolors.BOLD + bcolors.RED + " off." + bcolors.END)
-    def blink(self):
+    def blink(self, *args):
+        self.state = "blinking"
+        print (len(args))
+        print args
+        try:
+            repeat= int(args[0])
+        except: repeat = 1
+        try:
+                speed = float(args[1])
+        except: speed = .5
+        print repeat
+        print speed
         print("%s LED is"%self.color + bcolors.BOLD + bcolors.PURPLE + " blinking." + bcolors.END)
-        GPIO.output(self.pin,GPIO.HIGH)
-        time.sleep(.5)
-        GPIO.output(self.pin,GPIO.LOW)
-        time.sleep(.5)
+        while repeat > 0:
+            print 'repeat: '+ str(repeat)
+            GPIO.output(self.pin,GPIO.HIGH)
+            time.sleep(speed)
+            GPIO.output(self.pin,GPIO.LOW)
+            time.sleep(speed)
+            repeat -= 1
 
 
 #####################################################################
@@ -104,10 +132,6 @@ greenLED= LED(17,"greenLED","green", 20)
 redLED= LED(27,"redLED","red", 20)
 yellowLED= LED(18,"yellowLED","yellow", 20)
 
-#list of LED names to check for in activation code
-behaviors = ['on','off','blink']
-#x= redLED
-leds = ["redLED","greenLED","yellowLED"]
 #####################################################################
 #                     Put code below this
 #####################################################################
@@ -129,6 +153,10 @@ def main():
     print LED.dictionary
     while True:
         result = activitycode(LED.dictionary) 
+        print('\nredLED: '+ str(redLED.state)+
+                '\ngreenLED: '+ str(greenLED.state)+
+                '\nyellowLED: '+ str(yellowLED.state)
+             )
         if result == False:
             print "[--system--] powering down."
             redLED.blink()
@@ -140,23 +168,34 @@ def main():
 
 
 ########################  activityentered_code()  ###########################
+
 def activitycode(choices):
     entered_code = [str(x) for x in raw_input('\n[--system--] enter code for LED behavior: LEDname on/off/blink..\n>>>').split()]
     for argument in entered_code:
         if argument in choices:
             behavior_choice_index = entered_code.index(argument)+1
-            print(argument, entered_code[behavior_choice_index])
+            #print(argument, entered_code[behavior_choice_index])
             if entered_code[behavior_choice_index] == "on":
-                print argument
-                print choices[argument]
+                #print argument
+                #print choices[argument]
                 choices[argument].on()
             elif entered_code[behavior_choice_index] == "off":
                 choices[argument].off()
             elif entered_code[behavior_choice_index] == "blink":
-                choices[argument].blink()
-
+                try:blinkrepeat = entered_code[behavior_choice_index + 1]
+                except: blinkrepeat = None
+                try:blinkspeed = entered_code[behavior_choice_index + 2]
+                except: blinkspeed = None
+                #background the call of LED.blink
+                b1= Thread(target = choices[argument].blink(blinkrepeat,blinkspeed))
+                #choices[argument].blink(blinkrepeat,blinkspeed)
+                b1.start()
         elif argument == "exit":
             return False
+
+##############################################################################
+#                       Executable code below:
+##############################################################################
 
 main()
 
