@@ -25,14 +25,14 @@ GPIO.setmode(GPIO.BCM)      #for using the names of the pins
 
 GPIO.cleanup()             #shouldn't need to use this, but just in case
 
-GPIO.setwarnings(True)      #set to false if the warnings bother you, helps troubleshooting
+GPIO.setwarnings(False)      #set to false if the warnings bother you, helps troubleshooting
 
 ############################ Activating pins ########################
 #GPIO.setup(<put pin number here>,GPIO.IN/OUT)  #will depend on setmode above, use "IN" for sensors, and "OUT" for LEDs
 
-GPIO.setup(17,GPIO.OUT)
-GPIO.setup(27,GPIO.OUT)
-GPIO.setup(18,GPIO.OUT)
+GPIO.setup(17,GPIO.OUT, initial = 0)
+GPIO.setup(27,GPIO.OUT, initial = 0)
+GPIO.setup(18,GPIO.OUT, initial = 1)
 
 
 ########################### if pin is GPIO.OUT  ######################
@@ -92,34 +92,44 @@ class LED:
     #state = None
     def __init__(self,pin,name,color,power):
         self.pin = int(pin)         #this is the GPIO pin number (will depend on GPIO config)
+        self.name = name
         self.color = color
         self.power = power          #enter power in miliamps
-        self.state = None           #was going to use conditional loop if I could have got backgrounding to work
+        self.state = GPIO.input(self.pin)           #was going to use conditional loop if I could have got backgrounding to work
         LED.dictionary[name] = self #auto adds every instance of LED to the dictionary
 
+    def getstate(self):
+        self.state = GPIO.input(self.pin)
+        return self.state
+
+    def fake(self):
+        if GPIO.output(self.pin):           # if self.pin == 1  
+            print "%s on port %s is 1/GPIO.HIGH/True"%(self.name,self.pin)
+        else:
+            print "%s on port %s is 0/GPIO.LOW/False"%(self.name,self.pin)
+
     def on(self):
-        self.state = "on"
-        print("%s LED is"%self.color + bcolors.BOLD + bcolors.GREEN + " on." + bcolors.END)
         GPIO.output(self.pin,GPIO.HIGH)
+        print("%s LED is"%self.color + bcolors.BOLD + bcolors.GREEN + " on." + bcolors.END)
+
     def off(self):
-        self.state = "off"
         GPIO.output(self.pin,GPIO.LOW)
         print("%s LED is"%self.color + bcolors.BOLD + bcolors.RED + " off." + bcolors.END)
+
     def blink(self, *args):
-        self.state = "blinking"
-        print (len(args))
-        print args
+        #print (len(args))          #troubleshooting print statement
+        #print args                 # another
         try:
             repeat= int(args[0])
         except: repeat = 1
         try:
                 speed = (float(args[1]))/2
         except: speed = .5
-        print repeat
-        print speed
+        #print repeat               #troubleshooting print statement
+        #print speed                # another
         print("%s LED is"%self.color + bcolors.BOLD + bcolors.PURPLE + " blinking." + bcolors.END)
         while repeat > 0:
-            #print 'repeat: '+ str(repeat)
+            self.state = "blinking"
             GPIO.output(self.pin,GPIO.HIGH)
             time.sleep(speed)
             GPIO.output(self.pin,GPIO.LOW)
@@ -137,8 +147,12 @@ yellowLED= LED(18,"yellowLED","yellow", 20)
 #####################################################################
 
 def main():
+    """
+    loop asking for an activity code via raw input. Exits by typing 'exit'
+    """
     print('\n\n\n\n\n[--system--] enter code for LED behavior: LEDname on/off/strobe\n')
     print('\nconnecting....')
+    bootseq(1,4)
     time.sleep(.2)
     print('....')
     time.sleep(.2)
@@ -152,20 +166,44 @@ def main():
     print('----------------------------')
     print LED.dictionary
     while True:
-        result = activitycode(LED.dictionary) 
-        print('\nredLED: '+ str(redLED.state)+
-                '\ngreenLED: '+ str(greenLED.state)+
-                '\nyellowLED: '+ str(yellowLED.state)
-             )
+        result = activitycode(LED.dictionary)
+        redLED.getstate
+        yellowLED.getstate
+        greenLED.getstate  
         if result == False:
             print "[--system--] powering down."
-            redLED.blink()
-            greenLED.blink()
-            yellowLED.blink()
-            time.sleep(2)
+            bootseq(0,3)
+            time.sleep(4)
             GPIO.cleanup()
             break
 
+
+def bootseq(x,repeat):
+    redLED.off
+    greenLED.off
+    yellowLED.off
+
+    p_red= Thread(target = redLED.blink, args = (repeat,None))
+    p_green= Thread(target = greenLED.blink, args = (repeat,None))
+    p_yellow= Thread(target = yellowLED.blink, args = (repeat,None))
+    if x:
+        time.sleep(2)
+        p_green.start()
+        time.sleep(.25)
+        p_yellow.start()
+        time.sleep(.25)
+        p_red.start()
+    else:
+        time.sleep(2)
+        p_red.start()
+        time.sleep(.25)
+        p_yellow.start()
+        time.sleep(.25)
+        p_green.start()
+ 
+ 
+ 
+ 
 
 ########################  activityentered_code()  ###########################
 
@@ -198,7 +236,16 @@ def activitycode(choices):
 main()
 
 
+
+
+
+
+
+
+
+
 """
+
 
 #Uncomment this whole set when you're ready to add the polish to the script
 #it essentially just runs pin cleanup if for some reason the program freezes before it finishes
