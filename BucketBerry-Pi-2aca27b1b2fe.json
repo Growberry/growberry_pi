@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "bucketberry-pi",
+  "private_key_id": "2aca27b1b2fe73791a8ea08b5618de53d9ec01c6",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCoYBVdwJ/jO6XS\nk3HnTLJ07nkNILNHZbplba4Y5lH5Ggem4T8m47TDaNNNYd5kiFu2qO8s9xeMP9mQ\ncjZBNgYDenA8SLXLERa29aWHncysW6eofpCUVZ1cQQOkY/qFimK7isVGtEBM96+g\nWyfYClw4I6tmYVXL2BHh2JSTIP7i1ms/BqQI2T95S0oOurmIEVufpsBkqhCLKf/F\nO1y3OBRwAA8IILzthaph+YgonmsTG/6ZGXNi3O8lrf52ZO79qJjRXPdw6GnK+E7F\n28XJIiMndnpi3f1oOfzP99BqBhWsPdOIgO4RPQtC1/JA96xEDG0QdhlwNfEuluEZ\nmL5sCOGjAgMBAAECggEARbbaweGikdQ9mU2hSLKR5SZkCpJyiGpPXfWmsvqSEEC9\n0FPM8Q4w5wO9EXonOZrX1m5l8Ukxf8lkDJGtcxyqKsCEPgGg+75MmF5nNhqZBvhA\nF9yngjNcnzjwCB25OZeNv7b6bYbuZK/dENkNSz8m5bunGRHOE0OYS9l/0tdDkamn\n+lDTtTliSFwX/7CY9XCk3rIvsfyxUkznh9j4Yv8ig0bpn13lBr8JEdlgnFa77kU2\nZ2oJRTXTS0/IlRuhet8w8LRk1OLwDw79X3mbHF7tHByDGw57bil5YQjbFC+FvtnR\nNZKcj5QSHLnt0+5a4nWm5A8OQeM7Ki5ONuCAV0LVGQKBgQDQ8lXwXTMeCL5EgnV2\n18QiXeJ2bdZ+1X88OBkXK1e29UXEdjDf8omqkgMLFCR5U9v7P9IneC2kF/J/2uvy\nYgeQDkEivvxWVm4wqsRXoblemm5Z+4+ZPsYKiVYtn8+sK0WbyZjZ+pz6h5shV2uZ\nVz0F1hVaUpGFTzSQYL42ZwAZbQKBgQDOStVh2KPrEA2eC9EZYonTpWu8G7X/x6C6\nNElHw4ZFqc9xp13pJQXoMwmqCYKrJAHTPykBhl5q4jrlf7lq4+iMTkL6aSXoqUbg\nDU7mBF6v+W0UwZiw+FHm/Nfrexmlxqyl+2HWHz4EemeTmZvIpoT91KX0IxwMRVYQ\n3AlvyQCNTwKBgQC5yL/hGP16lwuWnukS4obih9f0tXUjEXIweTDWCRPU+gEuzmhm\nt6DwqSNLln1X49iVbgnOTm1GmoRkaqOgwMk4rXP9ERQNMIyJeU1bHdFU7LtyBtuH\nxukQNU0LBC4DR/Z8rqPaLZumpyyoWLKzhX4c0l3qEcCSZ/q05VA7zxmngQKBgFtN\nh6+swK/zBPPkawF/OV0xI8O3yA+S/TIsnhpjEXSXubalysy7lCe3Hxng57JzV1N1\n6uI/5F4ODt8wbpI+mNgwczh9fUfCVBoqCbeIS5g7HupG3RvGbAl98trIOwvCKPu1\njRHF9h7pRhpvrCFcghQOH/0z5OAReAwyNwMAxXvFAoGAYEqpd+nwZigvAaIhXRzN\n243opBTKPrLbQEaFnQS79iEC82vS11FVI2+G71mW2of+ZUvqkkTsVTpOelUPVFOo\nLHbGIzkwwOpgqfObKr+Ip4MHwjHsOmr1ncOIvue9jtd/kq+KVo70MTTHoqofvf9C\n7aVzngeHRYxOZCrEayU6Y8Y=\n-----END PRIVATE KEY-----\n",
+  "client_email": "austin@bucketberry-pi.iam.gserviceaccount.com",
+  "client_id": "103281709144473346790",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://accounts.google.com/o/oauth2/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/austin%40bucketberry-pi.iam.gserviceaccount.com"
+}
