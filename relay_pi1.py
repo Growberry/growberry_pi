@@ -11,7 +11,7 @@ pinList = [21, 26, 20, 19]
 # loop through pins and set mode and state to 'high'
 
 for i in pinList: 
-    GPIO.setup(i, GPIO.OUT) 
+    GPIO.setup(i, GPIO.OUT, pull_up_down=GPIO.PUD_DOWN) 
     GPIO.output(i, GPIO.HIGH)
 
 # time to sleep between operations in the main loop
