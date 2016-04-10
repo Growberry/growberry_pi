@@ -12,7 +12,7 @@ pinList = [21, 26, 20, 19]
 
 for i in pinList: 
     GPIO.setup(i, GPIO.OUT, pull_up_down=GPIO.PUD_DOWN) 
-    GPIO.output(i, GPIO.HIGH)
+    GPIO.output(i, GPIO.LOW)
 
 # time to sleep between operations in the main loop
 
@@ -21,16 +21,16 @@ SleepTimeL = 2
 # main loop
 
 try:
-  GPIO.output(21, GPIO.LOW)
+  GPIO.output(21, GPIO.HIGH)
   print "ONE"
   time.sleep(SleepTimeL); 
-  GPIO.output(26, GPIO.LOW)
+  GPIO.output(26, GPIO.HIGH)
   print "TWO"
   time.sleep(SleepTimeL);  
-  GPIO.output(20, GPIO.LOW)
+  GPIO.output(20, GPIO.HIGH)
   print "THREE"
   time.sleep(SleepTimeL);
-  GPIO.output(19, GPIO.LOW)
+  GPIO.output(19, GPIO.HIGH)
   print "FOUR"
   time.sleep(SleepTimeL);
   GPIO.cleanup()
