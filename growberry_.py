@@ -161,10 +161,16 @@ class Relay:
             print "%s on port %s is 0/GPIO.LOW/False" % (self.name, self.pin)
 
     def on(self):
+        """
+        switches GPIO pin to LOW/0 - in open state relays, this turns the relay ON.
+        """
         GPIO.output(self.pin, GPIO.LOW)
         print("%s Relay is" % self.name + bcolors.BOLD + bcolors.GREEN + " on." + bcolors.END)
 
     def off(self):
+        """
+        switches GPIO pin to HIGH/1 - in open state relays, this turns the relay OFF.
+        """
         GPIO.output(self.pin, GPIO.HIGH)
         print("%s LED is" % self.name + bcolors.BOLD + bcolors.RED + " off." + bcolors.END)
 
@@ -209,13 +215,13 @@ class Sensor:
 
         if humidity is None or temp is None:
             time.sleep(2)
-            humidity, temp = Adafruit_DHT.read(DHT_TYPE, DHT_PIN)
+            humidity, temp = Adafruit_DHT.read(self.sens_type, self.pin)
         return {"temp": temp, "humidity": humidity, "timestamp": datetime.datetime.now()}
 
 
 ############### Define things controlled vi Pi #####################
-relay1 = Relay(21, "lights")
-relay4 = Relay(19, "fans")
+LIGHTS = Relay(21, "lights")
+FANS = Relay(19, "fans")
 sensor1 = Sensor(17, Adafruit_DHT.DHT22, "temp_humidity")
 
 camera = PiCamera()
@@ -225,6 +231,13 @@ camera = PiCamera()
 #                           FUNCTIONS
 #####################################################################
 # worksheet.append_row((datetime.datetime.now(),time.strftime('%m/%d/%Y'),time.strftime("%H:%M:%S"), temp, humidity))$
+
+def takepic(save_dir):
+    timestamp = time.strftime("%m%d%Y.%H%M")
+    camera.capture('%s%s.jpg'%(save_dir, timestamp))
+
+
+
 
 def growmonitor(interval, set_temp, set_hour1, set_min1, set_hour2, set_min2):
     """
@@ -238,20 +251,20 @@ def growmonitor(interval, set_temp, set_hour1, set_min1, set_hour2, set_min2):
         sensor_reading = sensor1.read()  # returns a dictionary with "temp", "humidity", and "timestamp" keys
         if sensor_reading["temp"] > float(set_temp):
             fan_status = "Fans: on"
-            relay4.on
+            FANS.on
         else:
             fan_status = "Fans: off"
-            relay4.off
+            FANS.off
         # check if the time in within the set_times
         ontime = datetime.time(set_hour1, set_min1)
         offtime = datetime.time(int(set_hour2), int(set_min2))
         now = datetime.now()
         if ontime <= now.time() <= offtime:
             light_status = "Lights: on"
-            relay1.on
+            LIGHTS.on
         else:
             light_status = "Lights: off"
-            relay1.off
+            LIGHTS.off
         # print a data line
         data_line = (
         sensor_reading["timestamp"], sensor_reading["temp"], sensor_reading["humidity"], light_status, fan_status)
@@ -260,7 +273,7 @@ def growmonitor(interval, set_temp, set_hour1, set_min1, set_hour2, set_min2):
 
 
 def main():
-    print('\n\n\n\n\n[--system--] enter code for LED behavior: LEDname on/off/strobe\n')
+    print('\n\n\n\n\n')
     print('\nconnecting....')
     time.sleep(.2)
     print('....')
@@ -269,10 +282,13 @@ def main():
     time.sleep(1)
     print('....')
     time.sleep(.5)
-    print('connection established\n')
-    print('----------------------------')
-    print('  WELCOME TO THE LIGHTSHOW  ')
-    print('----------------------------')
+    print('  ________                    ___.                                                 ')
+    print(' /  _____/______  ______  _  _\_ |__   __________________ ___.__.    ______ ___.__.')
+    print('/   \  __\_  __ \/  _ \ \/ \/ /| __ \_/ __ \_  __ \_  __ <   |  |    \____ <   |  |')
+    print('\    \_\  \  | \(  <_> )     / | \_\ \  ___/|  | \/|  | \/\___  |    |  |_> >___  |')
+    print(' \______  /__|   \____/ \/\_/  |___  /\___  >__|   |__|   / ____| /\ |   __// ____|')
+    print('        \/                         \/     \/              \/      \/ |__|   \/     ')
+
     growmonitor(2, 24, 7, 00, 23, 00)
 
 
@@ -317,44 +333,3 @@ def activitycode(choices):
 
 main()
 
-"""
-
-
-#Uncomment this whole set when you're ready to add the polish to the script
-#it essentially just runs pin cleanup if for some reason the program freezes before it finishes
-#I dont really understand it, but it came from this page: 
-# http://raspi.tv/2013/rpi-gpio-basics-3-how-to-exit-gpio-programs-cleanly-avoid-warnings-and-protect-your-pi
-
-
-try:  
-    main()
-    
-
-    while True:
-        redLED.on()
-        time.sleep(1)
-        redLED.off()
-        time.sleep(1)
-        redLED.blink()
-    # here you put your main loop or block of code  
-    while counter < 9000000:  
-        # count up to 9000000 - takes ~20s  
-        counter += 1  
-    print "Target reached: %d" % counter  
-  
-except KeyboardInterrupt:  
-    # here you put any code you want to run before the program   
-    # exits when you press CTRL+C  
-    print "\n", counter # print value of counter  
-  
-except:  
-    # this catches ALL other exceptions including errors.  
-    # You won't get any error messages for debugging  
-    # so only use it once your code is working  
-    print "Other error or exception occurred!"  
-  
-finally:  
-    GPIO.cleanup() # this ensures a clean exit 
-
-
-"""
