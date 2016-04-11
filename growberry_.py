@@ -9,12 +9,16 @@
 
 
 ###########################  Imports here  ##########################
+
+
+#from datetime import datetime, time
+import datetime
 from threading import Thread
 import time
 import os
 from time import sleep
 import RPi.GPIO as GPIO
-
+import Adafruit_DHT
 #####################################################################
 #                           GPIO pin set up
 #####################################################################
@@ -191,7 +195,7 @@ class Relay:
             repeat -= 1
 
 
-Class Sensor(self,pin,sens_type,name):
+class Sensor:
     def __init__(self,pin,sens_type,name):
         self.sens_type = sens_type
         self.pin = int(pin)         #this is the GPIO pin number (will depend on GPIO config)$
@@ -219,26 +223,37 @@ sensor1 = Sensor(17,Adafruit_DHT.DHT22,"temp_humidity")
 #####################################################################
 #                     Put code below this
 #####################################################################
-worksheet.append_row((datetime.datetime.now(),time.strftime('%m/%d/%Y'),time.strftime("%H:%M:%S"), temp, humidity))$
+#worksheet.append_row((datetime.datetime.now(),time.strftime('%m/%d/%Y'),time.strftime("%H:%M:%S"), temp, humidity))$
 
 def growmonitor(interval,set_temp,set_hour1,set_min1,set_hour2,set_min2):
     """
     Every interval minutes, read the temp/humidity, if temp exceeds set_temp, turn on fans, 
     if time falls between set_time1 and set_time2: turn light on
     """
+    fan_status = None
+    light_status = None
     while True:
         #read the sensor, check temp, turn fans on/off
         sensor_reading = sensor1.read()     #returns a dictionary with "temp", "humidity", and "timestamp" keys
-        if sensor_reading["temp"] > float(set_temp)
+        if sensor_reading["temp"] > float(set_temp):
+            fan_status = "Fans: on"
+            relay4.on
+        else:
+            fan_status = "Fans: off"
+            relay4.off
         # check if the time in within the set_times
-        ontime = time(int(set_hour1),int(set_min1))
-        offtime = time(int(set_hour2),int(set_min2))
-        if ontime <= now.time() <= offtime):        
-            print "Light mode: on"
+        ontime = datetime.time(set_hour1,set_min1)
+        offtime = datetime.time(int(set_hour2),int(set_min2))
+        now = datetime.now()
+        if ontime <= now.time() <= offtime:        
+            light_status = "Lights: on"
             relay1.on
         else:
-            print "Light mode: off"
+            light_status = "Lights: off"
             relay1.off
+        #print a data line
+        data_line = (sensor_reading["timestamp"],sensor_reading["temp"],sensor_reading["humidity"],light_status, fan_status)
+        print data_line
         time.sleep(interval*60)
 
 def main():
@@ -255,15 +270,7 @@ def main():
     print('----------------------------')
     print('  WELCOME TO THE LIGHTSHOW  ')
     print('----------------------------')
-    print LED.dictionary
-    while True:
-        result = activitycode(LED.dictionary)
-        relay1.getstate
-        if result == False:
-            print "[--system--] powering down."
-            GPIO.cleanup()
-            break
-
+    growmonitor(2,24,7,00,23,00)
 
 ########################  activityentered_code()  ###########################
 
