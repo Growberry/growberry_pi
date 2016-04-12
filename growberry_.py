@@ -270,7 +270,7 @@ def growmonitor(interval, set_temp, set_hour1, set_min1, set_hour2, set_min2):
             LIGHTS.off()
         # print a data line
         data_line = (
-        sensor_reading["timestamp"],time.strftime("%m%d%Y.%H%M"), sensor_reading["temp"], sensor_reading["humidity"], light_status, fan_status)
+        sensor_reading["timestamp"],time.strftime("%m-%d-%Y.%H%M"), sensor_reading["temp"], sensor_reading["humidity"], light_status, fan_status)
         print data_line
         time.sleep(interval * 60)
 
