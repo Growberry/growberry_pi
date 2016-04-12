@@ -209,8 +209,8 @@ class Sensor:
         #print 'Temperature: {0:0.1f} C'.format(temp)
         #print 'Humidity:    {0:0.1f} %'.format(humidity)
 
-        print temp
-        print humidity
+        #print temp
+        #print humidity
 
         # Skip to the next reading if a valid measurement couldn't be taken.$
         # This might happen if the CPU is under a lot of load and the sensor$
@@ -270,7 +270,7 @@ def growmonitor(interval, set_temp, set_hour1, set_min1, set_hour2, set_min2):
             LIGHTS.off()
         # print a data line
         data_line = (
-        sensor_reading["timestamp"], sensor_reading["temp"], sensor_reading["humidity"], light_status, fan_status)
+        sensor_reading["timestamp"],time.strftime("%m%d%Y.%H%M"), sensor_reading["temp"], sensor_reading["humidity"], light_status, fan_status)
         print data_line
         time.sleep(interval * 60)
 
@@ -285,12 +285,13 @@ def main():
     time.sleep(1)
     print('....')
     time.sleep(.5)
-    print('  ________                    ___.                                                 ')
-    print(' /  _____/______  ______  _  _\_ |__   __________________ ___.__.    ______ ___.__.')
-    print('/   \  __\_  __ \/  _ \ \/ \/ /| __ \_/ __ \_  __ \_  __ <   |  |    \____ <   |  |')
-    print('\    \_\  \  | \(  <_> )     / | \_\ \  ___/|  | \/|  | \/\___  |    |  |_> >___  |')
-    print(' \______  /__|   \____/ \/\_/  |___  /\___  >__|   |__|   / ____| /\ |   __// ____|')
-    print('        \/                         \/     \/              \/      \/ |__|   \/     ')
+    print(
+        '  ________                    ___.                                                 \n'+\
+        ' /  _____/______  ______  _  _\_ |__   __________________ ___.__.    ______ ___.__.\n'+\
+        '/   \  __\_  __ \/  _ \ \/ \/ /| __ \_/ __ \_  __ \_  __ <   |  |    \____ <   |  |\n'+\
+        '\    \_\  \  | \(  <_> )     / | \_\ \  ___/|  | \/|  | \/\___  |    |  |_> >___  |\n'+\
+        ' \______  /__|   \____/ \/\_/  |___  /\___  >__|   |__|   / ____| /\ |   __// ____|\n'+\
+        '        \/                         \/     \/              \/      \/ |__|   \/     \n')
 
     growmonitor(2, 24, 7, 00, 23, 00)
 
