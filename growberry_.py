@@ -236,7 +236,7 @@ camera = PiCamera()
 # worksheet.append_row((datetime.datetime.now(),time.strftime('%m/%d/%Y'),time.strftime("%H:%M:%S"), temp, humidity))$
 
 def takepic(save_dir):
-    timestamp = time.strftime("%m%d%Y.%H%M")
+    timestamp = time.strftime("%m%d%Y_%H%M")
     camera.capture('%s%s.jpg'%(save_dir, timestamp))
 
 
@@ -253,43 +253,37 @@ def growmonitor(interval, set_temp, set_hour1, set_min1, set_hour2, set_min2):
         # read the sensor, check temp, turn fans on/off
         sensor_reading = sensor1.read()  # returns a dictionary with "temp", "humidity", and "timestamp" keys
         if sensor_reading["temp"] > float(set_temp):
-            fan_status = "Fans: on"
+            fan_status = "Fans:ON"
             FANS.on()
         else:
-            fan_status = "Fans: off"
+            fan_status = "Fans:OFF"
             FANS.off()
         # check if the time in within the set_times
         ontime = datetime.time(set_hour1, set_min1)
         offtime = datetime.time(int(set_hour2), int(set_min2))
         now = datetime.datetime.now()
         if ontime <= now.time() <= offtime:
-            light_status = "Lights: on"
+            light_status = "Lights:ON"
             LIGHTS.on()
         else:
-            light_status = "Lights: off"
+            light_status = "Lights:OFF"
             LIGHTS.off()
         # print a data line
         data_line = (
-        sensor_reading["timestamp"],time.strftime("%m-%d-%Y.%H%M"), sensor_reading["temp"], sensor_reading["humidity"], light_status, fan_status)
+        sensor_reading["timestamp"],time.strftime("%Y-%m-%d.%H%M"), sensor_reading["temp"], sensor_reading["humidity"], light_status, fan_status)
         print data_line
+        takepic("/home/pi/testpics/")
         time.sleep(interval * 60)
 
 
 def main():
     print('\n\n\n\n\n')
-    print('\nconnecting....')
-    time.sleep(.2)
-    print('....')
-    time.sleep(.2)
-    print('....')
-    time.sleep(1)
-    print('....')
-    time.sleep(.5)
-    print(
+
+    print(bcolors.RED +
         '  ________                    ___.                                                 \n'+\
-        ' /  _____/______  ______  _  _\_ |__   __________________ ___.__.    ______ ___.__.\n'+\
+        ' /  _____/______  ______  _  _\_ |__   __________________ ___.__.    ______ ___.__.\n'+bcolors.YELLOW +\
         '/   \  __\_  __ \/  _ \ \/ \/ /| __ \_/ __ \_  __ \_  __ <   |  |    \____ <   |  |\n'+\
-        '\    \_\  \  | \(  <_> )     / | \_\ \  ___/|  | \/|  | \/\___  |    |  |_> >___  |\n'+\
+        '\    \_\  \  | \(  <_> )     / | \_\ \  ___/|  | \/|  | \/\___  |    |  |_> >___  |\n'+bcolors.GREEN +\
         ' \______  /__|   \____/ \/\_/  |___  /\___  >__|   |__|   / ____| /\ |   __// ____|\n'+\
         '        \/                         \/     \/              \/      \/ |__|   \/     \n')
 
