@@ -172,7 +172,7 @@ class Relay:
         switches GPIO pin to HIGH/1 - in open state relays, this turns the relay OFF.
         """
         GPIO.output(self.pin, GPIO.HIGH)
-        print("%s LED is" % self.name + bcolors.BOLD + bcolors.RED + " off." + bcolors.END)
+        print("%s Relay is" % self.name + bcolors.BOLD + bcolors.RED + " off." + bcolors.END)
 
     def blink(self, *args):
         # print (len(args))          #troubleshooting print statement
@@ -229,6 +229,9 @@ sensor1 = Sensor(17, Adafruit_DHT.DHT22, "temp_humidity")
 
 camera = PiCamera()
 
+######################### configure i/o #############################
+logfile = '/home/pi/usbdrv/growberry_testlog/grow1_log.txt'
+OUTFILE = open(logfile)
 
 #####################################################################
 #                           FUNCTIONS
@@ -272,14 +275,15 @@ def growmonitor(interval, set_temp, set_hour1, set_min1, set_hour2, set_min2):
         data_line = (
         sensor_reading["timestamp"],time.strftime("%Y-%m-%d.%H%M"), sensor_reading["temp"], sensor_reading["humidity"], light_status, fan_status)
         print data_line
-        takepic("/home/pi/testpics/")
+        OUTFILE.write(data_line)
+        takepic('/home/pi/usbdrv/growberry_testlog/pictures/')
         time.sleep(interval * 60)
 
 
 def main():
     print('\n\n\n\n\n')
 
-    print(bcolors.RED +
+    print(bcolors.RED + bcolors.BOLD +
         '  ________                    ___.                                                 \n'+\
         ' /  _____/______  ______  _  _\_ |__   __________________ ___.__.    ______ ___.__.\n'+bcolors.YELLOW +\
         '/   \  __\_  __ \/  _ \ \/ \/ /| __ \_/ __ \_  __ \_  __ <   |  |    \____ <   |  |\n'+\
