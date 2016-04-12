@@ -271,10 +271,8 @@ def growmonitor(interval, set_temp, set_hour1, set_min1, set_hour2, set_min2):
             light_status = "Lights:OFF"
             LIGHTS.off()
         # print a data line
-        #data_line1 = (
-        #sensor_reading["timestamp"],time.strftime("%Y-%m-%d.%H%M"), sensor_reading["temp"], sensor_reading["humidity"], light_status, fan_status)
         data_line = (
-        str(sensor_reading["timestamp"])+'\t'+ str(time.strftime("%Y-%m-%d.%H%M")) +'\t'+ str(sensor_reading["temp"]) +'\t'+ str(sensor_reading["humidity"]) +'\t'+ light_status +'\t'+ fan_status)
+        str(sensor_reading["timestamp"])+'\t'+ str(time.strftime("%Y-%m-%d.%H%M")) +'\t'+ str(sensor_reading["temp"]) +'\t'+ str(sensor_reading["humidity"]) +'\t'+ light_status +'\t'+ fan_status + '\n')
 
         print data_line
         with open(logfile, "a") as data_log:
