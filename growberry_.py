@@ -14,7 +14,6 @@
 import datetime
 from threading import Thread
 import time
-import os
 import RPi.GPIO as GPIO
 import Adafruit_DHT
 from picamera import PiCamera
@@ -165,14 +164,14 @@ class Relay:
         switches GPIO pin to LOW/0 - in open state relays, this turns the relay ON.
         """
         GPIO.output(self.pin, GPIO.LOW)
-        print("%s Relay is" % self.name + bcolors.BOLD + bcolors.GREEN + " on." + bcolors.END)
+        #print("%s Relay is" % self.name + bcolors.BOLD + bcolors.GREEN + " on." + bcolors.END)
 
     def off(self):
         """
         switches GPIO pin to HIGH/1 - in open state relays, this turns the relay OFF.
         """
         GPIO.output(self.pin, GPIO.HIGH)
-        print("%s Relay is" % self.name + bcolors.BOLD + bcolors.RED + " off." + bcolors.END)
+        #print("%s Relay is" % self.name + bcolors.BOLD + bcolors.RED + " off." + bcolors.END)
 
     def blink(self, *args):
         # print (len(args))          #troubleshooting print statement
@@ -270,11 +269,23 @@ def growmonitor(interval, set_temp, set_hour1, set_min1, set_hour2, set_min2):
         else:
             light_status = "Lights:OFF"
             LIGHTS.off()
-        # print a data line
-        data_line = (
-        str(sensor_reading["timestamp"])+'\t'+ str(time.strftime("%Y-%m-%d.%H%M")) +'\t'+ str(sensor_reading["temp"]) +'\t'+ str(sensor_reading["humidity"]) +'\t'+ light_status +'\t'+ fan_status + '\n')
 
-        print data_line
+        data_line = (str(sensor_reading["timestamp"])+'\t'+ str(time.strftime("%Y-%m-%d.%H%M")) +'\t'+ str(sensor_reading["temp"]) +'\t'+ str(sensor_reading["humidity"]) +'\t'+ light_status +'\t'+ fan_status + '\n')
+
+        print_light_status = None
+        if light_status.split(':')[1]== "ON":
+            print_light_status = "Lights:"+':'+ bcolors.GREEN + 'ON' +bcolors.END
+        elif light_status.split(':')[1]== "OFF":
+            print_light_status = "Lights:"+':'+ bcolors.RED + 'OFF' +bcolors.END
+
+        print_fan_status = None
+        if fan_status.split(':')[1]== "ON":
+            print_fan_status = "Fans:"+':'+ bcolors.GREEN + 'ON' +bcolors.END
+        elif fan_status.split(':')[1]== "OFF":
+            print_fan_status = "Fans:"+':'+ bcolors.RED + 'OFF' +bcolors.END
+
+        print(str(sensor_reading["timestamp"])+'\t'+ str(time.strftime("%Y-%m-%d.%H%M")) +'\t'+ str(sensor_reading["temp"]) +'\t'+ str(sensor_reading["humidity"]) +'\t'+ print_light_status +'\t'+ print_fan_status + '\n')
+
         with open(logfile, "a") as data_log:
             data_log.write(data_line)
         takepic('/home/pi/usbdrv/growberry_testlog/pictures/')
@@ -292,7 +303,7 @@ def main():
         ' \______  /__|   \____/ \/\_/  |___  /\___  >__|   |__|   / ____| /\ |   __// ____|\n'+\
         '        \/                         \/     \/              \/      \/ |__|   \/     \n')
 
-    growmonitor(2, 24, 7, 00, 23, 00)
+    growmonitor(10, 24, 7, 00, 23, 00)
 
 
 ########################  activityentered_code()  ###########################
