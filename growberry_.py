@@ -206,8 +206,11 @@ class Sensor:
     def read(self):
         humidity, temp = Adafruit_DHT.read(self.sens_type, self.pin)
 
-        print 'Temperature: {0:0.1f} C'.format(temp)
-        print 'Humidity:    {0:0.1f} %'.format(humidity)
+        #print 'Temperature: {0:0.1f} C'.format(temp)
+        #print 'Humidity:    {0:0.1f} %'.format(humidity)
+
+        print temp
+        print humidity
 
         # Skip to the next reading if a valid measurement couldn't be taken.$
         # This might happen if the CPU is under a lot of load and the sensor$
@@ -251,20 +254,20 @@ def growmonitor(interval, set_temp, set_hour1, set_min1, set_hour2, set_min2):
         sensor_reading = sensor1.read()  # returns a dictionary with "temp", "humidity", and "timestamp" keys
         if sensor_reading["temp"] > float(set_temp):
             fan_status = "Fans: on"
-            FANS.on
+            FANS.on()
         else:
             fan_status = "Fans: off"
-            FANS.off
+            FANS.off()
         # check if the time in within the set_times
         ontime = datetime.time(set_hour1, set_min1)
         offtime = datetime.time(int(set_hour2), int(set_min2))
-        now = datetime.now()
+        now = datetime.datetime.now()
         if ontime <= now.time() <= offtime:
             light_status = "Lights: on"
-            LIGHTS.on
+            LIGHTS.on()
         else:
             light_status = "Lights: off"
-            LIGHTS.off
+            LIGHTS.off()
         # print a data line
         data_line = (
         sensor_reading["timestamp"], sensor_reading["temp"], sensor_reading["humidity"], light_status, fan_status)
