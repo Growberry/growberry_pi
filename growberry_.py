@@ -11,6 +11,7 @@
 
 
 # from datetime import datetime, time
+import os
 import datetime
 from threading import Thread
 import time
@@ -284,7 +285,7 @@ def growmonitor(interval, set_temp, set_hour1, set_min1, set_hour2, set_min2):
         elif fan_status.split(':')[1]== "OFF":
             print_fan_status = "Fans:"+':'+ bcolors.RED + 'OFF' +bcolors.END
 
-        print(str(sensor_reading["timestamp"])+'\t'+ str(time.strftime("%Y-%m-%d.%H%M")) +'\t'+ str(sensor_reading["temp"]) +'\t'+ str(sensor_reading["humidity"]) +'\t'+ print_light_status +'\t'+ print_fan_status + '\n')
+        print(str(sensor_reading["timestamp"])+'\t'+ str(time.strftime("%Y-%m-%d.%H%M")) +'\t'+ str(sensor_reading["temp"]) +'\t'+ str(sensor_reading["humidity"]) +'\t'+ print_light_status +'\t'+ print_fan_status)
 
         with open(logfile, "a") as data_log:
             data_log.write(data_line)
