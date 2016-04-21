@@ -20,6 +20,29 @@ import Adafruit_DHT
 from picamera import PiCamera
 
 #####################################################################
+#                           Parameters
+#####################################################################
+# Change these things to change how the threasholds work
+
+# Read interval
+measurement_interval = 10.00
+
+# LIGHTS ON TIME
+lights_on_time = 11.00
+
+# LIGHTS OFF TIME
+lights_off_time = 23.00
+
+# TEMP that activates fans
+fan_temp = 24.0
+
+# file to write the log file to
+logfile = '/home/pi/usbdrv/growberry_testlog/grow1_log.txt'
+
+# directory to save pictures in
+pic_dir = '/home/pi/usbdrv/growberry_testlog/pictures/'
+
+#####################################################################
 #                           GPIO pin set up
 #####################################################################
 # select one of these two modes:
@@ -27,7 +50,7 @@ GPIO.setmode(GPIO.BCM)  # for using the names of the pins
 # or
 # GPIO.setmode(GPIO.BOARD)   #for true pin number IDs (pin1 = 1)
 
-GPIO.cleanup()  # shouldn't need to use this, but just in case
+GPIO.cleanup()  # shouldn't need to use this, but just in case.  Should be done at the end
 
 GPIO.setwarnings(False)  # set to false if the warnings bother you, helps troubleshooting
 
@@ -36,10 +59,6 @@ GPIO.setwarnings(False)  # set to false if the warnings bother you, helps troubl
 
 GPIO.setup(21, GPIO.OUT, initial=1)
 GPIO.setup(19, GPIO.OUT, initial=1)
-
-
-# GPIO.setup(17,GPIO.OUT, initial = 1)
-
 
 #####################################################################
 #                           Classes
@@ -73,7 +92,6 @@ class bcolors:  # these are the color codes
         self.BOLD = ''
 
 
-##########################  LED class  #############################
 class LED:
     """
     Turns GPIO pins from LOW(off) to HIGH(on) and back again
@@ -133,7 +151,6 @@ class LED:
             repeat -= 1
 
 
-#####################################################################
 class Relay:
     """
     Turns GPIO pins from LOW(off) to HIGH(on) and back again
@@ -223,14 +240,14 @@ class Sensor:
 
 
 ############### Define things controlled vi Pi #####################
+
 LIGHTS = Relay(21, "lights")
+
 FANS = Relay(19, "fans")
+
 sensor1 = Sensor(17, Adafruit_DHT.DHT22, "temp_humidity")
 
 camera = PiCamera()
-
-######################### configure i/o #############################
-logfile = '/home/pi/usbdrv/growberry_testlog/grow1_log.txt'
 
 #####################################################################
 #                           FUNCTIONS
@@ -244,14 +261,23 @@ def takepic(save_dir):
 
 
 
-def growmonitor(interval, set_temp, set_hour1, set_min1, set_hour2, set_min2):
+def growmonitor(interval, set_temp, lights_on, lights_off):
     """
     Every interval minutes, read the temp/humidity, if temp exceeds set_temp, turn on fans, 
     if time falls between set_time1 and set_time2: turn light on
     """
+    #break float input date into python time object
+    on_hour = int(str(lights_on).split(".")[0])
+    on_min = int(str(lights_on).split(".")[1])
+
+    off_hour = int(str(lights_off).split(".")[0])
+    off_min = int(str(lights_off).split(".")[1])
+
     fan_status = None
     light_status = None
     while True:
+        #take picture and write it to the pic directory
+        takepic(pic_dir)
         # read the sensor, check temp, turn fans on/off
         sensor_reading = sensor1.read()  # returns a dictionary with "temp", "humidity", and "timestamp" keys
         if sensor_reading["temp"] > float(set_temp):
@@ -261,8 +287,8 @@ def growmonitor(interval, set_temp, set_hour1, set_min1, set_hour2, set_min2):
             fan_status = "Fans:OFF"
             FANS.off()
         # check if the time in within the set_times
-        ontime = datetime.time(set_hour1, set_min1)
-        offtime = datetime.time(int(set_hour2), int(set_min2))
+        ontime = datetime.time(on_hour, on_min)
+        offtime = datetime.time(off_hour, off_min)
         now = datetime.datetime.now()
         if ontime <= now.time() <= offtime:
             light_status = "Lights:ON"
@@ -289,7 +315,7 @@ def growmonitor(interval, set_temp, set_hour1, set_min1, set_hour2, set_min2):
 
         with open(logfile, "a") as data_log:
             data_log.write(data_line)
-        takepic('/home/pi/usbdrv/growberry_testlog/pictures/')
+
         time.sleep(interval * 60)
 
 
@@ -304,7 +330,7 @@ def main():
         ' \______  /__|   \____/ \/\_/  |___  /\___  >__|   |__|   / ____| /\ |   __// ____|\n'+\
         '        \/                         \/     \/              \/      \/ |__|   \/     \n')
 
-    growmonitor(10, 24, 7, 00, 23, 00)
+    growmonitor(measurement_interval, fan_temp, lights_on_time, lights_off_time)
 
 
 ########################  activityentered_code()  ###########################
