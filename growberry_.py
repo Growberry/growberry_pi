@@ -236,7 +236,7 @@ class Sensor:
         if humidity is None or temp is None:
             time.sleep(2)
             humidity, temp = Adafruit_DHT.read(self.sens_type, self.pin)
-        return {"temp": temp, "humidity": humidity, "timestamp": datetime.datetime.now()}
+        return {"temp": round(temp,1), "humidity": round(humidity,1), "timestamp": datetime.datetime.now()}
 
 
 ############### Define things controlled vi Pi #####################
@@ -301,9 +301,9 @@ def growmonitor(interval, set_temp, lights_on, lights_off):
 
         print_light_status = None
         if light_status.split(':')[1]== "ON":
-            print_light_status = "Lights:"+':'+ bcolors.GREEN + 'ON' +bcolors.END
+            print_light_status = "Lights:"+ bcolors.GREEN + 'ON' +bcolors.END
         elif light_status.split(':')[1]== "OFF":
-            print_light_status = "Lights:"+':'+ bcolors.RED + 'OFF' +bcolors.END
+            print_light_status = "Lights:"+ bcolors.RED + 'OFF' +bcolors.END
 
         print_fan_status = None
         if fan_status.split(':')[1]== "ON":
