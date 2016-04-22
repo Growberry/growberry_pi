@@ -245,6 +245,8 @@ LIGHTS = Relay(21, "lights")
 
 FANS = Relay(19, "fans")
 
+#H2O_PUMP = Relay(set up a pin for this, "water pump")
+
 sensor1 = Sensor(17, Adafruit_DHT.DHT22, "temp_humidity")
 
 camera = PiCamera()
@@ -258,6 +260,11 @@ def takepic(save_dir):
     timestamp = time.strftime("%Y-%m-%d.%H%M")
     camera.capture('%s%s.jpg'%(save_dir, timestamp))
 
+def watercycle(pumptime):
+    H2O_PUMP.on()
+    time.sleep(pumptime*60)
+    H2O_PUMP.off()
+    last_water = datetime.datetime.now()
 
 
 
@@ -272,7 +279,7 @@ def growmonitor(interval, set_temp, lights_on, lights_off):
 
     off_hour = int(str(lights_off).split(".")[0])
     off_min = int(str(lights_off).split(".")[1])
-
+    last_water = None
     fan_status = None
     light_status = None
     while True:
@@ -307,9 +314,9 @@ def growmonitor(interval, set_temp, lights_on, lights_off):
 
         print_fan_status = None
         if fan_status.split(':')[1]== "ON":
-            print_fan_status = "Fans:"+':'+ bcolors.GREEN + 'ON' +bcolors.END
+            print_fan_status = "Fans:"+ bcolors.GREEN + 'ON' +bcolors.END
         elif fan_status.split(':')[1]== "OFF":
-            print_fan_status = "Fans:"+':'+ bcolors.RED + 'OFF' +bcolors.END
+            print_fan_status = "Fans:"+ bcolors.RED + 'OFF' +bcolors.END
 
         print(str(sensor_reading["timestamp"])+'\t'+ str(time.strftime("%Y-%m-%d.%H%M")) +'\t'+ str(sensor_reading["temp"]) +'\t'+ str(sensor_reading["humidity"]) +'\t'+ print_light_status +'\t'+ print_fan_status)
 
