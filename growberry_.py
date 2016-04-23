@@ -36,6 +36,9 @@ lights_off_time = 23.00
 # TEMP that activates fans
 fan_temp = 24.0
 
+# toggle picture capture on/off
+toggle_camera = True
+
 # file to write the log file to
 logfile = '/home/pi/usbdrv/growberry_testlog/grow1_log.txt'
 
@@ -50,9 +53,9 @@ GPIO.setmode(GPIO.BCM)  # for using the names of the pins
 # or
 # GPIO.setmode(GPIO.BOARD)   #for true pin number IDs (pin1 = 1)
 
-GPIO.cleanup()  # shouldn't need to use this, but just in case.  Should be done at the end
+#GPIO.cleanup()  # shouldn't need to use this, but just in case.  Should be done at the end
 
-GPIO.setwarnings(False)  # set to false if the warnings bother you, helps troubleshooting
+GPIO.setwarnings(True)  # set to false if the warnings bother you, helps troubleshooting
 
 ############################ Activating pins ########################
 # GPIO.setup(<put pin number here>,GPIO.IN/OUT)  #will depend on setmode above, use "IN" for sensors, and "OUT" for LEDs
@@ -284,7 +287,8 @@ def growmonitor(interval, set_temp, lights_on, lights_off):
     light_status = None
     while True:
         #take picture and write it to the pic directory
-        takepic(pic_dir)
+        if toggle_camera:
+            takepic(pic_dir)
         # read the sensor, check temp, turn fans on/off
         sensor_reading = sensor1.read()  # returns a dictionary with "temp", "humidity", and "timestamp" keys
         if sensor_reading["temp"] > float(set_temp):
@@ -379,5 +383,10 @@ def activitycode(choices):
 #                       Executable code below:
 ##############################################################################
 
-main()
-
+try:
+    main()
+except KeyboardInterrupt:
+    print "Goodbye!"
+    GPIO.cleanup()
+finally:
+    GPIO.cleanup()
