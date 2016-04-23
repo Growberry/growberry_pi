@@ -244,9 +244,9 @@ class Sensor:
 
 ############### Define things controlled vi Pi #####################
 
-LIGHTS = Relay(19, "lights")
+LIGHTS = Relay(12, "lights")
 
-FANS = Relay(12, "fans")
+FANS = Relay(19, "fans")
 
 #H2O_PUMP = Relay(set up a pin for this, "water pump")
 
