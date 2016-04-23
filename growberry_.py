@@ -387,6 +387,5 @@ try:
     main()
 except KeyboardInterrupt:
     print "Goodbye!"
-    GPIO.cleanup()
 finally:
     GPIO.cleanup()
