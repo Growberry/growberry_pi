@@ -60,7 +60,7 @@ GPIO.setwarnings(True)  # set to false if the warnings bother you, helps trouble
 ############################ Activating pins ########################
 # GPIO.setup(<put pin number here>,GPIO.IN/OUT)  #will depend on setmode above, use "IN" for sensors, and "OUT" for LEDs
 
-GPIO.setup(21, GPIO.OUT, initial=1)
+GPIO.setup(12, GPIO.OUT, initial=1)
 GPIO.setup(19, GPIO.OUT, initial=1)
 
 #####################################################################
@@ -244,9 +244,9 @@ class Sensor:
 
 ############### Define things controlled vi Pi #####################
 
-LIGHTS = Relay(21, "lights")
+LIGHTS = Relay(19, "lights")
 
-FANS = Relay(19, "fans")
+FANS = Relay(12, "fans")
 
 #H2O_PUMP = Relay(set up a pin for this, "water pump")
 
