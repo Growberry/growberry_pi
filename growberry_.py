@@ -239,7 +239,7 @@ class Sensor:
         if humidity is None or temp is None:
             time.sleep(2)
             humidity, temp = Adafruit_DHT.read(self.sens_type, self.pin)
-        return {"temp": round(temp,1), "humidity": round(humidity,1), "timestamp": datetime.datetime.now()}
+        return {"temp": round(float(temp),1), "humidity": round(float(humidity),1), "timestamp": datetime.datetime.now()}
 
 
 ############### Define things controlled vi Pi #####################
