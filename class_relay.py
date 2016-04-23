@@ -30,8 +30,8 @@ GPIO.setwarnings(False)      #set to false if the warnings bother you, helps tro
 ############################ Activating pins ########################
 #GPIO.setup(<put pin number here>,GPIO.IN/OUT)  #will depend on setmode above, use "IN" for sensors, and "OUT" for LEDs
 
-GPIO.setup(21,GPIO.OUT, initial = 1)
 GPIO.setup(19,GPIO.OUT, initial = 1)
+GPIO.setup(12,GPIO.OUT, initial = 1)
 #GPIO.setup(18,GPIO.OUT, initial = 1)
 
 
@@ -193,7 +193,7 @@ class Relay:
 
 #
 #####################################################################
-relay1 = Relay(21,"lights")
+relay1 = Relay(12,"lights")
 relay4 = Relay(19, "fans")
 #####################################################################
 #                     Put code below this
