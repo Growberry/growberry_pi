@@ -28,10 +28,10 @@ from picamera import PiCamera
 measurement_interval = 10.00
 
 # LIGHTS ON TIME
-lights_on_time = 11.00
+lights_on_time = 1100
 
-# LIGHTS OFF TIME
-lights_off_time = 23.00
+# Length of day (in hours)
+daylength = 12
 
 # TEMP that activates fans
 fan_temp = 24.0
@@ -236,9 +236,10 @@ class Sensor:
         # This might happen if the CPU is under a lot of load and the sensor$
         # can't be reliably read (timing is critical to read the sensor).$
 
-        if humidity is None or temp is None:
+        while humidity is None or temp is None:  #this should prevent errors when rounding, but could cause a hang-up...
             time.sleep(2)
             humidity, temp = Adafruit_DHT.read(self.sens_type, self.pin)
+
         return {"temp": round(float(temp),1), "humidity": round(float(humidity),1), "timestamp": datetime.datetime.now()}
 
 
@@ -269,22 +270,29 @@ def watercycle(pumptime):
     H2O_PUMP.off()
     last_water = datetime.datetime.now()
 
+def lightcontrol(t, daylength):
+    """send in the time to turn the lights on, and how long to keep them on for. Returns a light status"""
 
+    i = datetime.datetime.strptime(t, '%H%M').time()
 
-def growmonitor(interval, set_temp, lights_on, lights_off):
+    ontime = datetime.datetime.combine(datetime.date.today(), i)
+    offtime = ontime + datetime.timedelta(hours=daylength)
+
+    if ontime <= datetime.datetime.now() <= offtime:
+        LIGHTS.on()
+        return "Lights:ON"
+    else:
+        LIGHTS.off()
+        return "Lights:OFF"
+
+def growmonitor(interval, set_temp, sunrise, daylength):
     """
     Every interval minutes, read the temp/humidity, if temp exceeds set_temp, turn on fans, 
     if time falls between set_time1 and set_time2: turn light on
     """
-    #break float input date into python time object
-    on_hour = int(str(lights_on).split(".")[0])
-    on_min = int(str(lights_on).split(".")[1])
 
-    off_hour = int(str(lights_off).split(".")[0])
-    off_min = int(str(lights_off).split(".")[1])
     last_water = None
     fan_status = None
-    light_status = None
     while True:
         #take picture and write it to the pic directory
         if toggle_camera:
@@ -297,18 +305,14 @@ def growmonitor(interval, set_temp, lights_on, lights_off):
         else:
             fan_status = "Fans:OFF"
             FANS.off()
-        # check if the time in within the set_times
-        ontime = datetime.time(on_hour, on_min)
-        offtime = datetime.time(off_hour, off_min)
-        now = datetime.datetime.now()
-        if ontime <= now.time() <= offtime:
-            light_status = "Lights:ON"
-            LIGHTS.on()
-        else:
-            light_status = "Lights:OFF"
-            LIGHTS.off()
 
-        data_line = (str(sensor_reading["timestamp"])+'\t'+ str(time.strftime("%Y-%m-%d.%H%M")) +'\t'+ str(sensor_reading["temp"]) +'\t'+ str(sensor_reading["humidity"]) +'\t'+ light_status +'\t'+ fan_status + '\n')
+        #run lightcontrol, which takes a time to turn on, and a "daylength"
+        light_status = lightcontrol(sunrise, daylength)
+
+
+        data_line = (str(sensor_reading["timestamp"]), str(time.strftime("%Y-%m-%d.%H%M")), str(sensor_reading["temp"]), str(sensor_reading["humidity"]), light_status, fan_status, '\n')
+
+
 
         print_light_status = None
         if light_status.split(':')[1]== "ON":
@@ -325,7 +329,7 @@ def growmonitor(interval, set_temp, lights_on, lights_off):
         print(str(sensor_reading["timestamp"])+'\t'+ str(time.strftime("%Y-%m-%d.%H%M")) +'\t'+ str(sensor_reading["temp"]) +'\t'+ str(sensor_reading["humidity"]) +'\t'+ print_light_status +'\t'+ print_fan_status)
 
         with open(logfile, "a") as data_log:
-            data_log.write(data_line)
+            data_log.write("\t".join(data_line))
 
         time.sleep(interval * 60)
 
@@ -341,7 +345,7 @@ def main():
         ' \______  /__|   \____/ \/\_/  |___  /\___  >__|   |__|   / ____| /\ |   __// ____|\n'+\
         '        \/                         \/     \/              \/      \/ |__|   \/     \n'+bcolors.END)
 
-    growmonitor(measurement_interval, fan_temp, lights_on_time, lights_off_time)
+    growmonitor(measurement_interval, fan_temp, lights_on_time, daylength)
 
 
 ########################  activityentered_code()  ###########################
@@ -385,6 +389,7 @@ def activitycode(choices):
 
 try:
     main()
+
 except KeyboardInterrupt:
     print "Goodbye!"
 finally:
