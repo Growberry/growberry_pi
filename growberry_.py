@@ -28,7 +28,7 @@ from picamera import PiCamera
 measurement_interval = 10.00
 
 # LIGHTS ON TIME
-lights_on_time = 1100
+lights_on_time = '1100'
 
 # Length of day (in hours)
 daylength = 12
