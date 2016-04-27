@@ -364,7 +364,7 @@ def growmonitor(interval, set_temp, sunrise, daylength):
         elif fan_status.split(':')[1]== "OFF":
             print_fan_status = "Fans:"+ bcolors.RED + 'OFF' +bcolors.END
 
-        print(str(sensor_reading["timestamp"])+'\t'+ str(time.strftime("%Y-%m-%d.%H%M")) +'\t'+ str(sensor_reading["temp"]) +'\t'+ str(sensor_reading["humidity"]) +'\t'+ print_light_status +'\t'+ print_fan_status)
+        print(str(sensor_reading["timestamp"])+'\t'+ str(time.strftime("%Y-%m-%d.%H%M")) +'\t'+ str(sensor_reading["temp"]) +'\t'+ str(sensor_reading["humidity"]) +'\t'+ print_light_status +'\t'+ print_fan_status + '\tTimeSinceWater:'+timesincelastwater )
 
         with open(logfile, "a") as data_log:
             #write the data line in TSV format
@@ -384,15 +384,17 @@ def main():
         ' \______  /__|   \____/ \/\_/  |___  /\___  >__|   |__|   / ____| /\ |   __// ____|\n'+\
         '        \/                         \/     \/              \/      \/ |__|   \/     \n'+bcolors.END)
     global last_water
-    #try:
-    line = subprocess.check_output(['tail', '-1', logfile])
-    x = line.split('\t')
-    last_log_time = datetime.datetime.strptime(x[1], "%Y-%m-%d.%H%M")
-
-
-    t= datetime.strptime(x[6].split('.')[0], "%H:%M:%S")
-    timesincewaterlastlog = timedelta(hours=t.hour, minutes=t.minute, seconds=t.second)
-    last_water = last_log_time - timesincewaterlastlog
+    try:
+        # attempt to determine the time since last watering by reading the last line in the logfile
+        line = subprocess.check_output(['tail', '-1', logfile])
+        x = line.split('\t')
+        last_log_time = datetime.datetime.strptime(x[1], "%Y-%m-%d.%H%M")
+        t= datetime.datetime.strptime(x[6].split('.')[0], "%H:%M:%S")
+        timesincewaterlastlog = datetime.timedelta(hours=t.hour, minutes=t.minute, seconds=t.second)
+        last_water = last_log_time - timesincewaterlastlog
+    except:
+        # if that doesn't work, just use the default
+        last_water = "not watered yet"
 
 
     growmonitor(measurement_interval, fan_temp, lights_on_time, daylength)
@@ -444,3 +446,4 @@ except KeyboardInterrupt:
     print "Goodbye!"
 finally:
     GPIO.cleanup()
+#!/usr/bin/env python
