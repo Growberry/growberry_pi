@@ -249,8 +249,8 @@ class Sensor:
 
 ############### Define things controlled vi Pi #####################
 ####################### GLOBAL VARIABLES  ##########################
-#lights currently controled via timer so I can test the water pump
-#LIGHTS = Relay(12, "lights")
+#lights currently controled via timer so I can test the water pump needs to go back to the correct pin
+LIGHTS = Relay(21, "lights")
 
 FANS = Relay(19, "fans")
 
