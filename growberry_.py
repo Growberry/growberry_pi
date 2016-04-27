@@ -257,6 +257,9 @@ LIGHTS = Relay(21, "lights")
 FANS = Relay(19, "fans")
 
 H2O_PUMP = Relay(12, "water pump")
+
+try:
+    last water = 
 last_water = "not watered yet"
 
 sensor1 = Sensor(17, Adafruit_DHT.DHT22, "temp_humidity")
