@@ -37,10 +37,10 @@ daylength = 12
 fan_temp = 24.0
 
 # times that the sprinkler should run (list of strings)
-watertimes = ['0700','1300','2230']
+watertimes = ['0700','1300','1900']
 
 # length of sprinkler cycle (in minutes)
-pumptime = 5
+pumptime = 11
 
 # toggle picture capture on/off
 toggle_camera = True
@@ -64,6 +64,8 @@ GPIO.setwarnings(True)  # set to false if the warnings bother you, helps trouble
 
 GPIO.setup(12, GPIO.OUT, initial=1)
 GPIO.setup(19, GPIO.OUT, initial=1)
+#fake pin setup to use while testing the sprinkler
+GPIO.setup(21, GPIO.OUT, initial=1)
 
 #####################################################################
 #                           Classes
@@ -255,6 +257,7 @@ LIGHTS = Relay(21, "lights")
 FANS = Relay(19, "fans")
 
 H2O_PUMP = Relay(12, "water pump")
+last_water = "not watered yet"
 
 sensor1 = Sensor(17, Adafruit_DHT.DHT22, "temp_humidity")
 
@@ -342,8 +345,8 @@ def growmonitor(interval, set_temp, sunrise, daylength):
         #run lightcontrol, which takes a time to turn on, and a "daylength"
         light_status = lightcontrol(sunrise, daylength)
 
-        timesincelastwater = sprinkler()
-
+        tslw = sprinkler()
+        timesincelastwater = str(tslw)
 
         data_line = (str(sensor_reading["timestamp"]), str(time.strftime("%Y-%m-%d.%H%M")), str(sensor_reading["temp"]), str(sensor_reading["humidity"]), light_status, fan_status, timesincelastwater, '\n')
 
