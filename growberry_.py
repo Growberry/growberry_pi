@@ -18,6 +18,7 @@ import time
 import RPi.GPIO as GPIO
 import Adafruit_DHT
 from picamera import PiCamera
+import subprocess
 
 #####################################################################
 #                           Parameters
@@ -257,11 +258,7 @@ LIGHTS = Relay(21, "lights")
 FANS = Relay(19, "fans")
 
 H2O_PUMP = Relay(12, "water pump")
-
-try:
-    last water = 
 last_water = "not watered yet"
-
 sensor1 = Sensor(17, Adafruit_DHT.DHT22, "temp_humidity")
 
 # camera is on by default, but in some cases toggling it off results in no camera initiation
@@ -386,6 +383,14 @@ def main():
         '\    \_\  \  | \(  <_> )     / | \_\ \  ___/|  | \/|  | \/\___  |    |  |_> >___  |\n'+bcolors.GREEN +\
         ' \______  /__|   \____/ \/\_/  |___  /\___  >__|   |__|   / ____| /\ |   __// ____|\n'+\
         '        \/                         \/     \/              \/      \/ |__|   \/     \n'+bcolors.END)
+    global last_water
+    #try:
+    line = subprocess.check_output(['tail', '-1', logfile])
+    x = line.split('\t')
+    last_log_time = datetime.datetime.strptime(x[1], "%Y-%m-%d.%H%M")
+    timesincewaterlastlog = datetime.timedelta(x[6])
+    last_water = last_log_time + timesincewaterlastlog
+
 
     growmonitor(measurement_interval, fan_temp, lights_on_time, daylength)
 
