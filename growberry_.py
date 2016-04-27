@@ -390,7 +390,7 @@ def main():
     last_log_time = datetime.datetime.strptime(x[1], "%Y-%m-%d.%H%M")
 
 
-    t = datetime.strptime(x[6].split('.')[0], "%H:%M:%S")
+    t= datetime.strptime(x[6].split('.')[0], "%H:%M:%S")
     timesincewaterlastlog = timedelta(hours=t.hour, minutes=t.minute, seconds=t.second)
     last_water = last_log_time - timesincewaterlastlog
 
