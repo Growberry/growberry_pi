@@ -53,7 +53,7 @@ GPIO.setmode(GPIO.BCM)  # for using the names of the pins
 # or
 # GPIO.setmode(GPIO.BOARD)   #for true pin number IDs (pin1 = 1)
 
-#GPIO.cleanup()  # shouldn't need to use this, but just in case.  Should be done at the end
+# GPIO.cleanup()  # shouldn't need to use this, but just in case.  Should be done at the end
 
 GPIO.setwarnings(True)  # set to false if the warnings bother you, helps troubleshooting
 
@@ -156,7 +156,8 @@ class LED:
 
 class Relay:
     """
-    Turns GPIO pins from LOW(off) to HIGH(on) and back again
+    Turns GPIO pins from LOW(on) to HIGH(off) and back again.  Remember: relays are inverted. 
+    3.3v turns the relay off.
 
     this class pretty much works for any device connected to a single GPIO pin
     as instances of Relays are created, their names are added as keys in the Relay.dictionary
@@ -226,15 +227,16 @@ class Sensor:
     def read(self):
         humidity, temp = Adafruit_DHT.read(self.sens_type, self.pin)
 
-        #print 'Temperature: {0:0.1f} C'.format(temp)
-        #print 'Humidity:    {0:0.1f} %'.format(humidity)
+        #print 'Temperature: {0:0.1f} C'.format(temp)       #prints Temp formated
+        #print 'Humidity:    {0:0.1f} %'.format(humidity)   #prints Humidity formatted
 
-        #print temp
-        #print humidity
+        #print temp         #prints temp unformated
+        #print humidity     #prints humidity unformated
 
-        # Skip to the next reading if a valid measurement couldn't be taken.$
+        # Sometimes the sensor will return "None"
         # This might happen if the CPU is under a lot of load and the sensor$
         # can't be reliably read (timing is critical to read the sensor).$
+        # the following loop will read the sensor every 2 seconds until both temp and humidity are not "None"
 
         while humidity is None or temp is None:  #this should prevent errors when rounding, but could cause a hang-up...
             time.sleep(2)
