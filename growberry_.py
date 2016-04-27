@@ -388,8 +388,11 @@ def main():
     line = subprocess.check_output(['tail', '-1', logfile])
     x = line.split('\t')
     last_log_time = datetime.datetime.strptime(x[1], "%Y-%m-%d.%H%M")
-    timesincewaterlastlog = datetime.timedelta(x[6])
-    last_water = last_log_time + timesincewaterlastlog
+
+
+    t = datetime.strptime(x[6].split('.')[0], "%H:%M:%S")
+    timesincewaterlastlog = timedelta(hours=t.hour, minutes=t.minute, seconds=t.second)
+    last_water = last_log_time - timesincewaterlastlog
 
 
     growmonitor(measurement_interval, fan_temp, lights_on_time, daylength)
