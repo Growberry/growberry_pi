@@ -35,13 +35,13 @@ lights_on_time = '1100'
 daylength = 12
 
 # TEMP that activates fans
-fan_temp = 24.0
+fan_temp = 22.5
 
 # times that the sprinkler should run (list of strings)
 watertimes = ['0700','1300','1900']
 
 # length of sprinkler cycle (in minutes)
-pumptime = 11
+pumptime = 3
 
 # toggle picture capture on/off
 toggle_camera = True
@@ -50,7 +50,7 @@ toggle_camera = True
 logfile = '/home/pi/usbdrv/growberry_testlog/grow1_log.txt'
 
 # directory to save pictures in
-pic_dir = '/home/pi/usbdrv/growberry_testlog/pictures/'
+pic_dir = '/home/pi/usbdrv/growberry_testlog/flowering_pictures/'
 
 #####################################################################
 #                           GPIO pin set up
