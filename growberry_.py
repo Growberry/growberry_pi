@@ -38,7 +38,7 @@ daylength = 12
 fan_temp = 22.5
 
 # times that the sprinkler should run (list of strings)
-watertimes = ['0700','1300','1900']
+watertimes = ['0600','1100','1600','2100']
 
 # length of sprinkler cycle (in minutes)
 pumptime = 3
