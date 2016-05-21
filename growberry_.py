@@ -18,6 +18,7 @@ import time
 import RPi.GPIO as GPIO
 import Adafruit_DHT
 from picamera import PiCamera
+import subprocess
 
 #####################################################################
 #                           Parameters
@@ -28,13 +29,19 @@ from picamera import PiCamera
 measurement_interval = 10.00
 
 # LIGHTS ON TIME
-lights_on_time = 11.00
+lights_on_time = '1100'
 
-# LIGHTS OFF TIME
-lights_off_time = 23.00
+# Length of day (in hours)
+daylength = 12
 
 # TEMP that activates fans
-fan_temp = 24.0
+fan_temp = 22.5
+
+# times that the sprinkler should run (list of strings)
+watertimes = ['0600','1100','1600','2100']
+
+# length of sprinkler cycle (in minutes)
+pumptime = 3
 
 # toggle picture capture on/off
 toggle_camera = True
@@ -43,17 +50,13 @@ toggle_camera = True
 logfile = '/home/pi/usbdrv/growberry_testlog/grow1_log.txt'
 
 # directory to save pictures in
-pic_dir = '/home/pi/usbdrv/growberry_testlog/pictures/'
+pic_dir = '/home/pi/usbdrv/growberry_testlog/flowering_pictures/'
 
 #####################################################################
 #                           GPIO pin set up
 #####################################################################
 # select one of these two modes:
 GPIO.setmode(GPIO.BCM)  # for using the names of the pins
-# or
-# GPIO.setmode(GPIO.BOARD)   #for true pin number IDs (pin1 = 1)
-
-#GPIO.cleanup()  # shouldn't need to use this, but just in case.  Should be done at the end
 
 GPIO.setwarnings(True)  # set to false if the warnings bother you, helps troubleshooting
 
@@ -62,6 +65,8 @@ GPIO.setwarnings(True)  # set to false if the warnings bother you, helps trouble
 
 GPIO.setup(12, GPIO.OUT, initial=1)
 GPIO.setup(19, GPIO.OUT, initial=1)
+#fake pin setup to use while testing the sprinkler
+GPIO.setup(21, GPIO.OUT, initial=1)
 
 #####################################################################
 #                           Classes
@@ -156,7 +161,8 @@ class LED:
 
 class Relay:
     """
-    Turns GPIO pins from LOW(off) to HIGH(on) and back again
+    Turns GPIO pins from LOW(on) to HIGH(off) and back again.  Remember: relays are inverted. 
+    3.3v turns the relay off.
 
     this class pretty much works for any device connected to a single GPIO pin
     as instances of Relays are created, their names are added as keys in the Relay.dictionary
@@ -226,33 +232,38 @@ class Sensor:
     def read(self):
         humidity, temp = Adafruit_DHT.read(self.sens_type, self.pin)
 
-        #print 'Temperature: {0:0.1f} C'.format(temp)
-        #print 'Humidity:    {0:0.1f} %'.format(humidity)
+        #print 'Temperature: {0:0.1f} C'.format(temp)       #prints Temp formated
+        #print 'Humidity:    {0:0.1f} %'.format(humidity)   #prints Humidity formatted
 
-        #print temp
-        #print humidity
+        #print temp         #prints temp unformated
+        #print humidity     #prints humidity unformated
 
-        # Skip to the next reading if a valid measurement couldn't be taken.$
+        # Sometimes the sensor will return "None"
         # This might happen if the CPU is under a lot of load and the sensor$
         # can't be reliably read (timing is critical to read the sensor).$
+        # the following loop will read the sensor every 2 seconds until both temp and humidity are not "None"
 
-        if humidity is None or temp is None:
+        while humidity is None or temp is None:  #this should prevent errors when rounding, but could cause a hang-up...
             time.sleep(2)
             humidity, temp = Adafruit_DHT.read(self.sens_type, self.pin)
+
         return {"temp": round(float(temp),1), "humidity": round(float(humidity),1), "timestamp": datetime.datetime.now()}
 
 
 ############### Define things controlled vi Pi #####################
-
-LIGHTS = Relay(12, "lights")
+####################### GLOBAL VARIABLES  ##########################
+#lights currently controled via timer so I can test the water pump needs to go back to the correct pin
+LIGHTS = Relay(21, "lights")
 
 FANS = Relay(19, "fans")
 
-#H2O_PUMP = Relay(set up a pin for this, "water pump")
-
+H2O_PUMP = Relay(12, "water pump")
+last_water = "not watered yet"
 sensor1 = Sensor(17, Adafruit_DHT.DHT22, "temp_humidity")
 
-camera = PiCamera()
+# camera is on by default, but in some cases toggling it off results in no camera initiation
+if toggle_camera:
+    camera = PiCamera()
 
 #####################################################################
 #                           FUNCTIONS
@@ -260,31 +271,64 @@ camera = PiCamera()
 # worksheet.append_row((datetime.datetime.now(),time.strftime('%m/%d/%Y'),time.strftime("%H:%M:%S"), temp, humidity))$
 
 def takepic(save_dir):
+    """Take a picture, and save it to directory specified using the date.time as the name"""
     timestamp = time.strftime("%Y-%m-%d.%H%M")
     camera.capture('%s%s.jpg'%(save_dir, timestamp))
 
 def watercycle(pumptime):
+    """ turns water pump on for time specified (in minutes)"""
+    global last_water
     H2O_PUMP.on()
     time.sleep(pumptime*60)
     H2O_PUMP.off()
     last_water = datetime.datetime.now()
 
+def sprinkler():
+    """checks if the sprinkler needs to run, returns the time since the end of the last watercycle run"""
+
+    #set up the watering cycle function to be started as a second thread and to run for the pump time
+    w1 = Thread(target=watercycle, args=(pumptime,))
+
+    if last_water != "not watered yet":
+        timesinceH2O = datetime.datetime.now() - last_water
+    else:
+        timesinceH2O = last_water
+
+    for lime in watertimes:
+        # convert the scheduled watertime to a date.time and see if it falls in the previous measurment_interval.
+        # if yes, start the watercylce
+        x = datetime.datetime.strptime(lime, '%H%M').time()
+        H2Otime = datetime.datetime.combine(datetime.date.today(), x)
+        if (datetime.datetime.now() - datetime.timedelta(minutes=measurement_interval)) <= H2Otime <= datetime.datetime.now():
+            w1.start()
+
+    return timesinceH2O
+
+def lightcontrol(t, daylength):
+    """send in the time to turn the lights on, and how long to keep them on for. Returns a light status"""
+
+    i = datetime.datetime.strptime(t, '%H%M').time()
+
+    ontime = datetime.datetime.combine(datetime.date.today(), i)
+    offtime = ontime + datetime.timedelta(hours=daylength)
+
+    if ontime <= datetime.datetime.now() <= offtime:
+        LIGHTS.on()
+        return "Lights:ON"
+    else:
+        LIGHTS.off()
+        return "Lights:OFF"
+
+def growmonitor(interval, set_temp, sunrise, daylength):
 
 
-def growmonitor(interval, set_temp, lights_on, lights_off):
     """
     Every interval minutes, read the temp/humidity, if temp exceeds set_temp, turn on fans, 
     if time falls between set_time1 and set_time2: turn light on
     """
-    #break float input date into python time object
-    on_hour = int(str(lights_on).split(".")[0])
-    on_min = int(str(lights_on).split(".")[1])
 
-    off_hour = int(str(lights_off).split(".")[0])
-    off_min = int(str(lights_off).split(".")[1])
     last_water = None
     fan_status = None
-    light_status = None
     while True:
         #take picture and write it to the pic directory
         if toggle_camera:
@@ -297,18 +341,16 @@ def growmonitor(interval, set_temp, lights_on, lights_off):
         else:
             fan_status = "Fans:OFF"
             FANS.off()
-        # check if the time in within the set_times
-        ontime = datetime.time(on_hour, on_min)
-        offtime = datetime.time(off_hour, off_min)
-        now = datetime.datetime.now()
-        if ontime <= now.time() <= offtime:
-            light_status = "Lights:ON"
-            LIGHTS.on()
-        else:
-            light_status = "Lights:OFF"
-            LIGHTS.off()
 
-        data_line = (str(sensor_reading["timestamp"])+'\t'+ str(time.strftime("%Y-%m-%d.%H%M")) +'\t'+ str(sensor_reading["temp"]) +'\t'+ str(sensor_reading["humidity"]) +'\t'+ light_status +'\t'+ fan_status + '\n')
+        #run lightcontrol, which takes a time to turn on, and a "daylength"
+        light_status = lightcontrol(sunrise, daylength)
+
+        tslw = sprinkler()
+        timesincelastwater = str(tslw)
+
+        data_line = (str(sensor_reading["timestamp"]), str(time.strftime("%Y-%m-%d.%H%M")), str(sensor_reading["temp"]), str(sensor_reading["humidity"]), light_status, fan_status, timesincelastwater, '\n')
+
+
 
         print_light_status = None
         if light_status.split(':')[1]== "ON":
@@ -322,10 +364,11 @@ def growmonitor(interval, set_temp, lights_on, lights_off):
         elif fan_status.split(':')[1]== "OFF":
             print_fan_status = "Fans:"+ bcolors.RED + 'OFF' +bcolors.END
 
-        print(str(sensor_reading["timestamp"])+'\t'+ str(time.strftime("%Y-%m-%d.%H%M")) +'\t'+ str(sensor_reading["temp"]) +'\t'+ str(sensor_reading["humidity"]) +'\t'+ print_light_status +'\t'+ print_fan_status)
+        print(str(sensor_reading["timestamp"])+'\t'+ str(time.strftime("%Y-%m-%d.%H%M")) +'\t'+ str(sensor_reading["temp"]) +'\t'+ str(sensor_reading["humidity"]) +'\t'+ print_light_status +'\t'+ print_fan_status + '\tTimeSinceWater:'+timesincelastwater )
 
         with open(logfile, "a") as data_log:
-            data_log.write(data_line)
+            #write the data line in TSV format
+            data_log.write("\t".join(data_line))
 
         time.sleep(interval * 60)
 
@@ -340,8 +383,21 @@ def main():
         '\    \_\  \  | \(  <_> )     / | \_\ \  ___/|  | \/|  | \/\___  |    |  |_> >___  |\n'+bcolors.GREEN +\
         ' \______  /__|   \____/ \/\_/  |___  /\___  >__|   |__|   / ____| /\ |   __// ____|\n'+\
         '        \/                         \/     \/              \/      \/ |__|   \/     \n'+bcolors.END)
+    global last_water
+    try:
+        # attempt to determine the time since last watering by reading the last line in the logfile
+        line = subprocess.check_output(['tail', '-1', logfile])
+        x = line.split('\t')
+        last_log_time = datetime.datetime.strptime(x[1], "%Y-%m-%d.%H%M")
+        t= datetime.datetime.strptime(x[6].split('.')[0], "%H:%M:%S")
+        timesincewaterlastlog = datetime.timedelta(hours=t.hour, minutes=t.minute, seconds=t.second)
+        last_water = last_log_time - timesincewaterlastlog
+    except:
+        # if that doesn't work, just use the default
+        last_water = "not watered yet"
 
-    growmonitor(measurement_interval, fan_temp, lights_on_time, lights_off_time)
+
+    growmonitor(measurement_interval, fan_temp, lights_on_time, daylength)
 
 
 ########################  activityentered_code()  ###########################
@@ -385,7 +441,9 @@ def activitycode(choices):
 
 try:
     main()
+
 except KeyboardInterrupt:
     print "Goodbye!"
 finally:
     GPIO.cleanup()
+#!/usr/bin/env python
