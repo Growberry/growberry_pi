@@ -203,7 +203,7 @@ def main():
     """
     loop asking for an activity code via raw input. Exits by typing 'exit'
     """
-    print('\n\n\n\n\n[--system--] enter code for LED behavior: LEDname on/off/strobe\n')
+    print('\n\n\n\n\n[--system--] enter code for behavior: LEDname on/off/strobe\n')
     print('\nconnecting....')
     time.sleep(.2)
     print('....')
