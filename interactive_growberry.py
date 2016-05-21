@@ -1,23 +1,6 @@
-"""
-
-if __name__ == "__main__":
-    cfg = ConfigParser()
-    ### *** WRITE config file ***
-
-    cfg['configData1'] = {'conf1': 'one', 'conf2': '12', 'conf3': 'false'}
-    cfg['configData2'] = {}
-    cfg['configData2']['config_string'] = 'string'  # set "string"
-    cfg['configData2']['config_bool'] = 'true'  # set "bool"
-    cfg['configData2']['config_int'] = '21'     # set "int"
-    cfg['configData2']['config_float'] = '10.211'   # set "float"
-
-    with open('config.ini', 'w') as configfile:
-        cfg.write(configfile)
-
-
 
 #!/usr/bin/env python
-
+"""
 #####################################################################
 #   code developed by: austinmeier                                  #
 #   developed on: 05/21/2016                                        #
