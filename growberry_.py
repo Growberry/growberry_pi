@@ -362,7 +362,7 @@ def growmonitor():
     Every interval minutes, read the temp/humidity, if temp exceeds set_temp, turn on fans, 
     if time falls between set_time1 and set_time2: turn light on
     """
-
+    global growsettings
     last_water = None
     fan_status = None
     while True:
@@ -412,6 +412,7 @@ def growmonitor():
 
 
 def main():
+    global growsettings
     growsettings = importconfig('config.ini')
     print('\n\n\n\n\n')
 
@@ -446,6 +447,7 @@ def main():
 
 try:
     # camera is on by default, but in some cases toggling it off results in no camera initiation
+    global growsettings
     growsettings = importconfig('config.ini')
     if growsettings['toggle_camera']:
         camera = PiCamera()
