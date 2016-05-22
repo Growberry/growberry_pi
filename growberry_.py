@@ -324,7 +324,8 @@ def sprinkler(growsettings):
     """checks if the sprinkler needs to run, returns the time since the end of the last watercycle run"""
 
     #set up the watering cycle function to be started as a second thread and to run for the pump time
-    w1 = Thread(target=watercycle, args=(growsettings['pumptime'],))
+    pumptime = growsettings['pumptime']
+    w1 = Thread(target=watercycle, args=(pumptime,))
 
     if last_water != "not watered yet":
         timesinceH2O = datetime.datetime.now() - last_water
@@ -372,7 +373,7 @@ def growmonitor():
             takepic(growsettings['pic_dir'])
         # read the sensor, check temp, turn fans on/off
         sensor_reading = sensor1.read()  # returns a dictionary with "temp", "humidity", and "timestamp" keys
-        if sensor_reading["temp"] > float(growsettings['set_temp']):
+        if sensor_reading["temp"] > float(growsettings['fan_temp']):
             fan_status = "Fans:ON"
             FANS.on()
         else:
@@ -445,6 +446,7 @@ def main():
 
 try:
     # camera is on by default, but in some cases toggling it off results in no camera initiation
+    growsettings = importconfig('config.ini')
     if growsettings['toggle_camera']:
         camera = PiCamera()
     main()
