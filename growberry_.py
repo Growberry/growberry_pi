@@ -324,8 +324,8 @@ def sprinkler(growsettings):
     """checks if the sprinkler needs to run, returns the time since the end of the last watercycle run"""
 
     #set up the watering cycle function to be started as a second thread and to run for the pump time
-    pumptime = growsettings['pumptime']
-    w1 = Thread(target=watercycle, args=(pumptime,))
+
+    w1 = Thread(target=watercycle, args=(growsettings['pumptime'],))
 
     if last_water != "not watered yet":
         timesinceH2O = datetime.datetime.now() - last_water
@@ -383,7 +383,7 @@ def growmonitor():
         #run lightcontrol, which takes a time to turn on, and a "daylength"
         light_status = lightcontrol(growsettings['lights_on_time'], growsettings['daylength'])
 
-        tslw = sprinkler(growsettings['measurement_interval'])
+        tslw = sprinkler(growsettings)
         timesincelastwater = str(tslw)
 
         data_line = (str(sensor_reading["timestamp"]), str(time.strftime("%Y-%m-%d.%H%M")), str(sensor_reading["temp"]), str(sensor_reading["humidity"]), light_status, fan_status, timesincelastwater, '\n')
