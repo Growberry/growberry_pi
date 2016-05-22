@@ -28,7 +28,7 @@
         <entry file="file://$PROJECT_DIR$/growberry_.py">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="53" column="0" selection-start-line="22" selection-start-column="0" selection-end-line="53" selection-end-column="0" />
+              <caret line="52" column="65" selection-start-line="25" selection-start-column="0" selection-end-line="52" selection-end-column="65" />
               <folding>
                 <element signature="e#491#500#0" expanded="true" />
               </folding>
@@ -49,8 +49,8 @@
       <file leaf-file-name="interactive_growberry.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/interactive_growberry.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.062893085">
-              <caret line="2" column="3" selection-start-line="2" selection-start-column="3" selection-end-line="2" selection-end-column="3" />
+            <state vertical-scroll-proportion="0.056603774">
+              <caret line="224" column="38" selection-start-line="224" selection-start-column="38" selection-end-line="224" selection-end-column="38" />
               <folding>
                 <element signature="e#453#481#0" expanded="true" />
               </folding>
@@ -61,8 +61,8 @@
       <file leaf-file-name="config.ini" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/config.ini">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-21.11111">
-              <caret line="38" column="0" selection-start-line="38" selection-start-column="0" selection-end-line="38" selection-end-column="0" />
+            <state vertical-scroll-proportion="-10.555555">
+              <caret line="24" column="7" selection-start-line="24" selection-start-column="7" selection-end-line="24" selection-end-column="7" />
               <folding />
             </state>
           </provider>
@@ -422,7 +422,13 @@
       <option name="project" value="LOCAL" />
       <updated>1463871228156</updated>
     </task>
-    <option name="localTasksCounter" value="20" />
+    <task id="LOCAL-00020" summary="bug fixing">
+      <created>1463871487174</created>
+      <option name="number" value="00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1463871487174</updated>
+    </task>
+    <option name="localTasksCounter" value="21" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -479,7 +485,8 @@
     <MESSAGE value="typos" />
     <MESSAGE value="fixed float rounding error that occured when either temp or humidity returned an integer." />
     <MESSAGE value="first try to import values from a config file and print them to the screen" />
-    <option name="LAST_COMMIT_MESSAGE" value="first try to import values from a config file and print them to the screen" />
+    <MESSAGE value="bug fixing" />
+    <option name="LAST_COMMIT_MESSAGE" value="bug fixing" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager />
@@ -631,7 +638,7 @@
     <entry file="file://$PROJECT_DIR$/growberry_.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="53" column="0" selection-start-line="22" selection-start-column="0" selection-end-line="53" selection-end-column="0" />
+          <caret line="52" column="65" selection-start-line="25" selection-start-column="0" selection-end-line="52" selection-end-column="65" />
           <folding>
             <element signature="e#491#500#0" expanded="true" />
           </folding>
@@ -640,16 +647,16 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/config.ini">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-21.11111">
-          <caret line="38" column="0" selection-start-line="38" selection-start-column="0" selection-end-line="38" selection-end-column="0" />
+        <state vertical-scroll-proportion="-10.555555">
+          <caret line="24" column="7" selection-start-line="24" selection-start-column="7" selection-end-line="24" selection-end-column="7" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/interactive_growberry.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.062893085">
-          <caret line="2" column="3" selection-start-line="2" selection-start-column="3" selection-end-line="2" selection-end-column="3" />
+        <state vertical-scroll-proportion="0.056603774">
+          <caret line="224" column="38" selection-start-line="224" selection-start-column="38" selection-end-line="224" selection-end-column="38" />
           <folding>
             <element signature="e#453#481#0" expanded="true" />
           </folding>

@@ -196,6 +196,44 @@ relay4 = Relay(19, "fans")
 def current_config():
     ### *** READ config file ***
     cfg.read('config.ini')
+
+    # Read interval
+    measurement_interval = cfg.getfloat('general', 'measurement_interval')
+
+    # LIGHTS ON TIME
+    lights_on_time = cfg.get('lights', 'lights_on_time')
+
+    # Length of day (in hours)
+    daylength = cfg.getfloat('lights', 'daylength')
+
+    # TEMP that activates fans
+    fan_temp = cfg.getfloat('general', 'fan_temp')
+
+    # times that the sprinkler should run (list of strings)
+    watertimes = cfg.get('water', 'watertimes')
+
+    # length of sprinkler cycle (in minutes)
+    pumptime = cfg.getfloat('water', 'pumptime')
+
+    # toggle picture capture on/off
+    toggle_camera = cfg.getboolean('general', 'toggle_camera')
+
+    # file to write the log file to
+    logfile = cfg.get('io', 'logfile')
+
+    # directory to save pictures in
+    pic_dir = cfg.get('io', 'pic_dir')
+
+    print(
+        "The measurement interval is: ",measurement_interval,"\n",
+        "The lights will turn on for ",daylength, " beginning at ", lights_on_time,"\n",
+        "If the temperature exceeds ",fan_temp," degrees celcius, the fans will be activated\n",
+        "The waterpump with be activated for ",pumptime," minutes at these times: ",watertimes,"\n",
+        "The camera is toggled on: ",toggle_camera,"\n",
+        "If 'True', the resulting pictures will be saved in ",pic_dir,"\n",
+        "All data is logged to ",logfile,"\n",
+        )
+
     print(cfg.sections())       # return all sections
     print(cfg.items('io')) # return section's list
     print(cfg.get('io', 'logfile'))
