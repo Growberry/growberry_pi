@@ -210,10 +210,10 @@ def current_config():
     fan_temp = cfg.getfloat('general', 'fan_temp')
 
     # times that the sprinkler should run (list of strings)
-    watertimes = cfg.get('water', 'watertimes')
+    watertimes = cfg.get('irrigation', 'watertimes')
 
     # length of sprinkler cycle (in minutes)
-    pumptime = cfg.getfloat('water', 'pumptime')
+    pumptime = cfg.getfloat('irrigation', 'pumptime')
 
     # toggle picture capture on/off
     toggle_camera = cfg.getboolean('general', 'toggle_camera')
