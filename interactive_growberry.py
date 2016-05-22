@@ -19,8 +19,6 @@ import subprocess
 from configparser import ConfigParser
 cfg = ConfigParser()
 
-
-
 #####################################################################
 #                           GPIO pin set up
 #####################################################################
@@ -34,8 +32,6 @@ GPIO.setwarnings(True)      #This should alert you to the fact that growberry_.p
 
 GPIO.setup(19,GPIO.OUT, initial = 1)
 GPIO.setup(12,GPIO.OUT, initial = 1)
-
-
 
 #####################################################################
 #                           Classes
@@ -66,8 +62,6 @@ class bcolors:                          #these are the color codes
         self.RED = ''
         self.END = ''
         self.BOLD = ''
-
-
 
 ##########################  LED class  #############################
 class LED:
@@ -125,7 +119,7 @@ class LED:
             time.sleep(speed)
             repeat -= 1
 
-#####################################################################
+##########################  Relay class ##############################
 class Relay:
     """
     Turns GPIO pins from LOW(off) to HIGH(on) and back again
@@ -139,7 +133,7 @@ class Relay:
         self.pin = int(pin)         #this is the GPIO pin number (will depend on GPIO config)
         self.name = name
         self.state = GPIO.input(self.pin)           #was going to use conditional loop if I could have got backgrounding to work
-        LED.dictionary[name] = self #auto adds every instance of LED to the dictionary
+        Relay.dictionary[name] = self #auto adds every instance of Relay to the dictionary
 
     def getstate(self):
         self.state = GPIO.input(self.pin)
@@ -180,122 +174,133 @@ class Relay:
             repeat -= 1
 
 
-#
+#######
+class Config:
+    """
+    reads config file, and modifies it
+    """
+    dictionary  = {}                #a dictionary will all created config instances' names as keys
+    #state = None
+    def __init__(self,path,name):
+        cfg.read(path)
+        self.path = path
+        self.sections =  cfg.sections()         # this is the sections in your config file (usually in a bracket)
+        self.name = name                        # here mostly so something can be added to the config.dict
+        Config.dictionary[name] = self          # auto adds every instance of config to the dictionary
+        self.settings = {}
+
+        cfg.read(path)
+        ### *** READ config file ***
+        cfg.read('config.ini')
+
+        # Read interval
+        self.settings['measurement_interval'] = cfg.get('options', 'measurement_interval')
+
+        # LIGHTS ON TIME
+        self.settings['lights_on_time'] = cfg.get('options', 'lights_on_time')
+
+        # Length of day (in hours)
+        self.settings['daylength'] = cfg.get('options', 'daylength')
+
+        # TEMP that activates fans
+        self.settings['fan_temp'] = cfg.get('options', 'fan_temp')
+
+        # times that the sprinkler should run (list of strings)
+        self.settings['watertimes'] = cfg.get('options', 'watertimes').split(',')
+
+        # length of sprinkler cycle (in minutes)
+        self.settings['pumptime'] = cfg.get('options', 'pumptime')
+
+        # toggle picture capture on/off
+        self.settings['toggle_camera'] = cfg.get('options', 'toggle_camera')
+
+        # file to write the log file to
+        self.settings['logfile'] = cfg.get('options', 'logfile')
+
+        # directory to save pictures in
+        self.settings['pic_dir'] = cfg.get('options', 'pic_dir')
+
+
+    def source(self):
+        cfg.read(self.path)
+        ### *** READ config file ***
+        cfg.read('config.ini')
+        self.settings['measurement_interval'] = cfg.get('options', 'measurement_interval')
+        self.settings['lights_on_time'] = cfg.get('options', 'lights_on_time')
+        self.settings['daylength'] = cfg.get('options', 'daylength')
+        self.settings['fan_temp'] = cfg.get('options', 'fan_temp')
+        self.settings['watertimes'] = cfg.get('options', 'watertimes').split(',')
+        self.settings['pumptime'] = cfg.get('options', 'pumptime')
+        self.settings['toggle_camera'] = cfg.get('options', 'toggle_camera')
+        self.settings['logfile'] = cfg.get('options', 'logfile')
+        self.settings['pic_dir'] = cfg.get('options', 'pic_dir')
+
+        return self.settings
+
+    def change(self, setting, new):
+        cfg['options'][setting] = new  # set "string"
+        with open('config.ini', 'w') as configfile:
+            cfg.write(configfile)
+            self.source()
+            print('The new %s is %s'%(setting, self.settings[setting]))
+
+
+
 #####################################################################
 relay1 = Relay(12,"water")
 relay4 = Relay(19, "fans")
+growsettings = Config('config.ini',"grow")
 #####################################################################
-#                     Put code below this
-#####################################################################
-
 
 #####################################################################
 #                       Functions
 #####################################################################
 
-def current_config():
+def importconfig(configfile):
+    config_dict = {}
     ### *** READ config file ***
-    cfg.read('config.ini')
+    cfg.read(configfile)
 
-    # Read interval
-    measurement_interval = cfg.getfloat('general', 'measurement_interval')
+    config_dict['measurement_interval'] = cfg.getfloat('options', 'measurement_interval')
 
     # LIGHTS ON TIME
-    lights_on_time = cfg.get('lights', 'lights_on_time')
+    config_dict['lights_on_time'] = cfg.get('options', 'lights_on_time')
 
     # Length of day (in hours)
-    daylength = cfg.getfloat('lights', 'daylength')
+    config_dict['daylength'] = cfg.getfloat('options', 'daylength')
 
     # TEMP that activates fans
-    fan_temp = cfg.getfloat('general', 'fan_temp')
+    config_dict['fan_temp'] = cfg.getfloat('options', 'fan_temp')
 
     # times that the sprinkler should run (list of strings)
-    watertimes = cfg.get('irrigation', 'watertimes').split(',')
+    config_dict['watertimes'] = cfg.get('options', 'watertimes').split(',')
 
     # length of sprinkler cycle (in minutes)
-    pumptime = cfg.getfloat('irrigation', 'pumptime')
+    config_dict['pumptime'] = cfg.getfloat('options', 'pumptime')
 
     # toggle picture capture on/off
-    toggle_camera = cfg.getboolean('general', 'toggle_camera')
+    config_dict['toggle_camera'] = cfg.getboolean('options', 'toggle_camera')
 
     # file to write the log file to
-    logfile = cfg.get('io', 'logfile')
+    config_dict['logfile'] = cfg.get('options', 'logfile')
 
     # directory to save pictures in
-    pic_dir = cfg.get('io', 'pic_dir')
+    config_dict['pic_dir'] = cfg.get('options', 'pic_dir')
 
-    print(
-        "The measurement interval is: " measurement_interval "\n",
-        "The lights will turn on for ",daylength, " beginning at ", lights_on_time,"\n",
-        "If the temperature exceeds ",fan_temp," degrees celcius, the fans will be activated\n",
-        "The waterpump with be activated for ",pumptime," minutes at these times: ",watertimes,"\n",
-        "The camera is toggled on: ",toggle_camera,"\n",
-        "If 'True', the resulting pictures will be saved in ",pic_dir,"\n",
-        "All data is logged to ",logfile,"\n",
-        )
-
-    print(cfg.sections())       # return all sections
-    print(cfg.items('io')) # return section's list
-    print(cfg.get('io', 'logfile'))
-    print(cfg.getfloat('general', 'fan_temp'))
-    print(cfg.get('configData1', 'conf2'))
-    print(cfg.get('configData1', 'conf3'))
-
-    print(cfg.get('configData2', 'config_string'))  # get "string" object
-    print(cfg.getboolean('configData2', 'config_bool')) # get "bool" object
-    print(cfg.getint('configData2', 'config_int'))      # get "int" object
-    print(cfg.getfloat('configData2', 'config_float'))  # get "float" object
-    try:
-        logfile = cfg.get('io', 'logfile').replace("'", "")  # get "string" object
-        lastlog = subprocess.check_output(['tail', '-1', logfile])
-    except:
-        # if that doesn't work, just print this warning
-        lastlog = "Could not retrieve last status"
-
-    print lastlog
-
-
-
-
-
-
-
-
-
-
-
-def main():
-    """
-    loop asking for an activity code via raw input. Exits by typing 'exit'
-    """
-
-    print('\n\n\n\n\n')
-
-    print(bcolors.RED + bcolors.BOLD +
-        '  ________                    ___.                                                 \n'+\
-        ' /  _____/______  ______  _  _\_ |__   __________________ ___.__.    ______ ___.__.\n'+bcolors.YELLOW +\
-        '/   \  __\_  __ \/  _ \ \/ \/ /| __ \_/ __ \_  __ \_  __ \   |  |    \____ \   |  |\n'+\
-        '\    \_\  \  | \(  <_> )     / | \_\ \  ___/|  | \/|  | \/\___  |    |  |_> >___  |\n'+bcolors.GREEN +\
-        ' \______  /__|   \____/ \/\_/  |___  /\___  >__|   |__|   / ____| /\ |   __// ____|\n'+\
-        '        \/                         \/     \/              \/      \/ |__|   \/     \n'+bcolors.END)
-    global last_water
-
-    current_config()
-    #activitycode(LED.dictionary)
-
+    return config_dict
 
 ########################  activityentered_code()  ###########################
-
-def activitycode(choices):
+def activitycode(choices,config):
     """
     In manual mode, you can enter a string, split into arguments at each space.
     Each argument is checked against the list of possible choices, and if the argument is in the list,
     the argument immediately following will dictate the behavior
     """
     entered_code = [str(x) for x in
-                    raw_input('\n[--system--] enter code for relay behavior: Relay name (%s) on/off/blink..\n>>>'%choices).split()]
+                    raw_input('\n[--system--] enter code for relay behavior:\n>>>').split()]
     for argument in entered_code:
         if argument in choices:
+            print "relay selected - would normally activate selected relay"
             behavior_choice_index = entered_code.index(argument) + 1
             # print(argument, entered_code[behavior_choice_index])
             if entered_code[behavior_choice_index] == "on":
@@ -315,8 +320,54 @@ def activitycode(choices):
                 b1 = Thread(target=choices[argument].blink, args=(blinkrepeat, blinkspeed))
                 # choices[argument].blink(blinkrepeat,blinkspeed)
                 b1.start()
+        elif argument in config.settings:
+            newsettingindex = entered_code.index(argument) + 1
+            config.change(argument,entered_code[newsettingindex])
+
         elif argument == "exit":
             return False
+
+
+
+
+
+#####################################################################
+#                            MAIN
+#####################################################################
+
+
+def main():
+    """
+    loop asking for an activity code via raw input. Exits by typing 'exit'
+    """
+
+    print('\n\n\n\n\n')
+
+    print(bcolors.RED + bcolors.BOLD +
+        '  ________                    ___.                                                 \n'+\
+        ' /  _____/______  ______  _  _\_ |__   __________________ ___.__.    ______ ___.__.\n'+bcolors.YELLOW +\
+        '/   \  __\_  __ \/  _ \ \/ \/ /| __ \_/ __ \_  __ \_  __ \   |  |    \____ \   |  |\n'+\
+        '\    \_\  \  | \(  <_> )     / | \_\ \  ___/|  | \/|  | \/\___  |    |  |_> >___  |\n'+bcolors.GREEN +\
+        ' \______  /__|   \____/ \/\_/  |___  /\___  >__|   |__|   / ____| /\ |   __// ____|\n'+\
+        '        \/                         \/     \/              \/      \/ |__|   \/     \n'+bcolors.END)
+    global last_water
+    try:
+        logfile = cfg.get('options', 'logfile').replace("'", "")  # get "string" object
+        lastlog = subprocess.check_output(['tail', '-1', logfile])
+    except:
+        # if that doesn't work, just print this warning
+        lastlog = "Could not retrieve last status"
+
+    print lastlog
+
+    while True:
+        result = activitycode(Relay.dictionary,growsettings)
+        if result == False:
+            print "[--system--] powering down."
+            GPIO.cleanup()
+            break
+
+
 
 
 ##############################################################################
@@ -325,11 +376,10 @@ def activitycode(choices):
 
 try:
     main()
-
 except KeyboardInterrupt:
     print "Goodbye!"
 finally:
     GPIO.cleanup()
-#!/usr/bin/env python
+
 
 

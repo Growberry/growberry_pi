@@ -124,49 +124,6 @@ class config:
 # #####################################################################
 # relay1 = Relay(12,"water")
 # relay4 = Relay(19, "fans")
-# #####################################################################
-# #                     Put code below this
-# #####################################################################
-
-
-#####################################################################
-#                       Functions
-#####################################################################
-
-def current_config():
-
-
-    print(
-        "The measurement interval is: " ,measurement_interval, "\n",
-        "The lights will turn on for ",daylength, " beginning at ", lights_on_time,"\n",
-        "If the temperature exceeds ",fan_temp," degrees celcius, the fans will be activated\n",
-        "The waterpump with be activated for ",pumptime," minutes at these times: ",watertimes,"\n",
-        "The camera is toggled on: ",toggle_camera,"\n",
-        "If 'True', the resulting pictures will be saved in ",pic_dir,"\n",
-        "All data is logged to ",logfile,"\n",
-        )
-
-    print(cfg.sections())       # return all sections
-    print(cfg.items('io')) # return section's list
-    print(cfg.get('io', 'logfile'))
-    print(cfg.getfloat('general', 'fan_temp'))
-    print(cfg.get('configData1', 'conf2'))
-    print(cfg.get('configData1', 'conf3'))
-
-    print(cfg.get('configData2', 'config_string'))  # get "string" object
-    print(cfg.getboolean('configData2', 'config_bool')) # get "bool" object
-    print(cfg.getint('configData2', 'config_int'))      # get "int" object
-    print(cfg.getfloat('configData2', 'config_float'))  # get "float" object
-    try:
-        logfile = cfg.get('io', 'logfile').replace("'", "")  # get "string" object
-        lastlog = subprocess.check_output(['tail', '-1', logfile])
-    except:
-        # if that doesn't work, just print this warning
-        lastlog = "Could not retrieve last status"
-
-    print lastlog
-
-
 
 
 
@@ -191,6 +148,15 @@ def main():
         ' \______  /__|   \____/ \/\_/  |___  /\___  >__|   |__|   / ____| /\ |   __// ____|\n'+\
         '        \/                         \/     \/              \/      \/ |__|   \/     \n'+bcolors.END)
     global last_water
+    try:
+        logfile = cfg.get('options', 'logfile').replace("'", "")  # get "string" object
+        lastlog = subprocess.check_output(['tail', '-1', logfile])
+    except:
+        # if that doesn't work, just print this warning
+        lastlog = "Could not retrieve last status"
+
+    print lastlog
+
     while True:
         result = activitycode(fake_choices,growsettings)
         if result == False:
@@ -208,7 +174,7 @@ def activitycode(choices,config):
     the argument immediately following will dictate the behavior
     """
     entered_code = [str(x) for x in
-                    raw_input('\n[--system--] enter code for relay behavior: Relay name (%s) on/off/blink..\n>>>'%choices).split()]
+                    raw_input('\n[--system--] enter code for relay behavior:\n>>>').split()]
     for argument in entered_code:
         if argument in choices:
             print "relay selected - would normally activate selected relay"
@@ -236,8 +202,7 @@ def activitycode(choices,config):
             config.change(argument,entered_code[newsettingindex])
 
         elif argument == "exit":
-            loop = 0
-            return loop
+            return False
 
 
 
@@ -277,54 +242,8 @@ def importconfig(configfile):
 ##############################################################################
 #                       Executable code below:
 ##############################################################################
-#
-#
-# loop = 1
-# while loop == 1:
-#     print('1 - Edit config file')
-#     print('2 - Test relays')
-#     print('Type exit at any time to quit')
-#     print('4 - ')
-#     print('5 - ')
-#     print()
 
-#
 fake_choices = {'relay':10}
 growsettings = config('config.ini',"grow")
 main()
 
-
-# print growsettings.settings
-# growsettings.change('daylength',"40")
-# growsettings.source()
-# print growsettings.settings
-# print('Your choices are:')
-# for stg in growsettings.settings.keys():
-#     print stg
-#
-#
-#
-# #print growsettings.settings['watertimes']
-# #for lime in growsettings.settings['watertimes']:
-# #        print lime
-#
-#
-# activitycode(fake_choices,growsettings)
-#
-# measurement_interval = "0"
-# daylength = "0"
-# ights_on_time = "0"
-# pumptime = "0"
-# toggle_camera = "0"
-# pic_dir = "0"
-# watertimes = "0"
-# logfile = "0"
-# fan_temp = "0"
-
-#
-#
-# x = importconfig('config.ini')
-# for thingy in x:
-#     print type(x[thingy])
-#     print x[thingy]
-# print type(toggle_camera)
