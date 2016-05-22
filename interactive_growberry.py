@@ -15,6 +15,7 @@ import time
 import os
 from time import sleep
 import RPi.GPIO as GPIO
+import subprocess
 from configparser import ConfigParser
 cfg = ConfigParser()
 
@@ -193,20 +194,11 @@ relay4 = Relay(19, "fans")
 #####################################################################
 
 def current_config():
-    try:
-        # attempt to determine the time since last watering by reading the last line in the logfile
-        lastlog = subprocess.check_output(['tail', '-1', logfile])
-
-    except:
-        # if that doesn't work, just print this warning
-        lastlog = "Could not retrieve last status"
-
-    print lastlog
-
     ### *** READ config file ***
     cfg.read('config.ini')
     print(cfg.sections())       # return all sections
     print(cfg.items('io')) # return section's list
+    print(cfg.get('io', 'logfile'))
     print(cfg.getfloat('general', 'fan_temp'))
     print(cfg.get('configData1', 'conf2'))
     print(cfg.get('configData1', 'conf3'))
@@ -215,6 +207,15 @@ def current_config():
     print(cfg.getboolean('configData2', 'config_bool')) # get "bool" object
     print(cfg.getint('configData2', 'config_int'))      # get "int" object
     print(cfg.getfloat('configData2', 'config_float'))  # get "float" object
+    try:
+        logfile = cfg.get('io', 'logfile').replace("'", "")  # get "string" object
+        lastlog = subprocess.check_output(['tail', '-1', logfile])
+    except:
+        # if that doesn't work, just print this warning
+        lastlog = "Could not retrieve last status"
+
+    print lastlog
+
 
 
 
@@ -240,7 +241,6 @@ def main():
         ' \______  /__|   \____/ \/\_/  |___  /\___  >__|   |__|   / ____| /\ |   __// ____|\n'+\
         '        \/                         \/     \/              \/      \/ |__|   \/     \n'+bcolors.END)
     global last_water
-
 
     current_config()
     #activitycode(LED.dictionary)
