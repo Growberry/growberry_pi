@@ -367,7 +367,7 @@ def growmonitor():
     fan_status = None
     while True:
         #update the settings
-        growsettings = importconfig('config.ini')
+        growsettings = importconfig('/home/pi/Documents/git/growberry_pi/config.ini')
         #take picture and write it to the pic directory
         if growsettings['toggle_camera']:
             takepic(growsettings['pic_dir'])
@@ -413,7 +413,7 @@ def growmonitor():
 
 def main():
     global growsettings
-    growsettings = importconfig('config.ini')
+    growsettings = importconfig('/home/pi/Documents/git/growberry_pi/config.ini')
     print('\n\n\n\n\n')
 
     print(bcolors.RED + bcolors.BOLD +
@@ -448,7 +448,7 @@ def main():
 try:
     # camera is on by default, but in some cases toggling it off results in no camera initiation
     global growsettings
-    growsettings = importconfig('config.ini')
+    growsettings = importconfig('/home/pi/Documents/git/growberry_pi/config.ini')
     if growsettings['toggle_camera']:
         camera = PiCamera()
     main()
