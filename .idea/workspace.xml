@@ -2,9 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="4c814d34-16f7-4b80-9d96-01d0866a92dc" name="Default" comment="">
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/test_config.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/config.ini" afterPath="$PROJECT_DIR$/config.ini" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/interactive_growberry.py" afterPath="$PROJECT_DIR$/interactive_growberry.py" />
     </list>
     <ignored path="growberry_pi.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -47,13 +46,25 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="interactive_growberry.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="interactive_growberry.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/interactive_growberry.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.24528302">
-              <caret line="219" column="0" selection-start-line="219" selection-start-column="0" selection-end-line="219" selection-end-column="0" />
+            <state vertical-scroll-proportion="0.0">
+              <caret line="333" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="333" selection-end-column="0" />
               <folding>
                 <element signature="e#453#481#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="test_config.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/test_config.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.7">
+              <caret line="196" column="22" selection-start-line="196" selection-start-column="22" selection-end-line="196" selection-end-column="22" />
+              <folding>
+                <element signature="e#561#578#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -62,7 +73,7 @@
       <file leaf-file-name="config.ini" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/config.ini">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-6.6666665">
+            <state vertical-scroll-proportion="-12.222222">
               <caret line="22" column="20" selection-start-line="22" selection-start-column="20" selection-end-line="22" selection-end-column="20" />
               <folding />
             </state>
@@ -89,6 +100,7 @@
         <option value="$PROJECT_DIR$/class_relay.py" />
         <option value="$PROJECT_DIR$/config.ini" />
         <option value="$PROJECT_DIR$/interactive_growberry.py" />
+        <option value="$PROJECT_DIR$/test_config.py" />
       </list>
     </option>
   </component>
@@ -149,7 +161,7 @@
     <property name="last_opened_file_path" value="$PROJECT_DIR$/.." />
     <property name="FullScreen" value="true" />
   </component>
-  <component name="RunManager" selected="Python.interactive_growberry">
+  <component name="RunManager" selected="Python.test_config">
     <configuration default="false" name="interactive_growberry" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -163,6 +175,23 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <module name="growberry_pi" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/interactive_growberry.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <method />
+    </configuration>
+    <configuration default="false" name="test_config" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="growberry_pi" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/test_config.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <method />
@@ -289,12 +318,14 @@
       <option name="USE_KEYWORD" value="false" />
       <method />
     </configuration>
-    <list size="1">
+    <list size="2">
       <item index="0" class="java.lang.String" itemvalue="Python.interactive_growberry" />
+      <item index="1" class="java.lang.String" itemvalue="Python.test_config" />
     </list>
     <recent_temporary>
-      <list size="1">
-        <item index="0" class="java.lang.String" itemvalue="Python.interactive_growberry" />
+      <list size="2">
+        <item index="0" class="java.lang.String" itemvalue="Python.test_config" />
+        <item index="1" class="java.lang.String" itemvalue="Python.interactive_growberry" />
       </list>
     </recent_temporary>
   </component>
@@ -441,7 +472,13 @@
       <option name="project" value="LOCAL" />
       <updated>1463877880100</updated>
     </task>
-    <option name="localTasksCounter" value="23" />
+    <task id="LOCAL-00023" summary="bug fixes">
+      <created>1463879349327</created>
+      <option name="number" value="00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1463879349327</updated>
+    </task>
+    <option name="localTasksCounter" value="24" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -662,7 +699,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/config.ini">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-6.6666665">
+        <state vertical-scroll-proportion="-12.222222">
           <caret line="22" column="20" selection-start-line="22" selection-start-column="20" selection-end-line="22" selection-end-column="20" />
           <folding />
         </state>
@@ -670,10 +707,20 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/interactive_growberry.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.24528302">
-          <caret line="219" column="0" selection-start-line="219" selection-start-column="0" selection-end-line="219" selection-end-column="0" />
+        <state vertical-scroll-proportion="0.0">
+          <caret line="333" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="333" selection-end-column="0" />
           <folding>
             <element signature="e#453#481#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test_config.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.7">
+          <caret line="196" column="22" selection-start-line="196" selection-start-column="22" selection-end-line="196" selection-end-column="22" />
+          <folding>
+            <element signature="e#561#578#0" expanded="true" />
           </folding>
         </state>
       </provider>
