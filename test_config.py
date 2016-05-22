@@ -20,26 +20,6 @@ from configparser import ConfigParser
 cfg = ConfigParser()
 
 
-
-#####################################################################
-#                           GPIO pin set up
-# #####################################################################
-# #select one of these two modes:
-# GPIO.setmode(GPIO.BCM)      #for using the names of the pins
-#
-# GPIO.setwarnings(True)      #This should alert you to the fact that growberry_.py is already using the pins
-#
-# ############################ Activating pins ########################
-# #GPIO.setup(<put pin number here>,GPIO.IN/OUT)  #will depend on setmode above, use "IN" for sensors, and "OUT" for relays
-#
-# GPIO.setup(19,GPIO.OUT, initial = 1)
-# GPIO.setup(12,GPIO.OUT, initial = 1)
-#
-
-
-#####################################################################
-#                           Classes
-#####################################################################
 class bcolors:                          #these are the color codes
     """
     Toggle switch for printing in color. Once activated, everything following is in color X
@@ -69,170 +49,77 @@ class bcolors:                          #these are the color codes
 
 
 
-# ##########################  LED class  #############################
-# class LED:
-#     """
-#     Turns GPIO pins from LOW(off) to HIGH(on) and back again
-#
-#     this class pretty much works for any device connected to a single GPIO pin
-#     as instances of LED are created, their names are added as keys in the LED.dictionary
-#     """
-#     dictionary  = {}                #a dictionary will all created LED instances' names as keys
-#     #state = None
-#     def __init__(self,pin,name,color,power):
-#         self.pin = int(pin)         #this is the GPIO pin number (will depend on GPIO config)
-#         self.name = name
-#         self.color = color
-#         self.power = power          #enter power in miliamps
-#         self.state = GPIO.input(self.pin)           #was going to use conditional loop if I could have got backgrounding to work
-#         LED.dictionary[name] = self #auto adds every instance of LED to the dictionary
-#
-#     def getstate(self):
-#         self.state = GPIO.input(self.pin)
-#         return self.state
-#
-#     def fake(self):
-#         if GPIO.output(self.pin):           # if self.pin == 1
-#             print "%s on port %s is 1/GPIO.HIGH/True"%(self.name,self.pin)
-#         else:
-#             print "%s on port %s is 0/GPIO.LOW/False"%(self.name,self.pin)
-#
-#     def on(self):
-#         GPIO.output(self.pin,GPIO.HIGH)
-#         print("%s LED is"%self.color + bcolors.BOLD + bcolors.GREEN + " on." + bcolors.END)
-#
-#     def off(self):
-#         GPIO.output(self.pin,GPIO.LOW)
-#         print("%s LED is"%self.color + bcolors.BOLD + bcolors.RED + " off." + bcolors.END)
-#
-#     def blink(self, *args):
-#         #print (len(args))          #troubleshooting print statement
-#         #print args                 # another
-#         try:
-#             repeat= int(args[0])
-#         except: repeat = 1
-#         try:
-#                 speed = (float(args[1]))/2
-#         except: speed = .5
-#         #print repeat               #troubleshooting print statement
-#         #print speed                # another
-#         print("%s LED is"%self.color + bcolors.BOLD + bcolors.PURPLE + " blinking." + bcolors.END)
-#         while repeat > 0:
-#             self.state = "blinking"
-#             GPIO.output(self.pin,GPIO.HIGH)
-#             time.sleep(speed)
-#             GPIO.output(self.pin,GPIO.LOW)
-#             time.sleep(speed)
-#             repeat -= 1
 
-# #####################################################################
-# class Relay:
-#     """
-#     Turns GPIO pins from LOW(off) to HIGH(on) and back again
-#
-#     this class pretty much works for any device connected to a single GPIO pin
-#     as instances of Relays are created, their names are added as keys in the Relay.dictionary
-#     """
-#     dictionary  = {}                #a dictionary will all created LED instances' names as keys
-#     #state = None
-#     def __init__(self,pin,name):
-#         self.pin = int(pin)         #this is the GPIO pin number (will depend on GPIO config)
-#         self.name = name
-#         self.state = GPIO.input(self.pin)           #was going to use conditional loop if I could have got backgrounding to work
-#         LED.dictionary[name] = self #auto adds every instance of LED to the dictionary
-#
-#     def getstate(self):
-#         self.state = GPIO.input(self.pin)
-#         return self.state
-#
-#     def fake(self):
-#         if GPIO.output(self.pin):           # if self.pin == 1
-#             print "%s on port %s is 1/GPIO.HIGH/True"%(self.name,self.pin)
-#         else:
-#             print "%s on port %s is 0/GPIO.LOW/False"%(self.name,self.pin)
-#
-#     def on(self):
-#         GPIO.output(self.pin,GPIO.LOW)
-#         print("%s Relay is"%self.name + bcolors.BOLD + bcolors.GREEN + " on." + bcolors.END)
-#
-#     def off(self):
-#         GPIO.output(self.pin,GPIO.HIGH)
-#         print("%s LED is"%self.name + bcolors.BOLD + bcolors.RED + " off." + bcolors.END)
-#
-#     def blink(self, *args):
-#         #print (len(args))          #troubleshooting print statement
-#         #print args                 # another
-#         try:
-#             repeat= int(args[0])
-#         except: repeat = 1
-#         try:
-#                 speed = (float(args[1]))/2
-#         except: speed = .5
-#         #print repeat               #troubleshooting print statement
-#         #print speed                # another
-#         print("%s Relay is"%self.name + bcolors.BOLD + bcolors.PURPLE + " blinking." + bcolors.END)
-#         while repeat > 0:
-#             self.state = "blinking"
-#             GPIO.output(self.pin,GPIO.LOW)
-#             time.sleep(speed)
-#             GPIO.output(self.pin,GPIO.HIGH)
-#             time.sleep(speed)
-#             repeat -= 1
-#
-#
-# #
 class config:
     """
     reads config file, and modifies it
     """
     dictionary  = {}                #a dictionary will all created config instances' names as keys
     #state = None
-    def __init__(self,path):
+    def __init__(self,path,name):
         cfg.read(path)
-        self.sections =  cfg.sections()        #this is the sections in your config file (usually in a bracket)
-        self.name = name
-        config.dictionary[name] = self #auto adds every instance of LED to the dictionary
+        self.path = path
+        self.sections =  cfg.sections()         # this is the sections in your config file (usually in a bracket)
+        self.name = name                        # here mostly so something can be added to the config.dict
+        config.dictionary[name] = self          # auto adds every instance of config to the dictionary
+        self.settings = {}
+
+        cfg.read(path)
+        ### *** READ config file ***
+        cfg.read('config.ini')
+
+        # Read interval
+        self.settings['measurement_interval'] = cfg.get('options', 'measurement_interval')
+
+        # LIGHTS ON TIME
+        self.settings['lights_on_time'] = cfg.get('options', 'lights_on_time')
+
+        # Length of day (in hours)
+        self.settings['daylength'] = cfg.get('options', 'daylength')
+
+        # TEMP that activates fans
+        self.settings['fan_temp'] = cfg.get('options', 'fan_temp')
+
+        # times that the sprinkler should run (list of strings)
+        self.settings['watertimes'] = cfg.get('options', 'watertimes').split(',')
+
+        # length of sprinkler cycle (in minutes)
+        self.settings['pumptime'] = cfg.get('options', 'pumptime')
+
+        # toggle picture capture on/off
+        self.settings['toggle_camera'] = cfg.get('options', 'toggle_camera')
+
+        # file to write the log file to
+        self.settings['logfile'] = cfg.get('options', 'logfile')
+
+        # directory to save pictures in
+        self.settings['pic_dir'] = cfg.get('options', 'pic_dir')
+
 
     def source(self):
-        cfg.read(path)
+        cfg.read(self.path)
+        ### *** READ config file ***
+        cfg.read('config.ini')
+        self.settings['measurement_interval'] = cfg.get('options', 'measurement_interval')
+        self.settings['lights_on_time'] = cfg.get('options', 'lights_on_time')
+        self.settings['daylength'] = cfg.get('options', 'daylength')
+        self.settings['fan_temp'] = cfg.get('options', 'fan_temp')
+        self.settings['watertimes'] = cfg.get('options', 'watertimes').split(',')
+        self.settings['pumptime'] = cfg.get('options', 'pumptime')
+        self.settings['toggle_camera'] = cfg.get('options', 'toggle_camera')
+        self.settings['logfile'] = cfg.get('options', 'logfile')
+        self.settings['pic_dir'] = cfg.get('options', 'pic_dir')
 
-    def getstate(self, section, newvalue):
+        return self.settings
 
-        return self.state
+    def change(self, setting, new):
+        cfg['options'][setting] = new  # set "string"
+        with open('config.ini', 'w') as configfile:
+            cfg.write(configfile)
+            self.source()
+            print('The new %s is %s'%(setting, self.settings[setting]))
 
-    def fake(self):
-        if GPIO.output(self.pin):           # if self.pin == 1
-            print "%s on port %s is 1/GPIO.HIGH/True"%(self.name,self.pin)
-        else:
-            print "%s on port %s is 0/GPIO.LOW/False"%(self.name,self.pin)
 
-    def on(self):
-        GPIO.output(self.pin,GPIO.HIGH)
-        print("%s LED is"%self.color + bcolors.BOLD + bcolors.GREEN + " on." + bcolors.END)
-
-    def off(self):
-        GPIO.output(self.pin,GPIO.LOW)
-        print("%s LED is"%self.color + bcolors.BOLD + bcolors.RED + " off." + bcolors.END)
-
-    def blink(self, *args):
-        #print (len(args))          #troubleshooting print statement
-        #print args                 # another
-        try:
-            repeat= int(args[0])
-        except: repeat = 1
-        try:
-                speed = (float(args[1]))/2
-        except: speed = .5
-        #print repeat               #troubleshooting print statement
-        #print speed                # another
-        print("%s LED is"%self.color + bcolors.BOLD + bcolors.PURPLE + " blinking." + bcolors.END)
-        while repeat > 0:
-            self.state = "blinking"
-            GPIO.output(self.pin,GPIO.HIGH)
-            time.sleep(speed)
-            GPIO.output(self.pin,GPIO.LOW)
-            time.sleep(speed)
-            repeat -= 1
 
 # #####################################################################
 # relay1 = Relay(12,"water")
@@ -247,35 +134,7 @@ class config:
 #####################################################################
 
 def current_config():
-    ### *** READ config file ***
-    cfg.read('config.ini')
 
-    # Read interval
-    measurement_interval = cfg.getfloat('general', 'measurement_interval')
-
-    # LIGHTS ON TIME
-    lights_on_time = cfg.get('lights', 'lights_on_time')
-
-    # Length of day (in hours)
-    daylength = cfg.getfloat('lights', 'daylength')
-
-    # TEMP that activates fans
-    fan_temp = cfg.getfloat('general', 'fan_temp')
-
-    # times that the sprinkler should run (list of strings)
-    watertimes = cfg.get('irrigation', 'watertimes').split(',')
-
-    # length of sprinkler cycle (in minutes)
-    pumptime = cfg.getfloat('irrigation', 'pumptime')
-
-    # toggle picture capture on/off
-    toggle_camera = cfg.getboolean('general', 'toggle_camera')
-
-    # file to write the log file to
-    logfile = cfg.get('io', 'logfile')
-
-    # directory to save pictures in
-    pic_dir = cfg.get('io', 'pic_dir')
 
     print(
         "The measurement interval is: " ,measurement_interval, "\n",
@@ -327,19 +186,22 @@ def main():
     print(bcolors.RED + bcolors.BOLD +
         '  ________                    ___.                                                 \n'+\
         ' /  _____/______  ______  _  _\_ |__   __________________ ___.__.    ______ ___.__.\n'+bcolors.YELLOW +\
-        '/   \  __\_  __ \/  _ \ \/ \/ /| __ \_/ __ \_  __ \_  __ <   |  |    \____ <   |  |\n'+\
+        '/   \  __\_  __ \/  _ \ \/ \/ /| __ \_/ __ \_  __ \_  __ \   |  |    \____ \   |  |\n'+\
         '\    \_\  \  | \(  <_> )     / | \_\ \  ___/|  | \/|  | \/\___  |    |  |_> >___  |\n'+bcolors.GREEN +\
         ' \______  /__|   \____/ \/\_/  |___  /\___  >__|   |__|   / ____| /\ |   __// ____|\n'+\
         '        \/                         \/     \/              \/      \/ |__|   \/     \n'+bcolors.END)
     global last_water
-
-    current_config()
-    #activitycode(LED.dictionary)
+    while True:
+        result = activitycode(fake_choices,growsettings)
+        if result == False:
+            print "[--system--] powering down."
+            #GPIO.cleanup()
+            break
 
 
 ########################  activityentered_code()  ###########################
 
-def activitycode(choices):
+def activitycode(choices,config):
     """
     In manual mode, you can enter a string, split into arguments at each space.
     Each argument is checked against the list of possible choices, and if the argument is in the list,
@@ -369,17 +231,48 @@ def activitycode(choices):
             #     b1 = Thread(target=choices[argument].blink, args=(blinkrepeat, blinkspeed))
             #     # choices[argument].blink(blinkrepeat,blinkspeed)
             #     b1.start()
-        elif argument == "config":
-            section = entered_code.index(argument) + 1
-            if
-            editconfig()
+        elif argument in config.settings:
+            newsettingindex = entered_code.index(argument) + 1
+            config.change(argument,entered_code[newsettingindex])
+
         elif argument == "exit":
-            return False
+            loop = 0
+            return loop
 
 
-relay_test =
 
+def importconfig(configfile):
+    config_dict = {}
+    ### *** READ config file ***
+    cfg.read(configfile)
 
+    config_dict['measurement_interval'] = cfg.getfloat('options', 'measurement_interval')
+
+    # LIGHTS ON TIME
+    config_dict['lights_on_time'] = cfg.get('options', 'lights_on_time')
+
+    # Length of day (in hours)
+    config_dict['daylength'] = cfg.getfloat('options', 'daylength')
+
+    # TEMP that activates fans
+    config_dict['fan_temp'] = cfg.getfloat('options', 'fan_temp')
+
+    # times that the sprinkler should run (list of strings)
+    config_dict['watertimes'] = cfg.get('options', 'watertimes').split(',')
+
+    # length of sprinkler cycle (in minutes)
+    config_dict['pumptime'] = cfg.getfloat('options', 'pumptime')
+
+    # toggle picture capture on/off
+    config_dict['toggle_camera'] = cfg.getboolean('options', 'toggle_camera')
+
+    # file to write the log file to
+    config_dict['logfile'] = cfg.get('options', 'logfile')
+
+    # directory to save pictures in
+    config_dict['pic_dir'] = cfg.get('options', 'pic_dir')
+
+    return config_dict
 
 ##############################################################################
 #                       Executable code below:
@@ -395,10 +288,43 @@ relay_test =
 #     print('5 - ')
 #     print()
 
+#
+fake_choices = {'relay':10}
+growsettings = config('config.ini',"grow")
+main()
 
 
+# print growsettings.settings
+# growsettings.change('daylength',"40")
+# growsettings.source()
+# print growsettings.settings
+# print('Your choices are:')
+# for stg in growsettings.settings.keys():
+#     print stg
+#
+#
+#
+# #print growsettings.settings['watertimes']
+# #for lime in growsettings.settings['watertimes']:
+# #        print lime
+#
+#
+# activitycode(fake_choices,growsettings)
+#
+# measurement_interval = "0"
+# daylength = "0"
+# ights_on_time = "0"
+# pumptime = "0"
+# toggle_camera = "0"
+# pic_dir = "0"
+# watertimes = "0"
+# logfile = "0"
+# fan_temp = "0"
 
-
-
-
-
+#
+#
+# x = importconfig('config.ini')
+# for thingy in x:
+#     print type(x[thingy])
+#     print x[thingy]
+# print type(toggle_camera)
