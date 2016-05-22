@@ -210,7 +210,7 @@ def current_config():
     fan_temp = cfg.getfloat('general', 'fan_temp')
 
     # times that the sprinkler should run (list of strings)
-    watertimes = cfg.get('irrigation', 'watertimes')
+    watertimes = cfg.get('irrigation', 'watertimes').split(',')
 
     # length of sprinkler cycle (in minutes)
     pumptime = cfg.getfloat('irrigation', 'pumptime')
@@ -225,7 +225,7 @@ def current_config():
     pic_dir = cfg.get('io', 'pic_dir')
 
     print(
-        "The measurement interval is: ",measurement_interval,"\n",
+        "The measurement interval is: " measurement_interval "\n",
         "The lights will turn on for ",daylength, " beginning at ", lights_on_time,"\n",
         "If the temperature exceeds ",fan_temp," degrees celcius, the fans will be activated\n",
         "The waterpump with be activated for ",pumptime," minutes at these times: ",watertimes,"\n",
