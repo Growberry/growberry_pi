@@ -323,7 +323,10 @@ def activitycode(choices,config):
         elif argument in config.settings:
             newsettingindex = entered_code.index(argument) + 1
             config.change(argument,entered_code[newsettingindex])
-
+        elif argument == "help":
+            print choices
+            for setting in config.settings:
+                print("%s: %s"%(setting, config.settings[setting]))
         elif argument == "exit":
             return False
 

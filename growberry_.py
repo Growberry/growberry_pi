@@ -19,38 +19,43 @@ import RPi.GPIO as GPIO
 import Adafruit_DHT
 from picamera import PiCamera
 import subprocess
-
+from configparser import ConfigParser
+cfg = ConfigParser()
 #####################################################################
 #                           Parameters
 #####################################################################
-# Change these things to change how the threasholds work
+# # Change these things to change how the threasholds work
+#
+# # Read interval
+# measurement_interval = 10.00
+#
+# # LIGHTS ON TIME
+# lights_on_time = '1100'
+#
+# # Length of day (in hours)
+# daylength = 12
+#
+# # TEMP that activates fans
+# fan_temp = 22.5
+#
+# # times that the sprinkler should run (list of strings)
+# watertimes = ['0600','1100','1600','2100']
+#
+# # length of sprinkler cycle (in minutes)
+# pumptime = 3
+#
+# # toggle picture capture on/off
+# toggle_camera = True
+#
+# # file to write the log file to
+# logfile = '/home/pi/usbdrv/growberry_testlog/grow1_log.txt'
+#
+# # directory to save pictures in
+# pic_dir = '/home/pi/usbdrv/growberry_testlog/flowering_pictures/'
+#
 
-# Read interval
-measurement_interval = 10.00
+growsettings = {}
 
-# LIGHTS ON TIME
-lights_on_time = '1100'
-
-# Length of day (in hours)
-daylength = 12
-
-# TEMP that activates fans
-fan_temp = 22.5
-
-# times that the sprinkler should run (list of strings)
-watertimes = ['0600','1100','1600','2100']
-
-# length of sprinkler cycle (in minutes)
-pumptime = 3
-
-# toggle picture capture on/off
-toggle_camera = True
-
-# file to write the log file to
-logfile = '/home/pi/usbdrv/growberry_testlog/grow1_log.txt'
-
-# directory to save pictures in
-pic_dir = '/home/pi/usbdrv/growberry_testlog/flowering_pictures/'
 
 #####################################################################
 #                           GPIO pin set up
@@ -261,14 +266,46 @@ H2O_PUMP = Relay(12, "water pump")
 last_water = "not watered yet"
 sensor1 = Sensor(17, Adafruit_DHT.DHT22, "temp_humidity")
 
-# camera is on by default, but in some cases toggling it off results in no camera initiation
-if toggle_camera:
-    camera = PiCamera()
+
 
 #####################################################################
 #                           FUNCTIONS
 #####################################################################
 # worksheet.append_row((datetime.datetime.now(),time.strftime('%m/%d/%Y'),time.strftime("%H:%M:%S"), temp, humidity))$
+
+def importconfig(configfile):
+    config_dict = {}
+    ### *** READ config file ***
+    cfg.read(configfile)
+
+    config_dict['measurement_interval'] = cfg.getfloat('options', 'measurement_interval')
+
+    # LIGHTS ON TIME
+    config_dict['lights_on_time'] = cfg.get('options', 'lights_on_time')
+
+    # Length of day (in hours)
+    config_dict['daylength'] = cfg.getfloat('options', 'daylength')
+
+    # TEMP that activates fans
+    config_dict['fan_temp'] = cfg.getfloat('options', 'fan_temp')
+
+    # times that the sprinkler should run (list of strings)
+    config_dict['watertimes'] = cfg.get('options', 'watertimes').split(',')
+
+    # length of sprinkler cycle (in minutes)
+    config_dict['pumptime'] = cfg.getfloat('options', 'pumptime')
+
+    # toggle picture capture on/off
+    config_dict['toggle_camera'] = cfg.getboolean('options', 'toggle_camera')
+
+    # file to write the log file to
+    config_dict['logfile'] = cfg.get('options', 'logfile')
+
+    # directory to save pictures in
+    config_dict['pic_dir'] = cfg.get('options', 'pic_dir')
+
+    return config_dict
+
 
 def takepic(save_dir):
     """Take a picture, and save it to directory specified using the date.time as the name"""
@@ -283,23 +320,23 @@ def watercycle(pumptime):
     H2O_PUMP.off()
     last_water = datetime.datetime.now()
 
-def sprinkler():
+def sprinkler(growsettings):
     """checks if the sprinkler needs to run, returns the time since the end of the last watercycle run"""
 
     #set up the watering cycle function to be started as a second thread and to run for the pump time
-    w1 = Thread(target=watercycle, args=(pumptime,))
+    w1 = Thread(target=watercycle, args=(growsettings['pumptime'],))
 
     if last_water != "not watered yet":
         timesinceH2O = datetime.datetime.now() - last_water
     else:
         timesinceH2O = last_water
 
-    for lime in watertimes:
+    for lime in growsettings['watertimes']:
         # convert the scheduled watertime to a date.time and see if it falls in the previous measurment_interval.
         # if yes, start the watercylce
         x = datetime.datetime.strptime(lime, '%H%M').time()
         H2Otime = datetime.datetime.combine(datetime.date.today(), x)
-        if (datetime.datetime.now() - datetime.timedelta(minutes=measurement_interval)) <= H2Otime <= datetime.datetime.now():
+        if (datetime.datetime.now() - datetime.timedelta(minutes= growsettings['measurement_interval'])) <= H2Otime <= datetime.datetime.now():
             w1.start()
 
     return timesinceH2O
@@ -319,9 +356,7 @@ def lightcontrol(t, daylength):
         LIGHTS.off()
         return "Lights:OFF"
 
-def growmonitor(interval, set_temp, sunrise, daylength):
-
-
+def growmonitor():
     """
     Every interval minutes, read the temp/humidity, if temp exceeds set_temp, turn on fans, 
     if time falls between set_time1 and set_time2: turn light on
@@ -330,12 +365,14 @@ def growmonitor(interval, set_temp, sunrise, daylength):
     last_water = None
     fan_status = None
     while True:
+        #update the settings
+        growsettings = importconfig('config.ini')
         #take picture and write it to the pic directory
-        if toggle_camera:
-            takepic(pic_dir)
+        if growsettings['toggle_camera']:
+            takepic(growsettings['pic_dir'])
         # read the sensor, check temp, turn fans on/off
         sensor_reading = sensor1.read()  # returns a dictionary with "temp", "humidity", and "timestamp" keys
-        if sensor_reading["temp"] > float(set_temp):
+        if sensor_reading["temp"] > float(growsettings['set_temp']):
             fan_status = "Fans:ON"
             FANS.on()
         else:
@@ -343,9 +380,9 @@ def growmonitor(interval, set_temp, sunrise, daylength):
             FANS.off()
 
         #run lightcontrol, which takes a time to turn on, and a "daylength"
-        light_status = lightcontrol(sunrise, daylength)
+        light_status = lightcontrol(growsettings['lights_on_time'], growsettings['daylength'])
 
-        tslw = sprinkler()
+        tslw = sprinkler(growsettings['measurement_interval'])
         timesincelastwater = str(tslw)
 
         data_line = (str(sensor_reading["timestamp"]), str(time.strftime("%Y-%m-%d.%H%M")), str(sensor_reading["temp"]), str(sensor_reading["humidity"]), light_status, fan_status, timesincelastwater, '\n')
@@ -366,14 +403,15 @@ def growmonitor(interval, set_temp, sunrise, daylength):
 
         print(str(sensor_reading["timestamp"])+'\t'+ str(time.strftime("%Y-%m-%d.%H%M")) +'\t'+ str(sensor_reading["temp"]) +'\t'+ str(sensor_reading["humidity"]) +'\t'+ print_light_status +'\t'+ print_fan_status + '\tTimeSinceWater:'+timesincelastwater )
 
-        with open(logfile, "a") as data_log:
+        with open(growsettings['logfile'], "a") as data_log:
             #write the data line in TSV format
             data_log.write("\t".join(data_line))
 
-        time.sleep(interval * 60)
+        time.sleep(growsettings['measurement_interval'] * 60)
 
 
 def main():
+    growsettings = importconfig('config.ini')
     print('\n\n\n\n\n')
 
     print(bcolors.RED + bcolors.BOLD +
@@ -386,7 +424,7 @@ def main():
     global last_water
     try:
         # attempt to determine the time since last watering by reading the last line in the logfile
-        line = subprocess.check_output(['tail', '-1', logfile])
+        line = subprocess.check_output(['tail', '-1', growsettings['logfile']])
         x = line.split('\t')
         last_log_time = datetime.datetime.strptime(x[1], "%Y-%m-%d.%H%M")
         t= datetime.datetime.strptime(x[6].split('.')[0], "%H:%M:%S")
@@ -397,42 +435,8 @@ def main():
         last_water = "not watered yet"
 
 
-    growmonitor(measurement_interval, fan_temp, lights_on_time, daylength)
+    growmonitor()
 
-
-########################  activityentered_code()  ###########################
-
-def activitycode(choices):
-    """
-    In manual mode, you can enter a string, split into arguments at each space.
-    Each argument is checked against the list of possible choices, and if the argument is in the list,
-    the argument immediately following will dictate the behavior
-    """
-    entered_code = [str(x) for x in
-                    raw_input('\n[--system--] enter code for relay behavior: Relay name on/off/blink..\n>>>').split()]
-    for argument in entered_code:
-        if argument in choices:
-            behavior_choice_index = entered_code.index(argument) + 1
-            # print(argument, entered_code[behavior_choice_index])
-            if entered_code[behavior_choice_index] == "on":
-                choices[argument].on()
-            elif entered_code[behavior_choice_index] == "off":
-                choices[argument].off()
-            elif entered_code[behavior_choice_index] == "blink":
-                try:
-                    blinkrepeat = entered_code[behavior_choice_index + 1]
-                except:
-                    blinkrepeat = None
-                try:
-                    blinkspeed = entered_code[behavior_choice_index + 2]
-                except:
-                    blinkspeed = None
-                # background the call of LED.blink
-                b1 = Thread(target=choices[argument].blink, args=(blinkrepeat, blinkspeed))
-                # choices[argument].blink(blinkrepeat,blinkspeed)
-                b1.start()
-        elif argument == "exit":
-            return False
 
 
 ##############################################################################
@@ -440,10 +444,13 @@ def activitycode(choices):
 ##############################################################################
 
 try:
+    # camera is on by default, but in some cases toggling it off results in no camera initiation
+    if growsettings['toggle_camera']:
+        camera = PiCamera()
     main()
 
 except KeyboardInterrupt:
     print "Goodbye!"
 finally:
     GPIO.cleanup()
-#!/usr/bin/env python
+
