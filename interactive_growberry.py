@@ -1,4 +1,3 @@
-
 #!/usr/bin/env python
 """
 #####################################################################
@@ -30,8 +29,8 @@ GPIO.setwarnings(True)      #This should alert you to the fact that growberry_.p
 ############################ Activating pins ########################
 #GPIO.setup(<put pin number here>,GPIO.IN/OUT)  #will depend on setmode above, use "IN" for sensors, and "OUT" for relays
 
-GPIO.setup(19,GPIO.OUT, initial = 1)
-GPIO.setup(12,GPIO.OUT, initial = 1)
+GPIO.setup(19,GPIO.OUT)
+GPIO.setup(12,GPIO.OUT)
 
 #####################################################################
 #                           Classes
@@ -327,6 +326,8 @@ def activitycode(choices,config):
             print choices
             for setting in config.settings:
                 print("%s: %s"%(setting, config.settings[setting]))
+        elif argument == "cleanup":
+            GPIO.cleanup()
         elif argument == "exit":
             return False
 
@@ -367,7 +368,6 @@ def main():
         result = activitycode(Relay.dictionary,growsettings)
         if result == False:
             print "[--system--] powering down."
-            GPIO.cleanup()
             break
 
 
@@ -382,7 +382,6 @@ try:
 except KeyboardInterrupt:
     print "Goodbye!"
 finally:
-    GPIO.cleanup()
-
+    print "did not clean up pins... I hope"
 
 
