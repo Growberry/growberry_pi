@@ -245,7 +245,7 @@ class Config:
                 importconfig(self.path)
                 print(bcolors.GREEN +'The new %s is %s'%(setting, self.settings[setting])+bcolors.END)
             except:
-                print "Something was wrong with the type entered"
+                print bcolors.RED +"Something was wrong with the type entered" + bcolors.END
 
 
 
@@ -388,7 +388,7 @@ def main():
     while True:
         result = activitycode(Relay.dictionary,growsettings)
         if result == False:
-            print "[--system--] powering down."
+            print bcolors.YELLOW + "[--system--] powering down." +bcolors.END
             break
 
 
@@ -403,6 +403,6 @@ try:
 except KeyboardInterrupt:
     print "Goodbye!"
 finally:
-    print "did not clean up pins... I hope"
+    print bcolors.BLUE + "Goodbye" + bcolors.END
 
 
