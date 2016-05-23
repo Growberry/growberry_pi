@@ -243,7 +243,7 @@ class Config:
             self.source()
             try:
                 importconfig(self.path)
-                print(bcolors.PURPLE +'The new %s is %s'+bcolors.END%(setting, self.settings[setting]))
+                print(bcolors.PURPLE +'The new %s is %s'%(setting, self.settings[setting])+bcolors.END)
             except:
                 print "Something was wrong with the type entered"
 
