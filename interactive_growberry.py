@@ -238,17 +238,21 @@ class Config:
 
     def change(self, setting, new):
         cfg['options'][setting] = new  # set "string"
-        with open('config.ini', 'w') as configfile:
+        with open(self.path, 'w') as configfile:
             cfg.write(configfile)
             self.source()
-            print('The new %s is %s'%(setting, self.settings[setting]))
+            try:
+                importconfig(self.path)
+                print('The new %s is %s'%(setting, self.settings[setting]))
+            except:
+                print "Something was wrong with the type entered"
 
 
 
 #####################################################################
 relay1 = Relay(12,"water")
 relay4 = Relay(19, "fans")
-growsettings = Config('config.ini',"grow")
+growsettings = Config('/home/pi/Documents/git/growberry_pi/config.ini',"grow")
 #####################################################################
 
 #####################################################################
@@ -321,11 +325,14 @@ def activitycode(choices,config):
             newsettingindex = entered_code.index(argument) + 1
             config.change(argument,entered_code[newsettingindex])
         elif argument == "relays":
-            ', '.join(choices.keys())
+            print(', '.join(choices.keys()))
         elif argument == "config":
-            ', '.join(config.settings.keys()
+            print(', '.join(config.settings.keys()))
         elif argument == "help":
-            print choices
+            print ("Enter commands separated by a space.  Possible relay behaviors are on/off/blink.  " +
+                    "If using blink, the following arguments will deterimine the number of blinks and the speed of those blinks.  " +
+                   "Multiple commands can be entered on a single line.  Arguments not recognized will skipped.  "
+                   )
             for setting in config.settings:
                 print("%s: %s"%(setting, config.settings[setting]))
         elif argument == "cleanup":
