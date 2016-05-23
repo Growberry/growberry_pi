@@ -326,10 +326,10 @@ def activitycode(choices,config):
             config.change(argument,entered_code[newsettingindex])
         elif argument == "relays":
             print "Relay options:"
-            print("\t", '\n\t'.join(choices.keys()))
+            print("\t"+'\n\t'.join(choices.keys()))
         elif argument == "config":
             print "config options:"
-            print("\t", '\n\t'.join(config.settings.keys()))
+            print("\t"+'\n\t'.join(config.settings.keys()))
         elif argument == "help":
             print ("Enter commands separated by a space.  Possible relay behaviors are on/off/blink.  " +
                     "If using blink, the following arguments will deterimine the number of blinks and the speed of those blinks.  " +
