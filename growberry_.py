@@ -339,7 +339,7 @@ def sprinkler(growsettings):
         H2Otime = datetime.datetime.combine(datetime.date.today(), x)
         if (datetime.datetime.now() - datetime.timedelta(minutes= growsettings['measurement_interval'])) <= H2Otime <= datetime.datetime.now():
             w1.start()
-
+        #else H2O_PUMP.off()
     return timesinceH2O
 
 def lightcontrol(t, daylength):

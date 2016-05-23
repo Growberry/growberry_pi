@@ -295,11 +295,9 @@ def activitycode(choices,config):
     Each argument is checked against the list of possible choices, and if the argument is in the list,
     the argument immediately following will dictate the behavior
     """
-    entered_code = [str(x) for x in
-                    raw_input('\n[--system--] enter code for relay behavior:\n>>>').split()]
+    entered_code = [str(x) for x in raw_input('\n[--system--] enter activitycode at any time: <object> <behavior>\n(Or enter one of the following options: relays, config, cleanup, printlog, help)\n>>>').split()] 
     for argument in entered_code:
         if argument in choices:
-            print "relay selected - would normally activate selected relay"
             behavior_choice_index = entered_code.index(argument) + 1
             # print(argument, entered_code[behavior_choice_index])
             if entered_code[behavior_choice_index] == "on":
@@ -322,13 +320,27 @@ def activitycode(choices,config):
         elif argument in config.settings:
             newsettingindex = entered_code.index(argument) + 1
             config.change(argument,entered_code[newsettingindex])
+        elif argument == "relays":
+            ', '.join(choices.keys())
+        elif argument == "config":
+            ', '.join(config.settings.keys()
         elif argument == "help":
             print choices
             for setting in config.settings:
                 print("%s: %s"%(setting, config.settings[setting]))
         elif argument == "cleanup":
             GPIO.cleanup()
-        elif argument == "exit":
+        elif argument == "printlog":
+            try:
+                loglineindex = entered_code.index(argument) + 1
+                lines = '-'+str(entered_code[loglineindex])
+                lastlog = subprocess.check_output(['tail', lines, config.settings['logfile']])
+            except:
+            # if that doesn't work, just print this warning
+                lastlog = "Could not retrieve last status"
+            print lastlog
+ 
+        elif argument == "exit" or argument == "quit":
             return False
 
 
@@ -348,12 +360,12 @@ def main():
     print('\n\n\n\n\n')
 
     print(bcolors.RED + bcolors.BOLD +
-        '  ________                    ___.                                                 \n'+\
+        '  ________.                   ___.                                                 \n'+\
         ' /  _____/______  ______  _  _\_ |__   __________________ ___.__.    ______ ___.__.\n'+bcolors.YELLOW +\
-        '/   \  __\_  __ \/  _ \ \/ \/ /| __ \_/ __ \_  __ \_  __ \   |  |    \____ \   |  |\n'+\
+        '/   \  __\_  __ \/  _ \ \/ \/ /| __ \_/ __ \_  __ \_  __ \   |  |   \_____ \   |  |\n'+\
         '\    \_\  \  | \(  <_> )     / | \_\ \  ___/|  | \/|  | \/\___  |    |  |_> >___  |\n'+bcolors.GREEN +\
-        ' \______  /__|   \____/ \/\_/  |___  /\___  >__|   |__|   / ____| /\ |   __// ____|\n'+\
-        '        \/                         \/     \/              \/      \/ |__|   \/     \n'+bcolors.END)
+        ' \______  /__|   \____/  /\_/  |___  /\___  >__|   |__|   / ____| /\ |   __// ____|\n'+\
+        '        \/             \/          \/     \/              \/      \/ |__|   \/     \n'+bcolors.END)
     global last_water
     try:
         logfile = cfg.get('options', 'logfile').replace("'", "")  # get "string" object
