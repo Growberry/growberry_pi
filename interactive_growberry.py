@@ -299,7 +299,7 @@ def activitycode(choices,config):
     Each argument is checked against the list of possible choices, and if the argument is in the list,
     the argument immediately following will dictate the behavior
     """
-    entered_code = [str(x) for x in raw_input('\n[--system--] enter activitycode at any time: <object> <behavior>\n(Or enter one of the following options: relays, config, cleanup, printlog, help)\n>>>').split()] 
+    entered_code = [str(x) for x in raw_input(bcolors.RED + bcolors.BOLD +'\n[--system--] enter activitycode at any time: <object> <behavior>\n(Or enter one of the following options: \n[relays]\t[config]\t[cleanup]\t[printlog]\t[help])\n>>>'+ bcolors.END).split()]
     for argument in entered_code:
         if argument in choices:
             behavior_choice_index = entered_code.index(argument) + 1
