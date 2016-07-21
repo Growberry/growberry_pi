@@ -22,6 +22,7 @@ try:
             print("New duty cycle = ",new_duty)
 
 finally:
-    print('Goodbye.')
     my_pwm.stop()
     GPIO.cleanup()
+    print('PWM stopped, GPIO pins have been cleaned up. Goodbye.')
+
