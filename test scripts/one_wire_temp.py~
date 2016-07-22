@@ -56,6 +56,6 @@ class w1therm:
 
 if __name__ == "__main__":
     heatsinktemps = w1therm()
-    while True:
+    while true:
         print heatsinktemps.gettemps()
         time.sleep(10)
