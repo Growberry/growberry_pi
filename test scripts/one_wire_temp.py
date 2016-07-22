@@ -57,5 +57,18 @@ class w1therm:
 if __name__ == "__main__":
     heatsinktemps = w1therm()
     while True:
-        print heatsinktemps.gettemps()
-        time.sleep(10)
+        a1='28-04165858a0ff'
+        b2='28-0316562048ff'
+        b3='28-031656474cff'
+        a3='28-031656e479ff'
+        b1='28-0416589cebff'
+        a2='28-0316563d4fff'
+        order = ('timestamp',a1,a2,a3,b1,b2,b3)
+        data= heatsinktemps.gettemps() 
+        row = []
+        for s in order:
+             row.append(str(data[s]) + '\t')
+        print '\t'.join(row)
+        time.sleep(2)
+
+
