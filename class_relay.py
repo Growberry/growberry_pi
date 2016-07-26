@@ -23,29 +23,7 @@ GPIO.setmode(GPIO.BCM)      #for using the names of the pins
 #or
 #GPIO.setmode(GPIO.BOARD)   #for true pin number IDs (pin1 = 1)
 
-GPIO.cleanup()             #shouldn't need to use this, but just in case
-
 GPIO.setwarnings(False)      #set to false if the warnings bother you, helps troubleshooting
-
-############################ Activating pins ########################
-#GPIO.setup(<put pin number here>,GPIO.IN/OUT)  #will depend on setmode above, use "IN" for sensors, and "OUT" for LEDs
-
-GPIO.setup(19,GPIO.OUT, initial = 1)
-GPIO.setup(12,GPIO.OUT, initial = 1)
-#GPIO.setup(18,GPIO.OUT, initial = 1)
-
-
-########################### if pin is GPIO.OUT  ######################
-
-#turning the pins on or off
-
-#GPIO.output(18,GPIO.HIGH)   #on
-#GPIO.output(18,GPIO.LOW)    #off
-
-
-##########################  if pin is GPIO.IN  ########################
-
-
 
 
 #####################################################################
@@ -190,15 +168,6 @@ class Relay:
             time.sleep(speed)
             repeat -= 1
 
-
-#
-#####################################################################
-relay1 = Relay(12,"lights")
-relay4 = Relay(19, "fans")
-#####################################################################
-#                     Put code below this
-#####################################################################
-
 def main():
     """
     loop asking for an activity code via raw input. Exits by typing 'exit'
@@ -214,12 +183,11 @@ def main():
     time.sleep(.5)
     print('connection established\n')
     print('----------------------------')
-    print('  WELCOME TO THE LIGHTSHOW  ')
+    print('     TEST MODE ACTIVATED    ')
     print('----------------------------')
     print LED.dictionary
     while True:
         result = activitycode(LED.dictionary)
-        relay1.getstate
         if result == False:
             print "[--system--] powering down."
             GPIO.cleanup()
@@ -254,6 +222,21 @@ def activitycode(choices):
 #                       Executable code below:
 ##############################################################################
 
-main()
-
-
+if __name__ == '__main__':
+    try:
+        relaydict = {}
+        while True:
+            setpin = raw_input('Enter GPIO pin number, or enter "done" to begin testing. ')
+            if str(setpin) == 'done':
+                main()
+                print '\n\nSet more pins, or ctr+c to shut down.'
+            else: 
+                GPIO.setup(int(setpin),GPIO.OUT, initial = 1)
+                setname = raw_input('Name of this relay: ')
+                relaydict[setname] = Relay(setpin,setname)
+    
+    except KeyboardInterrupt:
+        print '\n\n\n[--system--] powering down.'
+    finally:
+        GPIO.cleanup()
+        print "GPIO pins have been cleaned up.  Goodbye!"
