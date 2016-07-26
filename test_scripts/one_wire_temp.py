@@ -8,6 +8,7 @@ import time
 
 
 class w1therm:
+    """finds all 1-wire sensors currently plugged into the Pi.  Has methods to read sensors, and return a dictionary with each sensor's reading"""
     def __init__(self):
         self.sensorroot = '/sys/bus/w1/devices/'
         #find all sensors
@@ -16,6 +17,7 @@ class w1therm:
 
 
     def Read(self,id):
+        """returns a single entry dictionary, {id:temp}"""
         fname = self.sensorroot + id + "/w1_slave"
         if os.path.isfile(fname):  # Sensor id exists?
             with open(fname, "r") as f:
@@ -27,6 +29,7 @@ class w1therm:
             return {id: None}  # Return null when not found or error
 
     def Retrieve(self, sensor, result):
+        """this just iterates over sensors, and adds the results to a single dictionary"""
         result.update(self.Read(sensor))
 
 
@@ -69,6 +72,6 @@ if __name__ == "__main__":
         for s in order:
              row.append(str(data[s]) + '\t')
         print '\t'.join(row)
-        time.sleep(2)
+        time.sleep(4)
 
 
