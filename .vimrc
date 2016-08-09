@@ -26,4 +26,3 @@ set cpo-=<
 set wcm=<c-z>
 map <f4> :emenu <c-z>
 "--- End sweet menu
-</c-z></f4></c-z></up></silent></down></silent></c-o></up></silent></c-o></down></silent>
