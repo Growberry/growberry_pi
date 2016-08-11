@@ -23,5 +23,9 @@ nnoremap gV `[v`]
 " jk is escape
 inoremap jk <esc>
 
+" J and K to jump up and down in doc
+nnoremap J 15j
+nnoremap K 15k
+
 " toggle gundo
 nnoremap <leader>u :GundoToggle<CR>
