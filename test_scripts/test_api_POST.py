@@ -3,21 +3,22 @@ import time
 import json
 import random
 
-url = 'http://192.168.0.42:8000/reading/1'
+url = 'http://192.168.0.42:8000/reading/2'
 f = "post.log"
-temp = 20.0
-humidity = 50.0
-random.uniform(1, 10)
+temp = 99.0
+humidity = 99.0
+headers = {'Content-Type': 'application/json',}
+
 while True:
 
-    headers = {'Content-Type': 'application/json',}
     # these are the fields that are needed for the Reading database table
     dd = {'internal_temp': str(temp), 'internal_humidity': str(humidity), 'pic_dir': '/User/pi/pictures/1.jpg'}
     data = json.dumps(dd)
     r = requests.post(url, headers=headers, data=data)
-    headers = str(r.headers)
-    with open(f, 'w+') as outfile:
-        outfile.write(headers)
+    returned_headers = str(r.headers)
+    with open(f, 'a') as outfile:
+        outfile.write(returned_headers)
+        outfile.write("\n")
     #make the temps and humidity fluctuate:
     temp += random.uniform(-2,2)
     humidity += random.uniform(-5,5)
