@@ -23,6 +23,20 @@
 #   ------------------------------------------------------------
     export PS1="_______________________________________________________________________________\n| \w @ \h (\u) \n| => "
     export PS2="| => "
+######################################### insert the following in .profile to actually change the prompt
+Decoration1="\[\e[90m\]�~U~T["
+ RegularUserPart="\[\e[36m\]\u"
+ RootUserPart="\[\e[31;5m\]\u\[\e[m\]"
+ Between="\[\e[90m\]@"
+ HostPart="\[\e[32m\]\h:"
+ PathPart="\[\e[93m\]\w"
+ Decoration2="\[\e[90m\]]\n�~U~Z>\[\e[m\]"
+ case `id -u` in
+     0) export PS1="$Decoration1$RootUserPart$Between$HostPart$PathPart$Decoration2# ";;
+     *) export PS1="$Decoration1$RegularUserPart$Between$HostPart$PathPart$Decoration2$ ";;
+esac
+
+#########################################
 
 #   Set Paths
 #   ------------------------------------------------------------
