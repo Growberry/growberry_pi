@@ -1,0 +1,1 @@
+{"veg":{"sunrise" : "0600", "daylength" : 18, "fan_temp" : 25, "toggle_camera" : "True", "logfile": "logfile", "pic_dir" : "pic_dir"},"flower":{"sunrise" : "0800", "daylength" : 12, "fan_temp" : 27, "toggle_camera" : "True", "logfile": "logfile", "pic_dir" : "pic_dir"}}

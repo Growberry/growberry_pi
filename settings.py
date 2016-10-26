@@ -1,50 +1,53 @@
 import json
 import requests
-import time
+from datetime import datetime
 
-test_grow_id = 2
-test_url = 'http://192.168.0.42:8000/get_settings/10'
-test_url2 = 'http://ec2-54-244-205-179.us-west-2.compute.amazonaws.com/get_settings/'
 
 class Settings(object):
-    """url will be the API location, and file_loc is the location where the .json will be stored"""
+    """class to hold all settings. Can get/update settings. Returns settings in correct object way"""
     def __init__(self,base_url,file_loc, grow_id):
         self.file_loc = file_loc
         self.grow_id = str(grow_id)
         self.url = base_url + self.grow_id
-        # with open(self.file_loc,'r') as infile:
-        #     settings = json.load(infile)
-        #     for k,v in settings.iteritems():
-        #         self.k = v
-
+        self.settings = {}
+        self.online = False
+        self.startdate = None
+        #self.sunrise = None
+        self.daylength = None
+        self.pic_dir = None
+        self.settemp = None
 
 
     def update(self):
         try:
+            # if connected to the internet, request settings
             r = requests.get(self.url)
-            settings_json = r.text
-        #     print(type(settings_json))
-        #     print (settings_json)
-        # finally:
-        #     print('done')
+            settings_json = json.loads(r.text)
+            # set attributes 'online' and 'error'
+            settings_json['online'] = True
+            settings_json['error'] = False
             with open(self.file_loc,'w') as f:
                 json.dump(settings_json,f)
+        except Exception,e:
+            error = {'online':False, 'error':e}
+            self.settings.update(error)
         finally:
             with open(self.file_loc, 'r') as infile:
-                settings = json.load(infile)
-                for k, v in settings.iteritems():
-                    self.k = v
-#
-# while True:
-#     r = requests.get('http://192.168.0.42:8000/get_settings/10')
-#     headers = str(r.headers)
-#     with open('/home/pi/API_test.txt', 'w') as outfile:
-# 		outfile.write(headers)
-#     time.sleep(1800)
+                self.settings.update(json.load(infile))
+                self.startdate = datetime.strptime(self.settings.get('startdate', '042016'),'%m%d%y')
+                self.sunrise = datetime.strptime(self.settings['sunrise'],'%H%M')
+                self.daylength = float(self.settings['daylength'])
+                self.pic_dir = self.settings['pic_dir']
+                self.settemp = self.settings['settemp']
 
 if __name__ == '__main__':
-    settings = Settings(test_url2,'/Users/meiera/Documents/pythoncode/web_dev/templates/settings.json',2)
-    settings.update()
+    test_grow_id = 3
+    test_url = 'http://localhost:5000/get_settings/10'
+    test_url2 = 'http://ec2-54-244-205-179.us-west-2.compute.amazonaws.com/get_settings/'
+    fl = 'settings.json'
+    settings = Settings(test_url2,fl,test_grow_id)
 
-    print(settings.daylength)
-    # print(settings)
+    settings.update()
+    print settings.settings
+    print settings.startdate
+    print settings.sunrise

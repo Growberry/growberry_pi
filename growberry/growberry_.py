@@ -21,49 +21,24 @@ from picamera import PiCamera
 import subprocess
 from configparser import ConfigParser
 cfg = ConfigParser()
-#####################################################################
-#                           Parameters
-#####################################################################
-# # Change these things to change how the threasholds work
-#
-# # Read interval
-# measurement_interval = 10.00
-#
-# # LIGHTS ON TIME
-# lights_on_time = '1100'
-#
-# # Length of day (in hours)
-# daylength = 12
-#
-# # TEMP that activates fans
-# fan_temp = 22.5
-#
-# # times that the sprinkler should run (list of strings)
-# watertimes = ['0600','1100','1600','2100']
-#
-# # length of sprinkler cycle (in minutes)
-# pumptime = 3
-#
-# # toggle picture capture on/off
-# toggle_camera = True
-#
-# # file to write the log file to
-# logfile = '/home/pi/usbdrv/growberry_testlog/grow1_log.txt'
-#
-# # directory to save pictures in
-# pic_dir = '/home/pi/usbdrv/growberry_testlog/flowering_pictures/'
-#
 
-growsettings = {}
+#self imports
+from pins import Relay, Sensor
 
+
+#####################################################################
+#                       Global variables
+#####################################################################
+
+
+settings = {}
+
+PIC_DIR =
 
 #####################################################################
 #                           GPIO pin set up
 #####################################################################
-# select one of these two modes:
-GPIO.setmode(GPIO.BCM)  # for using the names of the pins
-
-GPIO.setwarnings(True)  # set to false if the warnings bother you, helps troubleshooting
+"""These have also moved into pins.py"""
 
 ############################ Activating pins ########################
 # GPIO.setup(<put pin number here>,GPIO.IN/OUT)  #will depend on setmode above, use "IN" for sensors, and "OUT" for LEDs
@@ -76,183 +51,9 @@ GPIO.setup(21, GPIO.OUT, initial=1)
 #####################################################################
 #                           Classes
 #####################################################################
-class bcolors:  # these are the color codes
-    """
-    Toggle switch for printing in color. Once activated, everything following is in color X
-
-    This color class is completely unecessary, but it makes the output cooler, and doesn't really cause any harm
-    if you remove it, you'll have to remove all uses of it in the functions
-                        example:
-    print(bcolors.YELLOW + "Warning" + bcolors.END)
-    this prints "Warning" in yellow, then turns off colors, so everything printed after END will be normal
-    """
-
-    PURPLE = '\033[95m'  # purple
-    BLUE = '\033[94m'  # blue
-    GREEN = '\033[92m'  # green
-    YELLOW = '\033[93m'  # yellow
-    RED = '\033[91m'  # red
-    END = '\033[0m'  # turns off color
-    BOLD = '\033[1m'  # turns on bold
-
-    def disable(self):
-        self.PURPLE = ''
-        self.BLUE = ''
-        self.GREEN = ''
-        self.YELLOW = ''
-        self.RED = ''
-        self.END = ''
-        self.BOLD = ''
+"""These have been moved to the pins.py to clean up the code."""
 
 
-class LED:
-    """
-    Turns GPIO pins from LOW(off) to HIGH(on) and back again
-
-    this class pretty much works for any device connected to a single GPIO pin
-    as instances of LED are created, their names are added as keys in the LED.dictionary
-    """
-    dictionary = {}  # a dictionary will all created LED instances' names as keys
-
-    # state = None
-    def __init__(self, pin, name, color, power):
-        self.pin = int(pin)  # this is the GPIO pin number (will depend on GPIO config)
-        self.name = name
-        self.color = color
-        self.power = power  # enter power in miliamps
-        self.state = GPIO.input(self.pin)  # was going to use conditional loop if I could have got backgrounding to work
-        LED.dictionary[name] = self  # auto adds every instance of LED to the dictionary
-
-    def getstate(self):
-        self.state = GPIO.input(self.pin)
-        return self.state
-
-    def fake(self):
-        if GPIO.output(self.pin):  # if self.pin == 1
-            print "%s on port %s is 1/GPIO.HIGH/True" % (self.name, self.pin)
-        else:
-            print "%s on port %s is 0/GPIO.LOW/False" % (self.name, self.pin)
-
-    def on(self):
-        GPIO.output(self.pin, GPIO.HIGH)
-        print("%s LED is" % self.color + bcolors.BOLD + bcolors.GREEN + " on." + bcolors.END)
-
-    def off(self):
-        GPIO.output(self.pin, GPIO.LOW)
-        print("%s LED is" % self.color + bcolors.BOLD + bcolors.RED + " off." + bcolors.END)
-
-    def blink(self, *args):
-        # print (len(args))          #troubleshooting print statement
-        # print args                 # another
-        try:
-            repeat = int(args[0])
-        except:
-            repeat = 1
-        try:
-            speed = (float(args[1])) / 2
-        except:
-            speed = .5
-        # print repeat               #troubleshooting print statement
-        # print speed                # another
-        print("%s LED is" % self.color + bcolors.BOLD + bcolors.PURPLE + " blinking." + bcolors.END)
-        while repeat > 0:
-            self.state = "blinking"
-            GPIO.output(self.pin, GPIO.HIGH)
-            time.sleep(speed)
-            GPIO.output(self.pin, GPIO.LOW)
-            time.sleep(speed)
-            repeat -= 1
-
-
-class Relay:
-    """
-    Turns GPIO pins from LOW(on) to HIGH(off) and back again.  Remember: relays are inverted. 
-    3.3v turns the relay off.
-
-    this class pretty much works for any device connected to a single GPIO pin
-    as instances of Relays are created, their names are added as keys in the Relay.dictionary
-    """
-    dictionary = {}  # a dictionary will all created LED instances' names as keys
-
-    # state = None
-    def __init__(self, pin, name):
-        self.pin = int(pin)  # this is the GPIO pin number (will depend on GPIO config)
-        self.name = name
-        self.state = GPIO.input(self.pin)  # was going to use conditional loop if I could have got backgrounding to work
-        LED.dictionary[name] = self  # auto adds every instance of LED to the dictionary
-
-    def getstate(self):
-        self.state = GPIO.input(self.pin)
-        return self.state
-
-    def fake(self):
-        if GPIO.output(self.pin):  # if self.pin == 1
-            print "%s on port %s is 1/GPIO.HIGH/True" % (self.name, self.pin)
-        else:
-            print "%s on port %s is 0/GPIO.LOW/False" % (self.name, self.pin)
-
-    def on(self):
-        """
-        switches GPIO pin to LOW/0 - in open state relays, this turns the relay ON.
-        """
-        GPIO.output(self.pin, GPIO.LOW)
-        #print("%s Relay is" % self.name + bcolors.BOLD + bcolors.GREEN + " on." + bcolors.END)
-
-    def off(self):
-        """
-        switches GPIO pin to HIGH/1 - in open state relays, this turns the relay OFF.
-        """
-        GPIO.output(self.pin, GPIO.HIGH)
-        #print("%s Relay is" % self.name + bcolors.BOLD + bcolors.RED + " off." + bcolors.END)
-
-    def blink(self, *args):
-        # print (len(args))          #troubleshooting print statement
-        # print args                 # another
-        try:
-            repeat = int(args[0])
-        except:
-            repeat = 1
-        try:
-            speed = (float(args[1])) / 2
-        except:
-            speed = .5
-        # print repeat               #troubleshooting print statement
-        # print speed                # another
-        print("%s Relay is" % self.name + bcolors.BOLD + bcolors.PURPLE + " blinking." + bcolors.END)
-        while repeat > 0:
-            self.state = "blinking"
-            GPIO.output(self.pin, GPIO.LOW)
-            time.sleep(speed)
-            GPIO.output(self.pin, GPIO.HIGH)
-            time.sleep(speed)
-            repeat -= 1
-
-
-class Sensor:
-    def __init__(self, pin, sens_type, name):
-        self.sens_type = sens_type
-        self.pin = int(pin)  # this is the GPIO pin number (will depend on GPIO config)$
-        self.name = name  #
-
-    def read(self):
-        humidity, temp = Adafruit_DHT.read(self.sens_type, self.pin)
-
-        #print 'Temperature: {0:0.1f} C'.format(temp)       #prints Temp formated
-        #print 'Humidity:    {0:0.1f} %'.format(humidity)   #prints Humidity formatted
-
-        #print temp         #prints temp unformated
-        #print humidity     #prints humidity unformated
-
-        # Sometimes the sensor will return "None"
-        # This might happen if the CPU is under a lot of load and the sensor$
-        # can't be reliably read (timing is critical to read the sensor).$
-        # the following loop will read the sensor every 2 seconds until both temp and humidity are not "None"
-
-        while humidity is None or temp is None:  #this should prevent errors when rounding, but could cause a hang-up...
-            time.sleep(2)
-            humidity, temp = Adafruit_DHT.read(self.sens_type, self.pin)
-
-        return {"temp": round(float(temp),1), "humidity": round(float(humidity),1), "timestamp": datetime.datetime.now()}
 
 
 ############### Define things controlled vi Pi #####################
