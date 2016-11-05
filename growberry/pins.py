@@ -1,7 +1,7 @@
 import time
 import RPi.GPIO as GPIO
 import Adafruit_DHT
-from picamera import PiCamera
+
 
 
 
@@ -25,15 +25,6 @@ class Relay:
         self.state = GPIO.input(self.pin)  # was going to use conditional loop if I could have got backgrounding to work
         Relay.dictionary[name] = self  # auto adds every instance of Relay to the dictionary
 
-    def getstate(self):
-        self.state = GPIO.input(self.pin)
-        return self.state
-
-    def fake(self):
-        if GPIO.output(self.pin):  # if self.pin == 1
-            print "%s on port %s is 1/GPIO.HIGH/True" % (self.name, self.pin)
-        else:
-            print "%s on port %s is 0/GPIO.LOW/False" % (self.name, self.pin)
 
     def on(self):
         """
@@ -81,6 +72,7 @@ class Sensor:
         self.pin = int(pin)  # this is the GPIO pin number (will depend on GPIO config)$
         self.name = name  #
 
+    @property
     def read(self):
         humidity, temp = Adafruit_DHT.read(self.sens_type, self.pin)
 

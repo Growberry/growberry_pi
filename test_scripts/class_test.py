@@ -2,7 +2,7 @@ class Settings:
     def __init__(self):
         self._a = 1
         self._b = 2
-        print "initial vars = ",self.a,self.b
+        print "initial vars = ",self._a,self._b
 
 
     def update(self):
