@@ -1,31 +1,64 @@
 
 import requests
 import json
-
-settings = {}
-
-settingsfile = '/Users/austinmeier/Documents/jaiswal/git/growberry_pi/growberry/data.json'
-
-url = 'http://192.168.0.42:8000/get_settings/10'
-test_url = 'http://192.168.0.11:8000/get_settings/10'
-url2 = 'http://localhost:5000/get_settings/10'
-
-def update_settings():
-    r = requests.get(url2)
-    with open(settingsfile,'w') as outfile:
-        # json.dump(r.text, outfile)
-        outfile.write(r.text)
-
-def load_settings():
-    with open(settingsfile,'r') as infile:
-        settings = json.load(infile)
-    # print settings['flower']
-    return settings
+import Adafruit_DHT
+import RPi.GPIO as GPIO
+from config import DHT22, RELAYS, SETTINGS_JSON, SETTINGS_URL, BARREL_ID, CAMERA
+from pins import Relay, Sensor
+from settings import Settings
+from picamera import PiCamera
+from one_wire_temp import w1therm
+from time import sleep
 
 
+#set up all variables as None
+camera = None
+#sensors
+in_sense = None
+ext_sense = None
+#relays
+lights = None
+fans = None
+#settings
+settings = None
 
-update_settings()
-settings = load_settings()
-print type(settings)
-# s = json.loads(settings)
-# print type(s)
+
+"""import all the configured DH22 sensors, and set them up with names"""
+for dht22_sensor in DHT22:
+    # do I need to GPIO.setup() for DH22???
+    if dht22_sensor[1] == 'internal':
+        in_sense = Sensor(dht22_sensor[0], Adafruit_DHT.DHT22, dht22_sensor[1])
+    elif dht22_sensor[1] == 'external':
+        ext_sense = Sensor(dht22_sensor[0], Adafruit_DHT.DHT22, dht22_sensor[1])
+
+
+"""import all the relays, and give them names"""
+
+for relay in RELAYS:
+    GPIO.setup(relay[0], GPIO.OUT, initial=1)
+    if relay[1] == 'lights':
+        lights = Relay(relay[0],relay[1])
+    elif relay[1] == 'fans':
+        fans = Relay(relay[0], relay[1])
+
+"""set up the Settings object that will handle all the settings"""
+
+settings = Settings(SETTINGS_URL,SETTINGS_JSON,BARREL_ID)
+settings.update()
+
+
+"""set up camera"""
+if CAMERA:
+    camera = PiCamera()
+
+
+"""set up 1wire temp for heatsinks"""
+heatsinktemps = w1therm()
+while True:
+    temps = heatsinktemps.gettemps()
+    for temp in temps:
+        #check if heatsinks are hotter than 50, if so, turn the lights off!
+        if temp > 50:
+            lights.off()
+            #somehow notify the user.. email maybe?
+    sleep(10)

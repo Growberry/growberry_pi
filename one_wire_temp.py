@@ -1,5 +1,10 @@
 #!/usr/bin/env python
 
+##################
+# this code was adapted from it's original form: GitHub's user RobThree
+##################
+
+
 from datetime import datetime
 import os
 from threading import Thread
