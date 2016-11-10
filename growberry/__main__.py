@@ -1,12 +1,14 @@
 
-import requests
-import json
-import Adafruit_DHT
-import RPi.GPIO as GPIO
 from config import DHT22, RELAYS, SETTINGS_JSON, SETTINGS_URL, BARREL_ID, CAMERA
-from pins import Relay, Sensor
+import RPi.GPIO as GPIO
+if DHT22:  # if there are no sensors in config, don't need to import Adafruit (can cause trouble)
+    import Adafruit_DHT
+    from pins import Sensor
+if RELAYS: # if no Relays configured, don't need Relay module
+    from pins import Relay
 from settings import Settings
-from picamera import PiCamera
+if CAMERA:
+    from picamera import PiCamera
 from one_wire_temp import w1therm
 from time import sleep
 
@@ -24,6 +26,8 @@ settings = None
 
 
 """import all the configured DH22 sensors, and set them up with names"""
+
+
 for dht22_sensor in DHT22:
     # do I need to GPIO.setup() for DH22???
     if dht22_sensor[1] == 'internal':

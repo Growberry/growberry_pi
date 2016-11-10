@@ -31,6 +31,7 @@ class Relay:
         switches GPIO pin to LOW/0 - in open state relays, this turns the relay ON.
         """
         GPIO.output(self.pin, GPIO.LOW)
+        # color: uncomment below for color export to terminal.
         #print("%s Relay is" % self.name + bcolors.BOLD + bcolors.GREEN + " on." + bcolors.END)
 
     def off(self):
@@ -38,22 +39,25 @@ class Relay:
         switches GPIO pin to HIGH/1 - in open state relays, this turns the relay OFF.
         """
         GPIO.output(self.pin, GPIO.HIGH)
+        # color: uncomment below for color export to terminal.
         #print("%s Relay is" % self.name + bcolors.BOLD + bcolors.RED + " off." + bcolors.END)
 
     def blink(self, *args):
+        """this should not be used for actual relays, just LEDs"""
         # print (len(args))          #troubleshooting print statement
         # print args                 # another
         try:
-            repeat = int(args[0])
+            repeat = int(args[0])   # if arguments are included, use the first one to mean number of blinks
         except:
-            repeat = 1
+            repeat = 1              # default is 1 blink
         try:
-            speed = (float(args[1])) / 2
+            speed = (float(args[1])) / 2    # second argument is the speed of blinks
         except:
-            speed = .5
+            speed = .5              # default is .5 seconds
         # print repeat               #troubleshooting print statement
         # print speed                # another
-        print("%s Relay is" % self.name + bcolors.BOLD + bcolors.PURPLE + " blinking." + bcolors.END)
+        # color: uncomment below for color export to terminal.
+        # print("%s Relay is" % self.name + bcolors.BOLD + bcolors.PURPLE + " blinking." + bcolors.END)
         while repeat > 0:
             self.state = "blinking"
             GPIO.output(self.pin, GPIO.LOW)
