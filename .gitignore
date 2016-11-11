@@ -1,2 +1,3 @@
 .idea/
 growberry/__pycache__/
+*.pyc
