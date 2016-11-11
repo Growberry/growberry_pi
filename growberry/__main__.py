@@ -1,5 +1,5 @@
 
-from config import DHT22, RELAYS, SETTINGS_JSON, SETTINGS_URL, BARREL_ID, CAMERA
+from config import DHT22, RELAYS, SETTINGS_JSON, SETTINGS_URL, BARREL_ID, CAMERA, MAXTEMP
 import RPi.GPIO as GPIO
 from threading import Thread
 
@@ -26,6 +26,7 @@ lights = None
 fans = None
 #settings
 settings = None
+
 
 
 """import all the configured DH22 sensors, and set them up with names"""
@@ -70,7 +71,7 @@ if CAMERA:
 #             #somehow notify the user.. email maybe?
 #     sleep(10)
 
-sun = Sun(lights,settings)
+sun = Sun(lights,settings,MAXTEMP)
 while True:
     settings.update()
     sun.lightcontrol()

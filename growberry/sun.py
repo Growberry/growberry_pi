@@ -6,7 +6,7 @@ from time import sleep
 class Sun:
     """the sun class handles all tasks related to turning the lights on and off"""
     heatsinktemps = w1therm()
-    def safetyvalve(self,lights,maxtemp):
+    def safetyvalve(self,lights,mt):
         """monitor the temp of the heatsinks.  If any of them exceed 55*C"""
         while True:
             temps = self.heatsinktemps.gettemps()
@@ -17,18 +17,19 @@ class Sun:
                 else:
                     tempfloat = float(temps[temp])
                     # check if heatsinks are hotter than 50, if so, turn the lights off!
-                    if tempfloat > maxtemp:
+                    if tempfloat > mt:
                         lights.off()
                         # somehow notify the user.. email maybe?
                         # also should log these alerts, not just print
-                        print 'ALERT: heatsink temp exceeded set value(%s).' %str(maxtemp)
-                        print 'current temps: ', temps, "Temp that caused the problem: ", temp
+                        print 'ALERT: heatsink temp exceeded set value(%s).' %str(mt)
+                        print 'current temps: ', temps, "Temp that caused the problem: ", temp, str(temps[temp])
             sleep(10)
 
 
-    def __init__(self,lights,settings):
+    def __init__(self,lights,settings,maxtemp):
         self.settings = settings # this is a Settings class
         self.lights = lights # Relay class
+        self.tempmax = maxtemp
 
         # start monitoring heatsinks
         t1 = Thread(target = self.safetyvalve, args = (self.lights,20))
