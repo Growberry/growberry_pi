@@ -20,7 +20,7 @@ SETTINGS_URL = 'http://ec2-54-244-205-179.us-west-2.compute.amazonaws.com/get_se
 SETTINGS_JSON = os.path.join(basedir,'settings.json')
 
 # this will be unique to each barrel.
-BARREL_ID = 3
+BARREL_ID = 4
 
 # able to toggle camera on/off
 CAMERA = False
