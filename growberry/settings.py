@@ -1,6 +1,6 @@
 import json
 import requests
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta 
 
 
 class Settings(object):
@@ -35,7 +35,7 @@ class Settings(object):
             with open(self.file_loc, 'r') as infile:
                 self.settings.update(json.load(infile))
                 self.startdate = datetime.strptime(self.settings.get('startdate', '042016'),'%m%d%y')
-                self.sunrise = datetime.strptime(self.settings['sunrise'],'%H%M')
+                self.sunrise = datetime.strptime(self.settings['sunrise'],'%H%M').time()
                 self.daylength = timedelta(hours=float(self.settings['daylength']))
                 self.pic_dir = self.settings['pic_dir']
                 self.settemp = self.settings['settemp']

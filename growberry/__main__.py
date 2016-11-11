@@ -75,3 +75,4 @@ while True:
     settings.update()
     sun.lightcontrol()
     print sun.status
+    sleep(600)

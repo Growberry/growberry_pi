@@ -10,14 +10,19 @@ class Sun:
         """monitor the temp of the heatsinks.  If any of them exceed 55*C"""
         while True:
             temps = self.heatsinktemps.gettemps()
-            for temp in temps:
-                # check if heatsinks are hotter than 50, if so, turn the lights off!
-                if temp > maxtemp:
-                    lights.off()
-                    # somehow notify the user.. email maybe?
-                    # also should log these alerts, not just print
-                    print 'ALERT: heatsink temp exceeded set value(%s).' %str(maxtemp)
-                    print 'current temps: ', temps
+            for temp in temps: # temps is a dict: {'28-031655df8bff': 18.625, 'timestamp': datetime.datetime(2016, 11, 11, 22, 47, 35, 344949)}
+                
+                if temp == 'timestamp':
+                    continue
+                else:
+                    tempfloat = float(temps[temp])
+                    # check if heatsinks are hotter than 50, if so, turn the lights off!
+                    if tempfloat > maxtemp:
+                        lights.off()
+                        # somehow notify the user.. email maybe?
+                        # also should log these alerts, not just print
+                        print 'ALERT: heatsink temp exceeded set value(%s).' %str(maxtemp)
+                        print 'current temps: ', temps, "Temp that caused the problem: ", temp
             sleep(10)
 
 
@@ -26,7 +31,7 @@ class Sun:
         self.lights = lights # Relay class
 
         # start monitoring heatsinks
-        t1 = Thread(target = self.safetyvalve, kwargs = {'lights' = self.lights,'maxtemp' = 20})
+        t1 = Thread(target = self.safetyvalve, args = (self.lights,20))
         t1.start()
 
     def lightcontrol(self):
