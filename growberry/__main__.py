@@ -1,8 +1,10 @@
 
 from config import DHT22, RELAYS, SETTINGS_JSON, SETTINGS_URL, BARREL_ID, CAMERA
 import RPi.GPIO as GPIO
+from threading import Thread
 
 from settings import Settings
+from sun import Sun
 if DHT22:  # if there are no sensors in config, don't need to import Adafruit (can cause trouble)
     import Adafruit_DHT
     from pins import Sensor
@@ -67,3 +69,9 @@ if CAMERA:
 #             lights.off()
 #             #somehow notify the user.. email maybe?
 #     sleep(10)
+
+sun = Sun(lights,settings)
+while True:
+    settings.update()
+    sun.lightcontrol()
+    print sun.status
