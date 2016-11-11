@@ -1,12 +1,13 @@
 
 from config import DHT22, RELAYS, SETTINGS_JSON, SETTINGS_URL, BARREL_ID, CAMERA
 import RPi.GPIO as GPIO
+
+from settings import Settings
 if DHT22:  # if there are no sensors in config, don't need to import Adafruit (can cause trouble)
     import Adafruit_DHT
     from pins import Sensor
 if RELAYS: # if no Relays configured, don't need Relay module
     from pins import Relay
-from settings import Settings
 if CAMERA:
     from picamera import PiCamera
 from one_wire_temp import w1therm
@@ -57,12 +58,12 @@ if CAMERA:
 
 
 """set up 1wire temp for heatsinks"""
-heatsinktemps = w1therm()
-while True:
-    temps = heatsinktemps.gettemps()
-    for temp in temps:
-        #check if heatsinks are hotter than 50, if so, turn the lights off!
-        if temp > 50:
-            lights.off()
-            #somehow notify the user.. email maybe?
-    sleep(10)
+# heatsinktemps = w1therm()
+# while True:
+#     temps = heatsinktemps.gettemps()
+#     for temp in temps:
+#         #check if heatsinks are hotter than 50, if so, turn the lights off!
+#         if temp > 50:
+#             lights.off()
+#             #somehow notify the user.. email maybe?
+#     sleep(10)

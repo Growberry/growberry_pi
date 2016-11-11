@@ -19,7 +19,7 @@ class Sun:
     def __init__(self,lights,settings):
         self.settings = settings # this is a Settings class
         self.lights = lights # Relay class
-        
+
         # start monitoring heatsinks
         t1 = Thread(target = self.safetyvalve, args = self.lights)
         t1.start()
