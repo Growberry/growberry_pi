@@ -63,7 +63,6 @@ class Relay:
         # color: uncomment below for color export to terminal.
         # print("%s Relay is" % self.name + bcolors.BOLD + bcolors.PURPLE + " blinking." + bcolors.END)
         while repeat > 0:
-            self.state = "blinking"
             GPIO.output(self.pin, GPIO.LOW)
             time.sleep(speed)
             GPIO.output(self.pin, GPIO.HIGH)
