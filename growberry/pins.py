@@ -22,9 +22,13 @@ class Relay:
     def __init__(self, pin, name):
         self.pin = int(pin)  # this is the GPIO pin number (will depend on GPIO config)
         self.name = name
-        self.state = GPIO.input(self.pin)  # was going to use conditional loop if I could have got backgrounding to work
-        Relay.dictionary[name] = self  # auto adds every instance of Relay to the dictionary
 
+        Relay.dictionary[name] = self  # auto adds every instance of Relay to the dictionary
+        print "relay ready to go, captain."
+
+    @property
+    def state(self):
+        return GPIO.input(self, self.pin)  # was going to use conditional loop if I could have got backgrounding to work
 
     def on(self):
         """
