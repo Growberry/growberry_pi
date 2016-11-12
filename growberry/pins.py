@@ -25,10 +25,10 @@ class Relay:
         GPIO.setup(pin, GPIO.OUT, initial=1)
 
         Relay.dictionary[name] = self  # auto adds every instance of Relay to the dictionary
-        print "relay ready to go, captain."
 
     @property
     def state(self):
+        #  Doesn't work yet...
         # GPIO must be set to IN to read their state, but need to remain OUT to control
         GPIO.setup(self.pin,GPIO.IN)
         self._state = GPIO.input(self.pin)
@@ -103,4 +103,4 @@ class Sensor:
             time.sleep(2)
             humidity, temp = Adafruit_DHT.read(self.sens_type, self.pin)
 
-        return {"temp": round(float(temp),1), "humidity": round(float(humidity),1), "timestamp": datetime.datetime.now()}
+        return {"temp": round(float(temp),1), "humidity": round(float(humidity),1), "timestamp": datetime.datetime.utcnow()}

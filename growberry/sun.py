@@ -43,8 +43,8 @@ class Sun:
         # testing print statement:
         print "rise: ", sunrise
         print "set", sunset
-        print datetime.datetime.utcnow()
-        if sunrise <= datetime.datetime.utcnow() <= sunset:
+        print datetime.datetime.now()
+        if sunrise <= datetime.datetime.now() <= sunset:
             self.lights.on()
             print "turning lights on...\n"
         else:
