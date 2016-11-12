@@ -74,8 +74,16 @@ if CAMERA:
 #     sleep(10)
 
 sun = Sun(lights,settings,MAXTEMP)
-while True:
-    settings.update()
-    sun.lightcontrol()
-    print sun.status
-    sleep(600)
+
+try:
+    while True:
+        settings.update()
+        sun.lightcontrol()
+        print sun.status
+        sleep(600)
+except(KeyboardInterrupt):
+    print "growberry canceled manually."
+
+finally:
+    GPIO.cleanup()
+    print "Pins are cleaned up.  Goodbye."

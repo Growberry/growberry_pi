@@ -18,7 +18,7 @@ class Sun:
 
     def safetyvalve(self, lights, mt):
         """monitor the temp of the heatsinks.  If any of them exceed 55*C, power lights off. mt = maxtemp"""
-        while True:
+        while self:
             temps = self.heatsinktemps.gettemps()
             for temp in temps:  # temps is a dict: {'28-031655df8bff': 18.625, 'timestamp': datetime.datetime(2016, 11, 11, 22, 47, 35, 344949)}
 
