@@ -84,7 +84,7 @@ try:
         data = [insense_report['timestamp'].isoformat(),insense_report['temp'],insense_report['humidity'],sun.sinktemps]
         sun.sinktemps = []
         print data
-        d = "%s\t%s\t%s\t%s" % (str(data[0]), str(data[1]), str(data[2]), '|'.join([str(x) for x in data[3]]))
+        d = "%s\t%s\t%s\t%s\n" % (str(data[0]), str(data[1]), str(data[2]), '|'.join([str(x) for x in data[3]]))
         with open(TEST_OUT,'w') as outfile:
             outfile.write(d)
         sleep(MEASUREMENT_INT)

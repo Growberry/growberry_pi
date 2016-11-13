@@ -29,7 +29,7 @@ CAMERA = False
 MAXTEMP = 25
 
 # Measurement interval (in seconds)
-MEASUREMENT_INT = 60
+MEASUREMENT_INT = 600
 
 # a test file to log to while testing
 TEST_OUT = 'testout.txt'
