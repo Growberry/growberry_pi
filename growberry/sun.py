@@ -49,10 +49,10 @@ class Sun:
         # print datetime.datetime.now()
         if sunrise <= datetime.datetime.now() <= sunset:
             self.lights.on()
-            print "\n<turning lights on>\n"
+            # print "\n<turning lights on>\n"
         else:
             self.lights.off()
-            print "\n<turning lights off>\n"
+            # print "\n<turning lights off>\n"
 
 
 

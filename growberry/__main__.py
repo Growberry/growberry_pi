@@ -1,5 +1,5 @@
 
-from config import DHT22, RELAYS, SETTINGS_JSON, SETTINGS_URL, BARREL_ID, CAMERA, MAXTEMP,MEASUREMENT_INT
+from config import DHT22, RELAYS, SETTINGS_JSON, SETTINGS_URL, BARREL_ID, CAMERA, MAXTEMP,MEASUREMENT_INT, TEST_OUT
 import RPi.GPIO as GPIO
 from threading import Thread
 
@@ -81,9 +81,12 @@ try:
         sun.lightcontrol()
         # sunstatus = sun.status
         insense_report = in_sense.read
-        data = [insense_report['timestamp'],insense_report['temp'],insense_report['humidity'],sun.sinktemps]
+        data = [insense_report['timestamp'].isoformat(),insense_report['temp'],insense_report['humidity'],sun.sinktemps]
         sun.sinktemps = []
         print data
+        d = "%s\t%s\t%s\t%s" % (str(data[0]), str(data[1]), str(data[2]), '|'.join([str(x) for x in data[3]]))
+        with open(TEST_OUT,'w') as outfile:
+            outfile.write(d)
         sleep(MEASUREMENT_INT)
 except(KeyboardInterrupt):
     print "growberry canceled manually."

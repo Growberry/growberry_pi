@@ -30,3 +30,6 @@ MAXTEMP = 25
 
 # Measurement interval (in seconds)
 MEASUREMENT_INT = 60
+
+# a test file to log to while testing
+TEST_OUT = 'testout.txt'
