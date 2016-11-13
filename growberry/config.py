@@ -26,7 +26,7 @@ BARREL_ID = 4
 CAMERA = False
 
 # Maximum temp for heatsinks before safetycheck shuts the lights off
-MAXTEMP = 21
+MAXTEMP = 25
 
 # Measurement interval (in seconds)
 MEASUREMENT_INT = 60

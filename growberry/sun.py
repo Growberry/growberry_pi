@@ -44,15 +44,15 @@ class Sun:
         sunrise = datetime.datetime.combine(datetime.date.today(), self.settings.sunrise)
         sunset = sunrise + self.settings.daylength
         # testing print statement:
-        print "rise: ", sunrise
-        print "set", sunset
-        print datetime.datetime.now()
+        # print "rise: ", sunrise
+        # print "set", sunset
+        # print datetime.datetime.now()
         if sunrise <= datetime.datetime.now() <= sunset:
             self.lights.on()
-            print "turning lights on...\n"
+            print "\n<turning lights on>\n"
         else:
             self.lights.off()
-            print "turning lights off...\n"
+            print "\n<turning lights off>\n"
 
 
 

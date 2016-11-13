@@ -43,8 +43,8 @@ for dht22_sensor in DHT22:
 """import all the relays, and give them names"""
 
 for relay in RELAYS:
-    print type(relay)
-    print relay
+    # print type(relay)
+    # print relay
     GPIO.setup(relay[0], GPIO.OUT, initial=1)
     if relay[1] == 'lights':
         lights = Relay(relay[0],relay[1])
