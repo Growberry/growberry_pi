@@ -1,5 +1,5 @@
 
-from config import DHT22, RELAYS, SETTINGS_JSON, SETTINGS_URL, BARREL_ID, CAMERA, MAXTEMP
+from config import DHT22, RELAYS, SETTINGS_JSON, SETTINGS_URL, BARREL_ID, CAMERA, MAXTEMP,MEASUREMENT_INT
 import RPi.GPIO as GPIO
 from threading import Thread
 
@@ -84,7 +84,7 @@ try:
         data = [insense_report['timestamp'],insense_report['temp'],insense_report['humidity'],sun.sinktemps]
         sun.sinktemps = []
         print data
-        sleep(600)
+        sleep(MEASUREMENT_INT)
 except(KeyboardInterrupt):
     print "growberry canceled manually."
 

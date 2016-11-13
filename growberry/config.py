@@ -27,3 +27,6 @@ CAMERA = False
 
 # Maximum temp for heatsinks before safetycheck shuts the lights off
 MAXTEMP = 21
+
+# Measurement interval (in seconds)
+MEASUREMENT_INT = 60
