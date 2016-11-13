@@ -80,10 +80,13 @@ try:
         settings.update()
         sun.lightcontrol()
         print sun.status
+        print in_sense.read
+        heatsinktemp = sun.heatsinktemps.gettemps()
+        print "heatsink temp = ", heatsinktemp
         sleep(600)
 except(KeyboardInterrupt):
     print "growberry canceled manually."
 
 finally:
     GPIO.cleanup()
-    print "Pins are cleaned up.  Goodbye."
+    print "Pins are cleaned up, threads are killed.  Goodbye."

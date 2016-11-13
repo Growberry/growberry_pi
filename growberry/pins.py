@@ -40,7 +40,7 @@ class Relay:
         GPIO.output(self.pin, GPIO.LOW)
 
     def off(self):
-       """ switches GPIO pin to HIGH/1 - in open state relays, this turns the relay OFF."""
+        """ switches GPIO pin to HIGH/1 - in open state relays, this turns the relay OFF."""
         GPIO.output(self.pin, GPIO.HIGH)
 
     def blink(self, *args):
