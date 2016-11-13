@@ -10,7 +10,8 @@ class Sun:
         self.settings = settings # this is a Settings class
         self.lights = lights # Relay class
         self.mt = maxtemp
-        self.heatsinktemps = w1therm()
+        self.heatsinksensor = w1therm()
+        self.sinktemps = []
         # start monitoring heatsinks
         t1 = Thread(target = self.safetyvalve, args = (self.lights,self.mt))
         t1.daemon = True
@@ -20,13 +21,14 @@ class Sun:
     def safetyvalve(self, lights, mt):
         """monitor the temp of the heatsinks.  If any of them exceed 55*C, power lights off. mt = maxtemp"""
         while self:
-            temps = self.heatsinktemps.gettemps()
+            temps = self.heatsinksensor.gettemps()
             for temp in temps:  # temps is a dict: {'28-031655df8bff': 18.625, 'timestamp': datetime.datetime(2016, 11, 11, 22, 47, 35, 344949)}
 
                 if temp == 'timestamp':
                     continue
                 else:
                     tempfloat = float(temps[temp])
+                    self.sinktemps.append(tempfloat)
                     # check if heatsinks are hotter than 50, if so, turn the lights off!
                     if tempfloat > mt:
                         lights.off()
@@ -59,7 +61,7 @@ class Sun:
         # return lenth of time lights have been on
     @property
     def status(self):
-        lightstatus = {'lights':self.lights.state,'heatsinktemps':self.heatsinktemps.gettemps()}
+        lightstatus = {'lights':self.lights.state,'heatsinksensor':self.heatsinksensor.gettemps()}
         # if self.lights.state:
         #     lightstatus['lights'] = True
         return lightstatus

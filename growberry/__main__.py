@@ -79,10 +79,11 @@ try:
     while True:
         settings.update()
         sun.lightcontrol()
-        print sun.status
-        print in_sense.read
-        heatsinktemp = sun.heatsinktemps.gettemps()
-        print "heatsink temp = ", heatsinktemp
+        # sunstatus = sun.status
+        insense_report = in_sense.read
+        data = [insense_report['timestamp'],insense_report['temp'],insense_report['humidity'],sun.sinktemps]
+        sun.sinktemps = []
+        print data
         sleep(600)
 except(KeyboardInterrupt):
     print "growberry canceled manually."
@@ -90,3 +91,11 @@ except(KeyboardInterrupt):
 finally:
     GPIO.cleanup()
     print "Pins are cleaned up, threads are killed.  Goodbye."
+
+
+"""
+{'lights': 1, 'heatsinktemps': {'28-031655df8bff': 21.0, 'timestamp': datetime.datetime(2016, 11, 13, 7, 1, 51, 598183)}}
+{'timestamp': datetime.datetime(2016, 11, 13, 7, 1, 52, 124097), 'temp': 19.4, 'humidity': 79.3}
+heatsink temp =  {'28-031655df8bff': 21.0, 'timestamp': datetime.datetime(2016, 11, 13, 7, 1, 52, 948184)}
+
+"""
