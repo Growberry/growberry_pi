@@ -13,6 +13,7 @@ class Sun:
         self.heatsinktemps = w1therm()
         # start monitoring heatsinks
         t1 = Thread(target = self.safetyvalve, args = (self.lights,self.mt))
+        t1.daemon = True
         t1.start()
 
 

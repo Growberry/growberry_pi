@@ -36,20 +36,12 @@ class Relay:
         return self._state
 
     def on(self):
-        """
-        switches GPIO pin to LOW/0 - in open state relays, this turns the relay ON.
-        """
+        """switches GPIO pin to LOW/0 - in open state relays, this turns the relay ON."""
         GPIO.output(self.pin, GPIO.LOW)
-        # color: uncomment below for color export to terminal.
-        #print("%s Relay is" % self.name + bcolors.BOLD + bcolors.GREEN + " on." + bcolors.END)
 
     def off(self):
-        """
-        switches GPIO pin to HIGH/1 - in open state relays, this turns the relay OFF.
-        """
+       """ switches GPIO pin to HIGH/1 - in open state relays, this turns the relay OFF."""
         GPIO.output(self.pin, GPIO.HIGH)
-        # color: uncomment below for color export to terminal.
-        #print("%s Relay is" % self.name + bcolors.BOLD + bcolors.RED + " off." + bcolors.END)
 
     def blink(self, *args):
         """this should not be used for actual relays, just LEDs"""
