@@ -1,6 +1,6 @@
 import RPi.GPIO as GPIO
+GPIO.setmode(GPIO.BCM)  # for using the names of the pins
 
-from pins import Relay
 
 class Wind:
     """This will house all of functions used to control the fans"""
@@ -11,7 +11,7 @@ class Wind:
         self.pwm = GPIO.PWM(speedpin, 25000) # 25 Kilohertz is inaudible to human ears
         self._speed = speed
         self.pwm.start(speed)
-        self.lights = lights
+#        self.lights = lights
 
     @property
     def speed(self):
@@ -54,7 +54,7 @@ class Wind:
         #
 
 if __name__ == "__main__":
-    wind = Wind(13,18)
+    wind = Wind(19,18)
 
     try:
         while True:
@@ -74,7 +74,7 @@ if __name__ == "__main__":
                 print("New duty cycle = ", inputspeed)
 
     finally:
-        my_pwm.stop()
+        wind.pwm.stop()
         GPIO.cleanup()
         print('PWM stopped, GPIO pins have been cleaned up. Goodbye.')
 
