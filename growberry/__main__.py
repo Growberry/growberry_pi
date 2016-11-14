@@ -62,17 +62,6 @@ if CAMERA:
     camera = PiCamera()
 
 
-"""set up 1wire temp for heatsinks"""
-# heatsinktemps = w1therm()
-# while True:
-#     temps = heatsinktemps.gettemps()
-#     for temp in temps:
-#         #check if heatsinks are hotter than 50, if so, turn the lights off!
-#         if temp > 50:
-#             lights.off()
-#             #somehow notify the user.. email maybe?
-#     sleep(10)
-
 sun = Sun(lights,settings,MAXTEMP)
 
 try:
@@ -81,11 +70,11 @@ try:
         sun.lightcontrol()
         # sunstatus = sun.status
         insense_report = in_sense.read
-        data = [insense_report['timestamp'].isoformat(),insense_report['temp'],insense_report['humidity'],sun.sinktemps]
+        data = [insense_report['timestamp'].isoformat(), lights.state, insense_report['temp'],insense_report['humidity'],sun.sinktemps]
         sun.sinktemps = []
         print data
-        d = "%s\t%s\t%s\t%s\n" % (str(data[0]), str(data[1]), str(data[2]), '|'.join([str(x) for x in data[3]]))
-        with open(TEST_OUT,'w') as outfile:
+        d = "%s\t%s\tlights:%s\t%s\t%s\n" % (str(data[0]), str(data[1]), str(data[2]), str(data[3]), '|'.join([str(x) for x in data[4]]))
+        with open(TEST_OUT,'a') as outfile:
             outfile.write(d)
         sleep(MEASUREMENT_INT)
 except(KeyboardInterrupt):
@@ -94,11 +83,3 @@ except(KeyboardInterrupt):
 finally:
     GPIO.cleanup()
     print "Pins are cleaned up, threads are killed.  Goodbye."
-
-
-"""
-{'lights': 1, 'heatsinktemps': {'28-031655df8bff': 21.0, 'timestamp': datetime.datetime(2016, 11, 13, 7, 1, 51, 598183)}}
-{'timestamp': datetime.datetime(2016, 11, 13, 7, 1, 52, 124097), 'temp': 19.4, 'humidity': 79.3}
-heatsink temp =  {'28-031655df8bff': 21.0, 'timestamp': datetime.datetime(2016, 11, 13, 7, 1, 52, 948184)}
-
-"""
