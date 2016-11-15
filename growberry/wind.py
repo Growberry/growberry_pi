@@ -24,9 +24,13 @@ class Wind:
         if 0 < value <= 100:
             self._speed = value
             self.pwm.ChangeDutyCycle(value)
-            GPIO.output(self.powerpin, GPIO.LOW) # power on
+            # GPIO.output(self.powerpin, GPIO.LOW) # power on
+            self.on()
+            print "ON"
         elif value == 0:
-            GPIO.output(self.powerpin, GPIO.HIGH)  # power off
+            self.off()
+            print "OFF"
+            # GPIO.output(self.powerpin, GPIO.HIGH)  # power off
             # if self.lights.state:  #lights.state = 1 means lights are off
             #     GPIO.output(self.powerpin, GPIO.HIGH)  # power off
             # else:
@@ -34,24 +38,15 @@ class Wind:
         else:
             raise ValueError("Speed must be between 0-100")
 
-        """
+    def on(self):
+        """switches GPIO pin to LOW/0 - in open state relays, this turns the relay ON."""
+        GPIO.output(self.pin, GPIO.LOW)
 
 
+    def off(self):
+        """ switches GPIO pin to HIGH/1 - in open state relays, this turns the relay OFF."""
+        GPIO.output(self.pin, GPIO.HIGH)
 
-        """
-
-        # if the lights are on: fans MUST be on
-        #
-        # def wind(day, daytemp, nighttemp, int_temp, sinktemp):
-        #     if day:
-        #         fans.on
-        #         fans.speed()
-        #     else:
-        #         if int_temp > nighttemp:
-        #             fans.on
-        #             fans.speed(y)
-        #         else:
-        #
 
 if __name__ == "__main__":
     wind = Wind(19,18)
