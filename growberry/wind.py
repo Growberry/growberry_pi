@@ -54,7 +54,7 @@ if __name__ == "__main__":
             print inputspeed
             print type(inputspeed)
             try:
-                wind.speed = inputspeed
+                wind.speed(inputspeed)
                 # new_duty = 100.0 - speed
                 # wind.pwm.ChangeDutyCycle(new_duty)
             except ValueError:
