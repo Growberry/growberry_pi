@@ -1,6 +1,6 @@
 import RPi.GPIO as GPIO
 GPIO.setmode(GPIO.BCM)  # for using the names of the pins
-
+GPIO.setwarnings(True)  # set to false if the warnings bother you, helps troubleshooting
 
 class Wind:
     """This will house all of functions used to control the fans"""
@@ -9,26 +9,23 @@ class Wind:
         GPIO.setup(powerpin, GPIO.OUT, initial=1)
         GPIO.setup(speedpin, GPIO.OUT)
         self.pwm = GPIO.PWM(speedpin, 25000) # 25 Kilohertz is inaudible to human ears
-        self._speed = speed
+        #self._speed = speed
         self.pwm.start(speed)
+        self.tach = speed
 #        self.lights = lights
 
-    @property
-    def speed(self):
-        # handles the speed of the fans, including master power, on/off.
-        return self._speed
 
-    @speed.setter
-    # fans need power to have a speed
     def speed(self, value):
+        """ handles the speed of the fans, including master power, on/off."""
         if 0 < value <= 100:
-            self._speed = value
             self.pwm.ChangeDutyCycle(value)
             # GPIO.output(self.powerpin, GPIO.LOW) # power on
             self.on()
+            self.tach = value
             print "ON"
         elif value == 0:
             self.off()
+            self.tach = 0
             print "OFF"
             # GPIO.output(self.powerpin, GPIO.HIGH)  # power off
             # if self.lights.state:  #lights.state = 1 means lights are off
@@ -40,16 +37,16 @@ class Wind:
 
     def on(self):
         """switches GPIO pin to LOW/0 - in open state relays, this turns the relay ON."""
-        GPIO.output(self.pin, GPIO.LOW)
+        GPIO.output(self.powerpin, GPIO.LOW)
 
 
     def off(self):
         """ switches GPIO pin to HIGH/1 - in open state relays, this turns the relay OFF."""
-        GPIO.output(self.pin, GPIO.HIGH)
+        GPIO.output(self.powerpin, GPIO.HIGH)
 
 
 if __name__ == "__main__":
-    wind = Wind(19,18)
+    wind = Wind(13,18)
 
     try:
         while True:
