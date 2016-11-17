@@ -5,6 +5,7 @@ from threading import Thread
 
 from settings import Settings
 from sun import Sun
+from wind import Wind
 if DHT22:  # if there are no sensors in config, don't need to import Adafruit (can cause trouble)
     import Adafruit_DHT
     from pins import Sensor
@@ -63,6 +64,7 @@ if CAMERA:
 
 
 sun = Sun(lights,settings,MAXTEMP)
+wind = Wind(13,18)
 
 try:
     while True:

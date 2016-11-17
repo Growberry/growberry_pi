@@ -7,23 +7,22 @@ class Sun:
     """the sun class handles all tasks related to turning the lights on and off"""
 
     def __init__(self,lights,settings,maxtemp):
-        self.settings = settings # this is a Settings class
-        self.lights = lights # Relay class
+        self.settings = settings  # this is a Settings class
+        self.lights = lights  # Relay class
         self.mt = maxtemp
         self.heatsinksensor = w1therm()
         self.sinktemps = []
         # start monitoring heatsinks
-        t1 = Thread(target = self.safetyvalve, args = (self.lights,self.mt))
+        t1 = Thread(target=self.safetyvalve, args=(self.lights,self.mt))
         t1.daemon = True
         t1.start()
 
 
     def safetyvalve(self, lights, mt):
-        """monitor the temp of the heatsinks.  If any of them exceed 55*C, power lights off. mt = maxtemp"""
+        """Monitor the temp of the heatsinks.  If any of them exceed 55*C, power lights off. mt = maxtemp"""
         while self:
             temps = self.heatsinksensor.gettemps()
             for temp in temps:  # temps is a dict: {'28-031655df8bff': 18.625, 'timestamp': datetime.datetime(2016, 11, 11, 22, 47, 35, 344949)}
-
                 if temp == 'timestamp':
                     continue
                 else:
@@ -54,9 +53,6 @@ class Sun:
             self.lights.off()
             # print "\n<turning lights off>\n"
 
-
-
-        # monitor heatsink temps, shut off when too hot
 
         # return lenth of time lights have been on
     @property

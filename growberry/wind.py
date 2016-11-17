@@ -15,19 +15,19 @@ class Wind:
 
 
     def speed(self, value):
-        """ handles the speed of the fans, including master power, on/off."""
+        """Handles the speed of the fans, including master power, on/off."""
         dutycycle = 100.0 - value  # 100 is slow, 0 is fast
         if 0 < value <= 100:
             self.pwm.ChangeDutyCycle(dutycycle)
-            # GPIO.output(self.powerpin, GPIO.LOW) # power on
-            self.on()
+            GPIO.output(self.powerpin, GPIO.LOW) # power on
+            # self.on()
             self.tach = value
             # print "ON"
         elif value == 0:
-            self.off()
+            # self.off()
+            GPIO.output(self.powerpin, GPIO.HIGH)  # power off
             self.tach = 0
             # print "OFF"
-            # GPIO.output(self.powerpin, GPIO.HIGH)  # power off
             # if self.lights.state:  #lights.state = 1 means lights are off
             #     GPIO.output(self.powerpin, GPIO.HIGH)  # power off
             # else:
@@ -35,35 +35,45 @@ class Wind:
         else:
             raise ValueError("Speed must be between 0.0-100.0")
 
-    def on(self):
-        """switches GPIO pin to LOW/0 - in open state relays, this turns the relay ON."""
-        GPIO.output(self.powerpin, GPIO.LOW)
+    # def on(self):
+    #     """switches GPIO pin to LOW/0 - in open state relays, this turns the relay ON."""
+    #     GPIO.output(self.powerpin, GPIO.LOW)
+    #
+    #
+    # def off(self):
+    #     """ switches GPIO pin to HIGH/1 - in open state relays, this turns the relay OFF."""
+    #     GPIO.output(self.powerpin, GPIO.HIGH)
+
+    # def tempcontrol(self, settemp):
+    #     while True:
+    #         # send temp measurement to PID
+    #         # inside PID there will be an if/else clause that sets the min fanspeed if the lights are on
+    #         newfanspeed = pid(temp)
+    #         self.speed(newfanspeed)
+    #
+
+    @property
+    def state(self):
+        return GPIO.input(self.powerpin)
 
 
-    def off(self):
-        """ switches GPIO pin to HIGH/1 - in open state relays, this turns the relay OFF."""
-        GPIO.output(self.powerpin, GPIO.HIGH)
-
-
+"""Manual control mode"""
 if __name__ == "__main__":
-    wind = Wind(13,18)
-
+    power = raw_input("Which GPIO pin powers the fan (13)?\n>>>")
+    pwm = raw_input("Which pin controls the speed (18)?\n>>>")
+    wind = Wind(power,pwm)
     try:
         while True:
             inputspeed = input("Enter fan speed(0.0-100.0): ")
-            print inputspeed
-            print type(inputspeed)
             try:
                 wind.speed(inputspeed)
-                # new_duty = 100.0 - speed
-                # wind.pwm.ChangeDutyCycle(new_duty)
             except ValueError:
                 print "invalid set speed"
             except:
-                print "broken"
+                print "something went wrong."
                 break
             else:
-                print "New duty cycle = ", inputspeed
+                print "New duty cycle = %s"%inputspeed
 
     finally:
         wind.pwm.stop()

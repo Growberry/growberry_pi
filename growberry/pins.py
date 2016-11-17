@@ -66,10 +66,12 @@ class Relay:
 
 
 class Sensor:
+    array = []
     def __init__(self, pin, sens_type, name):
         self.sens_type = sens_type
         self.pin = int(pin)  # this is the GPIO pin number (will depend on GPIO config)$
         self.name = name  #
+        Sensor.array.append(self)
 
     @property
     def read(self):
@@ -90,4 +92,4 @@ class Sensor:
             time.sleep(2)
             humidity, temp = Adafruit_DHT.read(self.sens_type, self.pin)
 
-        return {"temp": round(float(temp),1), "humidity": round(float(humidity),1), "timestamp": datetime.datetime.utcnow()}
+        return {"%s"%self.name: {"temp": round(float(temp),1), "humidity": round(float(humidity),1), "timestamp": datetime.datetime.utcnow()}}
