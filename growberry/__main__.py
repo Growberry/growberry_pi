@@ -15,6 +15,7 @@ if CAMERA:
     from picamera import PiCamera
 from one_wire_temp import w1therm
 from time import sleep
+import datetime
 
 
 #set up all variables as None
@@ -63,21 +64,66 @@ if CAMERA:
     camera = PiCamera()
 
 
+def thermostat(lights, wind, sensor):
+    while True:
+        night = lights.state  # when the lights.state is 1, the lights are off
+        fanspeed = wind.tach
+        # the max temp I'd expect is 50C, so if you devide by 50, and times 100, you get a percentage
+        percentfan = ((sensor.read[sensor.name]['temp']) / 50) * 100
+        if not night and fanspeed == 0:
+            wind.speed(percentfan)
+        else:
+            wind.speed(percentfan)
+
+
+
+
+
+
+
 sun = Sun(lights,settings,MAXTEMP)
 wind = Wind(13,18)
+
+
 
 try:
     while True:
         settings.update()
         sun.lightcontrol()
-        # sunstatus = sun.status
-        insense_report = in_sense.read
-        data = [insense_report['timestamp'].isoformat(), lights.state, insense_report['temp'],insense_report['humidity'],sun.sinktemps]
+
+        sensor_data = {}
+        for sensor in Sensor.array:
+            sensor_data.update(sensor.read)
+
+        data = {
+            'timestamp': datetime.datetime.utcnow(),  # datetime
+            'sinktemps': sun.sinktemps,  # list of float object
+            'sensors': sensor_data,  # dict {'name':{'timestamp','temp','humidity'}}
+            'lights': lights.state,  # bool
+            'fanspeed': wind.tach  # float
+        }
         sun.sinktemps = []
-        print data
-        d = "%s\t%s\tlights:%s\t%s\t%s\n" % (str(data[0]), str(data[1]), str(data[2]), str(data[3]), '|'.join([str(x) for x in data[4]]))
+        str_sinks = '|'.join([str(x) for x in data['sinktemps']])
+
+        data_str = '\t'.join([str(x) for x in [data['timestamp'].isoformat(),
+                                               data['lights'],
+                                               data['fanspeed'],
+                                               sensor_data['internal']['temp'],
+                                               sensor_data['external']['temp'],
+                                               sensor_data['internal']['humidity'],
+                                               sensor_data['external']['humidity'],
+                                               str_sinks,
+                                               ]])
+
+        # data = [insense_report['timestamp'].isoformat(), lights.state, insense_report['temp'],insense_report['humidity'],sun.sinktemps]
+
+        # print data
+        # d = "%s\t%s\tlights:%s\t%s\t%s\n" % (str(data[0]), str(data[1]), str(data[2]), str(data[3]))
+        thermostat(lights,wind,in_sense)
+
         with open(TEST_OUT,'a') as outfile:
-            outfile.write(d)
+            outfile.write(data_str)
+
         sleep(MEASUREMENT_INT)
 except(KeyboardInterrupt):
     print "growberry canceled manually."
