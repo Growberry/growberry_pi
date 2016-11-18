@@ -61,7 +61,7 @@ class Wind:
 if __name__ == "__main__":
     power = raw_input("Which GPIO pin powers the fan (13)?\n>>>")
     pwm = raw_input("Which pin controls the speed (18)?\n>>>")
-    wind = Wind(power,pwm)
+    wind = Wind(int(power),int(pwm))
     try:
         while True:
             inputspeed = input("Enter fan speed(0.0-100.0): ")
