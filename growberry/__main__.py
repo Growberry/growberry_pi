@@ -69,7 +69,7 @@ def thermostat(lights, wind, sensor):
         night = lights.state  # when the lights.state is 1, the lights are off
         fanspeed = wind.tach
         # the max temp I'd expect is 50C, so if you devide by 50, and times 100, you get a percentage
-        percentfan = ((sensor.read[sensor.name]['temp']) / 50) * 100
+        percentfan = round(((sensor.read[sensor.name]['temp']) / 50) * 100, ndigits=1)
         print percentfan
         if not night and fanspeed == 0:
             wind.speed(percentfan)
@@ -84,7 +84,7 @@ def thermostat(lights, wind, sensor):
 print "setting up lights, and fans"
 sun = Sun(lights,settings,MAXTEMP)
 wind = Wind(13,18)
-hvac = Thread(target=thermostat(lights=lights, wind=wind, sensor=in_sense))
+hvac = Thread(target=thermostat, args=(lights, wind, in_sense))
 hvac.daemon = True
 hvac.start()
 
