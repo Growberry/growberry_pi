@@ -84,7 +84,9 @@ def thermostat(lights, wind, sensor):
 print "setting up lights, and fans"
 sun = Sun(lights,settings,MAXTEMP)
 wind = Wind(13,18)
-
+hvac = Thread(target=thermostat(lights=lights, wind=wind, sensor=in_sense))
+hvac.daemon = True
+hvac.start()
 
 
 try:
@@ -93,9 +95,6 @@ try:
         print "settings updated"
         sun.lightcontrol()
         print "lights updated"
-        hvac = Thread(target= thermostat(lights=lights, wind=wind, sensor=in_sense))
-        hvac.daemon = True
-        hvac.start()
         sensor_data = {}
         for sensor in Sensor.array:
 
