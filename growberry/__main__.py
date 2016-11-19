@@ -80,7 +80,7 @@ def thermostat(lights, wind, sensor):
 
 
 
-
+print "setting up lights, and fans"
 sun = Sun(lights,settings,MAXTEMP)
 wind = Wind(13,18)
 
@@ -89,8 +89,9 @@ wind = Wind(13,18)
 try:
     while True:
         settings.update()
+        print "settings updated"
         sun.lightcontrol()
-
+        print "lights updated"
         sensor_data = {}
         for sensor in Sensor.array:
             sensor_data.update(sensor.read)
@@ -102,6 +103,7 @@ try:
             'lights': lights.state,  # bool
             'fanspeed': wind.tach  # float
         }
+        print data
         sun.sinktemps = []
         str_sinks = '|'.join([str(x) for x in data['sinktemps']])
 
@@ -114,7 +116,7 @@ try:
                                                sensor_data['external']['humidity'],
                                                str_sinks,
                                                ]])
-
+        print data_str
         # data = [insense_report['timestamp'].isoformat(), lights.state, insense_report['temp'],insense_report['humidity'],sun.sinktemps]
 
         # print data
