@@ -70,11 +70,12 @@ def thermostat(lights, wind, sensor):
         fanspeed = wind.tach
         # the max temp I'd expect is 50C, so if you devide by 50, and times 100, you get a percentage
         percentfan = ((sensor.read[sensor.name]['temp']) / 50) * 100
+        print percentfan
         if not night and fanspeed == 0:
             wind.speed(percentfan)
         else:
             wind.speed(percentfan)
-
+        sleep(60)
 
 
 
@@ -92,8 +93,12 @@ try:
         print "settings updated"
         sun.lightcontrol()
         print "lights updated"
+        hvac = Thread(target= thermostat(lights=lights, wind=wind, sensor=in_sense))
+        hvac.daemon = True
+        hvac.start()
         sensor_data = {}
         for sensor in Sensor.array:
+
             sensor_data.update(sensor.read)
 
         data = {
@@ -121,7 +126,7 @@ try:
 
         # print data
         # d = "%s\t%s\tlights:%s\t%s\t%s\n" % (str(data[0]), str(data[1]), str(data[2]), str(data[3]))
-        thermostat(lights,wind,in_sense)
+
 
         with open(TEST_OUT,'a') as outfile:
             outfile.write(data_str)
