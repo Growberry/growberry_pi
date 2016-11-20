@@ -1,7 +1,9 @@
 
-from config import DHT22, RELAYS, SETTINGS_JSON, SETTINGS_URL, BARREL_ID, CAMERA, MAXTEMP,MEASUREMENT_INT, TEST_OUT
+from config import DHT22, RELAYS, SETTINGS_JSON, SETTINGS_URL, BARREL_ID, CAMERA, MAXTEMP,MEASUREMENT_INT, TEST_OUT, DATAPOST_URL
 import RPi.GPIO as GPIO
 from threading import Thread
+import json
+import requests
 
 from settings import Settings
 from sun import Sun
@@ -71,10 +73,10 @@ def thermostat(lights, wind, sensor):
         # the max temp I'd expect is 50C, so if you devide by 50, and times 100, you get a percentage
         percentfan = round(((sensor.read[sensor.name]['temp']) / 50) * 100, ndigits=1)
         print percentfan
-        if not night and fanspeed == 0:
+        if not night:
             wind.speed(percentfan)
         else:
-            wind.speed(percentfan)
+            wind.speed(0)
         sleep(60)
 
 
@@ -101,17 +103,24 @@ try:
             sensor_data.update(sensor.read)
 
         data = {
-            'timestamp': datetime.datetime.utcnow(),  # datetime
+            'timestamp': datetime.datetime.utcnow().isoformat(),  # datetime
             'sinktemps': sun.sinktemps,  # list of float object
             'sensors': sensor_data,  # dict {'name':{'timestamp','temp','humidity'}}
             'lights': lights.state,  # bool
             'fanspeed': wind.tach  # float
         }
-        print data
+        url = DATAPOST_URL + '/' + str(BARREL_ID)
+        headers = {'Content-Type': 'application/json', }
+        data = json.dumps(testdata)
+        r = requests.post(url, headers=headers, data=data)  # data
+        returned_headers = str(r.headers)
+        print 'returned: ', r, 'of type: ', type(r)
+        print '\nthe text of which is: ', r.text
+        # print data
         sun.sinktemps = []
         str_sinks = '|'.join([str(x) for x in data['sinktemps']])
 
-        data_str = '\t'.join([str(x) for x in [data['timestamp'].isoformat(),
+        data_str = '\t'.join([str(x) for x in [data['timestamp'],
                                                data['lights'],
                                                data['fanspeed'],
                                                sensor_data['internal']['temp'],
@@ -129,7 +138,7 @@ try:
 
         with open(TEST_OUT,'a') as outfile:
             outfile.write(data_str)
-
+            outfile.write('\n')
         sleep(MEASUREMENT_INT)
 except(KeyboardInterrupt):
     print "growberry canceled manually."

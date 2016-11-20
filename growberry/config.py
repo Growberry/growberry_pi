@@ -19,6 +19,9 @@ SETTINGS_URL = 'http://ec2-54-244-205-179.us-west-2.compute.amazonaws.com/get_se
 
 SETTINGS_JSON = os.path.join(basedir,'settings.json')
 
+# data posting API
+DATAPOST_URL = 'http://ec2-54-244-205-179.us-west-2.compute.amazonaws.com/reading/'
+
 # this will be unique to each barrel.
 BARREL_ID = 4
 
