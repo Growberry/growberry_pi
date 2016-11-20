@@ -6,7 +6,7 @@ import datetime
 
 # url = 'http://127.0.0.1:5000/reading/3'
 # url = 'http://192.168.0.42:8000/reading/3'
-url = 'http://ec2-54-244-205-179.us-west-2.compute.amazonaws.com/reading/'
+url = 'http://ec2-54-244-205-179.us-west-2.compute.amazonaws.com/reading/4'
 
 f = "post.log"
 headers = {'Content-Type': 'application/json',}
@@ -33,17 +33,19 @@ while True:
     # these are the fields that are needed for the Reading database table
     # dd = {'internal_temp': str(temp), 'internal_humidity': str(humidity), 'pic_dir': '/User/pi/pictures/1.jpg'}
     data = json.dumps(testdata)
+
     r = requests.post(url, headers=headers, data=data)  #data
     returned_headers = str(r.headers)
     print 'returned: ',r, 'of type: ', type(r)
-    print '\nthe tex of which is: ', r.text
+    print '\nthe tex of which is: ', r.text, '\n'
+    print data
 
     # with open(f, 'a') as outfile:
     #     outfile.write(returned_headers)
     #     outfile.write("\n")
     #make the temps and humidity fluctuate:
 
-    temp += random.uniform(-2,2)
-    humidity += random.uniform(-5,5)
+    # temp += random.uniform(-2,2)
+    # humidity += random.uniform(-5,5)
     #attempt to call the api every half hour
     time.sleep(1800)
