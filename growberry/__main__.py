@@ -110,9 +110,11 @@ try:
             'fanspeed': wind.tach,  # float
             'pic_dir': '/tmp/placeholder'  # replace this with an actual directory when pictures are working
         }
-        url = DATAPOST_URL + '/' + str(BARREL_ID)
+        url = DATAPOST_URL + str(BARREL_ID)
         headers = {'Content-Type': 'application/json', }
+
         data_json = json.dumps(data)
+        print data_json
         r = requests.post(url, headers=headers, data=data_json)  # data
         returned_headers = str(r.headers)
         print 'returned: ', r, 'of type: ', type(r)
@@ -120,7 +122,6 @@ try:
         # print data
         sun.sinktemps = []
         str_sinks = '|'.join([str(x) for x in data['sinktemps']])
-        str_sinks = '|'.join([str(x) for x in request.json['sinktemps']])
         data_str = '\t'.join([str(x) for x in [data['timestamp'],
                                                data['lights'],
                                                data['fanspeed'],

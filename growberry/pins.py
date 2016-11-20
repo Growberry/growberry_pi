@@ -92,4 +92,4 @@ class Sensor:
             time.sleep(2)
             humidity, temp = Adafruit_DHT.read(self.sens_type, self.pin)
 
-        return {"%s"%self.name: {"temp": round(float(temp),1), "humidity": round(float(humidity),1), "timestamp": datetime.datetime.utcnow()}}
+        return {"%s"%self.name: {"temp": round(float(temp),1), "humidity": round(float(humidity),1), "timestamp": datetime.datetime.utcnow().isoformat()}}
