@@ -89,7 +89,8 @@ wind = Wind(13,18)
 hvac = Thread(target=thermostat, args=(lights, wind, in_sense))
 hvac.daemon = True
 hvac.start()
-
+print "waiting for first heatsink reading..."
+sleep(30)
 
 try:
     while True:
@@ -101,7 +102,6 @@ try:
         for sensor in Sensor.array:
 
             sensor_data.update(sensor.read)
-
         data = {
             'timestamp': datetime.datetime.utcnow().isoformat(),  # datetime
             'sinktemps': sun.sinktemps,  # list of float object
@@ -110,6 +110,7 @@ try:
             'fanspeed': wind.tach,  # float
             'pic_dir': '/tmp/placeholder'  # replace this with an actual directory when pictures are working
         }
+
         url = DATAPOST_URL + str(BARREL_ID)
         headers = {'Content-Type': 'application/json', }
 
@@ -121,15 +122,16 @@ try:
         print '\nthe text of which is: ', r.text
         # print data
         sun.sinktemps = []
-        str_sinks = '|'.join([str(x) for x in data['sinktemps']])
+        #str_sinks = '|'.join([str(x) for x in data['sinktemps']])
+        # FIX THIS SO IT CAN MAKE A STRING DYNAMICALLY, and print the HEADERS
         data_str = '\t'.join([str(x) for x in [data['timestamp'],
                                                data['lights'],
                                                data['fanspeed'],
                                                sensor_data['internal']['temp'],
-                                               sensor_data['external']['temp'],
+        #                                       sensor_data['external']['temp'],
                                                sensor_data['internal']['humidity'],
-                                               sensor_data['external']['humidity'],
-                                               str_sinks,
+        #                                       sensor_data['external']['humidity'],
+        #                                       str_sinks,
                                                ]])
         print data_str
         # data = [insense_report['timestamp'].isoformat(), lights.state, insense_report['temp'],insense_report['humidity'],sun.sinktemps]

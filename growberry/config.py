@@ -6,7 +6,7 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 # if you add others, you need to set them up in __init__.py
 DHT22 = [ #(pin number, 'name')
     (17, 'internal'),
-    (22,'external')
+#    (22,'external')
 ]
 
 # a list containing all relays.  The names must be 'lights' and 'fans'
@@ -24,7 +24,7 @@ DATAPOST_URL = 'http://ec2-54-244-205-179.us-west-2.compute.amazonaws.com/readin
 
 
 # this will be unique to each barrel.
-BARREL_ID = 4
+BARREL_ID = 5
 
 # able to toggle camera on/off
 CAMERA = False
@@ -33,7 +33,7 @@ CAMERA = False
 MAXTEMP = 45
 
 # Measurement interval (in seconds)
-MEASUREMENT_INT = 600
+MEASUREMENT_INT = 1800
 
 # a test file to log to while testing
 TEST_OUT = 'testout.txt'
