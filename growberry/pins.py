@@ -27,16 +27,19 @@ class Relay:
 
     @property
     def state(self):
+        """ 0 is on, 1 is off """
         self._state = GPIO.input(self.pin)
         return self._state
 
     def on(self):
-        """switches GPIO pin to LOW/0 - in open state relays, this turns the relay ON."""
-        GPIO.output(self.pin, GPIO.LOW)
+        """switches GPIO pin to LOW/0 - in open state relays, this turns the relay ON. (does nothing if relay already on (0))"""
+        if self.state:
+            GPIO.output(self.pin, GPIO.LOW)
 
     def off(self):
-        """ switches GPIO pin to HIGH/1 - in open state relays, this turns the relay OFF."""
-        GPIO.output(self.pin, GPIO.HIGH)
+        """ switches GPIO pin to HIGH/1 - in open state relays, this turns the relay OFF.(does nothing if relay already off (1))"""
+        if not self.state:
+            GPIO.output(self.pin, GPIO.HIGH)
 
     def blink(self, *args):
         """this should not be used for actual relays, just LEDs"""

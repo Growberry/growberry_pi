@@ -37,7 +37,7 @@ class Settings(object):
                 self.startdate = datetime.strptime(self.settings.get('startdate', '042016'),'%m%d%y')
                 self.sunrise = datetime.strptime(self.settings['sunrise'],'%H%M').time()
                 self.daylength = timedelta(hours=float(self.settings['daylength']))
-                self.pic_dir = self.settings['pic_dir']
+                self.pic_dir = self.settings.get('pic_dir', '/fake/pic_dir/'
                 self.settemp = self.settings['settemp']
 
 if __name__ == '__main__':
