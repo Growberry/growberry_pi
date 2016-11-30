@@ -37,3 +37,6 @@ MEASUREMENT_INT = 1800
 
 # a test file to log to while testing
 TEST_OUT = 'testout.txt'
+
+# location where picture is writen before upload
+PHOTO_LOC = 'testpic.jpg'

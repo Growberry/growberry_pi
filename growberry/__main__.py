@@ -1,9 +1,10 @@
 
-from config import DHT22, RELAYS, SETTINGS_JSON, SETTINGS_URL, BARREL_ID, CAMERA, MAXTEMP,MEASUREMENT_INT, TEST_OUT, DATAPOST_URL
+from config import DHT22, RELAYS, SETTINGS_JSON, SETTINGS_URL, BARREL_ID, CAMERA, MAXTEMP,MEASUREMENT_INT, TEST_OUT, DATAPOST_URL, PHOTO_LOC
 import RPi.GPIO as GPIO
 from threading import Thread
 import json
 import requests
+from picamera import PiCamera
 
 from settings import Settings
 from sun import Sun
@@ -79,9 +80,29 @@ def thermostat(lights, wind, sensor):
             wind.speed(0)
         sleep(60)
 
+def data_capture(url):
+    sensor_data = {}
+    for sensor in Sensor.array:
+        sensor_data.update(sensor.read)
+    data = {
+        'timestamp': datetime.datetime.utcnow().isoformat(),  # datetime
+        'sinktemps': sun.sinktemps,  # list of float object
+        'sensors': sensor_data,  # dict {'name':{'timestamp','temp','humidity'}}
+        'lights': lights.state,  # bool
+        'fanspeed': wind.tach,  # float
+        'pic_dir': '/tmp/placeholder'  # replace this with an actual directory when pictures are working
+            }
 
+    files = {
+        'metadata': ('metadata.json', json.dumps(data), 'application/json'),
+            }
 
+    if camera:
+        camera.capture(PHOTO_LOC)
+        files.update({'photo': (PHOTO_LOC, open(PHOTO_LOC, 'rb'), 'image/jpg')})
 
+    r = requests.post(url, files=files)
+    return r
 
 print "setting up lights, and fans"
 sun = Sun(lights,settings,MAXTEMP)
@@ -98,52 +119,40 @@ try:
         print "settings updated"
         sun.lightcontrol()
         print "lights updated"
-        sensor_data = {}
-        for sensor in Sensor.array:
-
-            sensor_data.update(sensor.read)
-        data = {
-            'timestamp': datetime.datetime.utcnow().isoformat(),  # datetime
-            'sinktemps': sun.sinktemps,  # list of float object
-            'sensors': sensor_data,  # dict {'name':{'timestamp','temp','humidity'}}
-            'lights': lights.state,  # bool
-            'fanspeed': wind.tach,  # float
-            'pic_dir': '/tmp/placeholder'  # replace this with an actual directory when pictures are working
-        }
 
         url = DATAPOST_URL + str(BARREL_ID)
-        headers = {'Content-Type': 'application/json', }
+        data_capture(url)
 
-        data_json = json.dumps(data)
-        print data_json
-        r = requests.post(url, headers=headers, data=data_json)  # data
-        returned_headers = str(r.headers)
-        print 'returned: ', r, 'of type: ', type(r)
-        print '\nthe text of which is: ', r.text
-        # print data
-        sun.sinktemps = []
-        #str_sinks = '|'.join([str(x) for x in data['sinktemps']])
-        # FIX THIS SO IT CAN MAKE A STRING DYNAMICALLY, and print the HEADERS
-        data_str = '\t'.join([str(x) for x in [data['timestamp'],
-                                               data['lights'],
-                                               data['fanspeed'],
-                                               sensor_data['internal']['temp'],
-        #                                       sensor_data['external']['temp'],
-                                               sensor_data['internal']['humidity'],
-        #                                       sensor_data['external']['humidity'],
-        #                                       str_sinks,
-                                               ]])
-        print data_str
+        # data_json = json.dumps(data)
+        # print data_json
+        # r = requests.post(url, headers=headers, data=data_json)  # data
+        # returned_headers = str(r.headers)
+        # print 'returned: ', r, 'of type: ', type(r)
+        # print '\nthe text of which is: ', r.text
+        # # print data
+        # sun.sinktemps = []
+        # #str_sinks = '|'.join([str(x) for x in data['sinktemps']])
+        # # FIX THIS SO IT CAN MAKE A STRING DYNAMICALLY, and print the HEADERS
+        # data_str = '\t'.join([str(x) for x in [data['timestamp'],
+        #                                        data['lights'],
+        #                                        data['fanspeed'],
+        #                                        sensor_data['internal']['temp'],
+        # #                                       sensor_data['external']['temp'],
+        #                                        sensor_data['internal']['humidity'],
+        # #                                       sensor_data['external']['humidity'],
+        # #                                       str_sinks,
+        #                                        ]])
+        # print data_str
         # data = [insense_report['timestamp'].isoformat(), lights.state, insense_report['temp'],insense_report['humidity'],sun.sinktemps]
 
         # print data
         # d = "%s\t%s\tlights:%s\t%s\t%s\n" % (str(data[0]), str(data[1]), str(data[2]), str(data[3]))
 
 
-        with open(TEST_OUT,'a') as outfile:
-            outfile.write(data_str)
-            outfile.write('\n')
-        sleep(MEASUREMENT_INT)
+        # with open(TEST_OUT,'a') as outfile:
+        #     outfile.write(data_str)
+        #     outfile.write('\n')
+        # sleep(MEASUREMENT_INT)
 except(KeyboardInterrupt):
     print "growberry canceled manually."
 
