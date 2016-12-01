@@ -4,11 +4,11 @@ import json
 import random
 import datetime
 
-# url = 'http://127.0.0.1:5000/reading/4'
-# url = 'http://192.168.0.42:8000/reading/3'
-# url = 'http://ec2-54-244-205-179.us-west-2.compute.amazonaws.com/reading/4'
 
-url = 'http://127.0.0.1:5000/multi/1'
+url = 'http://127.0.0.1:5000/multi/4'
+# url = 'http://192.168.0.42:8000/multi/2'
+# url = 'http://ec2-54-244-205-179.us-west-2.compute.amazonaws.com/multi/4'
+
 
 
 
@@ -29,7 +29,7 @@ testdata = {'fanspeed': 29.6,
             'timestamp': testtimestamp.isoformat(),
             'lights': 1,
             'pic_dir':'fake',
-            'sinktemps': emptytemps,
+            'sinktemps': testsinktempts,
             'sensors': {
                         'internal': {
                             'timestamp': datetime.datetime(2016, 11, 19, 7, 26, 34, 715252).isoformat(),
@@ -52,8 +52,8 @@ testdata = {'fanspeed': 29.6,
 
 
 files = {
-    'metadata':('metadata.json', json.dumps(testdata), 'application/json'),
-    'photo':(photopath, open(photopath,'rb'), 'image/png')
+    'metadata':('metadata.json', json.dumps(testdata), 'application/json')
+    ,'photo':(photopath, open(photopath,'rb'), 'image/jpg')
 }
 
 r = requests.post(url, files=files)
@@ -64,6 +64,7 @@ r = requests.post(url, files=files)
 
 print r.content
 
+print 'done'
 
 
 
