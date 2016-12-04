@@ -5,15 +5,15 @@ import random
 import datetime
 
 
-url = 'http://127.0.0.1:5000/multi/4'
-# url = 'http://192.168.0.42:8000/multi/2'
+# url = 'http://127.0.0.1:5000/multi/4'
+url = 'http://192.168.0.42:8000/multi/2'
 # url = 'http://ec2-54-244-205-179.us-west-2.compute.amazonaws.com/multi/4'
 
 
 
 
 
-photopath = '/Users/austinmeier/testpic.jpg'
+photopath = '/home/nimrod337/growberry_pi/testpic123.jpg'
 
 testtimestamp = datetime.datetime.utcnow()
 
