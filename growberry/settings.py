@@ -2,7 +2,7 @@ import json
 import requests
 from datetime import datetime, timedelta 
 import logging
-#logger = logging.getLogger('__name__')
+logger = logging.getLogger(__name__)
 class Settings(object):
     """class to hold all settings. Can get/update settings. Returns settings in correct object way"""
     def __init__(self,base_url,file_loc, grow_id):

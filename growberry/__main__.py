@@ -46,7 +46,7 @@ for dht22_sensor in DHT22:
         in_sense = Sensor(dht22_sensor[0], Adafruit_DHT.DHT22, dht22_sensor[1])
     elif dht22_sensor[1] == 'external':
         ext_sense = Sensor(dht22_sensor[0], Adafruit_DHT.DHT22, dht22_sensor[1])
-str_sensor = ','.join(Sensor.array)
+str_sensor = ','.join([str(x) for x in Sensor.array])
 logger.info("DHT22 sensors configured: %s" %str_sensor)
 
 
@@ -57,7 +57,7 @@ for relay in RELAYS:
         lights = Relay(relay[0],relay[1])
     elif relay[1] == 'fans':
         fans = Relay(relay[0], relay[1])
-str_relays = ','.join(Relay.dictionary.items())
+str_relays = ','.join([str(x) for x in Relay.dictionary.items()])
 logger.info('Relays configured: %s' %str_relays)
 
 
@@ -179,13 +179,8 @@ try:
         # with open(TEST_OUT,'a') as outfile:
         #     outfile.write(data_str)
         #     outfile.write('\n')
-<<<<<<< HEAD
 
         sleep(MEASUREMENT_INT)
-
-=======
-        sleep(MEASUREMENT_INT)
->>>>>>> 21eb21315ad6b79a05f2fb6b213b781f95d3f701
 except(KeyboardInterrupt):
     print "growberry canceled manually."
 

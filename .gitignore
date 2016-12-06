@@ -2,3 +2,4 @@
 growberry/__pycache__/
 *.pyc
 growberry/settings.json
+*.log
