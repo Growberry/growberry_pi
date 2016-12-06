@@ -6,7 +6,7 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 # if you add others, you need to set them up in __init__.py
 DHT22 = [ #(pin number, 'name')
     (17, 'internal'),
-#    (22,'external')
+    (22,'external')
 ]
 
 # a list containing all relays.  The names must be 'lights' and 'fans'
@@ -15,19 +15,20 @@ RELAYS = [ # (pin number, 'name')
     # ,(13, 'fans')
 ]
 
-SETTINGS_URL = 'http://ec2-54-244-205-179.us-west-2.compute.amazonaws.com/get_settings/'
+SETTINGS_URL = 'http://192.168.0.42:8000/get_settings/'
+#SETTINGS_URL = 'http://ec2-54-244-205-179.us-west-2.compute.amazonaws.com/get_settings/'
 
 SETTINGS_JSON = os.path.join(basedir,'settings.json')
 
 # data posting API
-DATAPOST_URL = 'http://ec2-54-244-205-179.us-west-2.compute.amazonaws.com/reading/'
-
+#DATAPOST_URL = 'http://ec2-54-244-205-179.us-west-2.compute.amazonaws.com/reading/'
+DATAPOST_URL = 'http://192.168.0.42:8000/multi/'
 
 # this will be unique to each barrel.
-BARREL_ID = 5
+BARREL_ID = 3
 
 # able to toggle camera on/off
-CAMERA = False
+CAMERA = True
 
 # Maximum temp for heatsinks before safetycheck shuts the lights off
 MAXTEMP = 45
@@ -39,4 +40,4 @@ MEASUREMENT_INT = 1800
 TEST_OUT = 'testout.txt'
 
 # location where picture is writen before upload
-PHOTO_LOC = 'testpic.jpg'
+PHOTO_LOC = 'testpic123.jpg'

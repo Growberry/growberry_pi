@@ -97,7 +97,28 @@ def data_capture(url):
         'fanspeed': wind.tach,  # float
         'pic_dir': '/tmp/placeholder'  # replace this with an actual directory when pictures are working
             }
+    testsinktempts = [16.937, 17.437, 16.687, 17.187, 16.687, 17.437]
+    testtimestamp = datetime.datetime.utcnow()
 
+    testdata = {'fanspeed': 29.6,
+            'timestamp': testtimestamp.isoformat(),
+            'lights': 1,
+            'pic_dir':'fake',
+            'sinktemps': testsinktempts,
+            'sensors': {
+                        'internal': {
+                            'timestamp': datetime.datetime(2016, 11, 19, 7, 26, 34, 715252).isoformat(),
+						    'temp': 14.8,
+						    'humidity': 59.7
+						            },
+				        'external': {
+                            'timestamp': datetime.datetime(2016, 11, 19, 7, 26, 35, 240868).isoformat(),
+						    'temp': 17.2,
+						    'humidity': 48.9
+						            }
+				        },
+
+            }
     files = {
         'metadata': ('metadata.json', json.dumps(data), 'application/json'),
             }
@@ -105,7 +126,7 @@ def data_capture(url):
     if camera:
         camera.capture(PHOTO_LOC)
         files.update({'photo': (PHOTO_LOC, open(PHOTO_LOC, 'rb'), 'image/jpg')})
-
+        print 'image taken.  Files for upload: ', files
     r = requests.post(url, files=files)
     return r
 
@@ -126,8 +147,9 @@ try:
         print "lights updated"
 
         url = DATAPOST_URL + str(BARREL_ID)
-        data_capture(url)
-
+        print 'the URL where the data is headed: \n\n',url,'\n\n'
+        response = data_capture(url)
+        print response
         # data_json = json.dumps(data)
         # print data_json
         # r = requests.post(url, headers=headers, data=data_json)  # data
@@ -157,9 +179,13 @@ try:
         # with open(TEST_OUT,'a') as outfile:
         #     outfile.write(data_str)
         #     outfile.write('\n')
+<<<<<<< HEAD
 
         sleep(MEASUREMENT_INT)
 
+=======
+        sleep(MEASUREMENT_INT)
+>>>>>>> 21eb21315ad6b79a05f2fb6b213b781f95d3f701
 except(KeyboardInterrupt):
     print "growberry canceled manually."
 
