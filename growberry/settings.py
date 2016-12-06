@@ -1,8 +1,8 @@
 import json
 import requests
 from datetime import datetime, timedelta 
-
-
+import logging
+#logger = logging.getLogger('__name__')
 class Settings(object):
     """class to hold all settings. Can get/update settings. Returns settings in correct object way"""
     def __init__(self,base_url,file_loc, grow_id):
@@ -16,7 +16,7 @@ class Settings(object):
         self.daylength = None
         self.pic_dir = None
         self.settemp = None
-
+        logger.debug('Settings instance created.')
 
     def update(self):
         try:
@@ -28,9 +28,11 @@ class Settings(object):
             settings_json['error'] = False
             with open(self.file_loc,'w') as f:
                 json.dump(settings_json,f)
+            logger.info('Settings retrieved from growberry_web')
         except Exception,e:
             error = {'online':False, 'error':e}
             self.settings.update(error)
+            logger.warning('Settings could not be obtained from growberry_web.')
         finally:
             with open(self.file_loc, 'r') as infile:
                 self.settings.update(json.load(infile))

@@ -5,6 +5,9 @@ from threading import Thread
 import json
 import requests
 from picamera import PiCamera
+import logging
+
+
 
 from settings import Settings
 from sun import Sun
@@ -32,34 +35,36 @@ fans = None
 #settings
 settings = None
 
+logger = logging.getLogger('__name__')
+logging.basicConfig(filename='log_growberry.log',level=logging.DEBUG)
+format = "%(asctime)s [%(levelname)s] %(message)s"
 
 
 """import all the configured DH22 sensors, and set them up with names"""
-
-
 for dht22_sensor in DHT22:
-    # do I need to GPIO.setup() for DH22???
     if dht22_sensor[1] == 'internal':
         in_sense = Sensor(dht22_sensor[0], Adafruit_DHT.DHT22, dht22_sensor[1])
     elif dht22_sensor[1] == 'external':
         ext_sense = Sensor(dht22_sensor[0], Adafruit_DHT.DHT22, dht22_sensor[1])
+str_sensor = ','.join(Sensor.array)
+logger.info("DHT22 sensors configured: %s" %str_sensor)
 
 
 """import all the relays, and give them names"""
-
 for relay in RELAYS:
-    # print type(relay)
-    # print relay
     GPIO.setup(relay[0], GPIO.OUT, initial=1)
     if relay[1] == 'lights':
         lights = Relay(relay[0],relay[1])
     elif relay[1] == 'fans':
         fans = Relay(relay[0], relay[1])
+str_relays = ','.join(Relay.dictionary.items())
+logger.info('Relays configured: %s' %str_relays)
+
 
 """set up the Settings object that will handle all the settings"""
-
 settings = Settings(SETTINGS_URL,SETTINGS_JSON,BARREL_ID)
 settings.update()
+
 
 
 """set up camera"""
@@ -152,7 +157,9 @@ try:
         # with open(TEST_OUT,'a') as outfile:
         #     outfile.write(data_str)
         #     outfile.write('\n')
-        # sleep(MEASUREMENT_INT)
+
+        sleep(MEASUREMENT_INT)
+
 except(KeyboardInterrupt):
     print "growberry canceled manually."
 
