@@ -35,9 +35,10 @@ fans = None
 #settings
 settings = None
 
-logger = logging.getLogger('__name__')
-logging.basicConfig(filename='log_growberry.log',level=logging.DEBUG)
-format = "%(asctime)s [%(levelname)s] %(message)s"
+logger = logging.getLogger(__name__)
+logging_format = "[%(levelname)s] %(asctime)s %(message)s"
+logging.basicConfig(filename='log_growberry.log',format=logging_format, level=logging.DEBUG)
+
 
 
 """import all the configured DH22 sensors, and set them up with names"""
@@ -70,6 +71,7 @@ settings.update()
 """set up camera"""
 if CAMERA:
     camera = PiCamera()
+    logger.info('camera configured.')
 
 
 def thermostat(lights, wind, sensor):
@@ -78,11 +80,12 @@ def thermostat(lights, wind, sensor):
         fanspeed = wind.tach
         # the max temp I'd expect is 50C, so if you devide by 50, and times 100, you get a percentage
         percentfan = round(((sensor.read[sensor.name]['temp']) / 50) * 100, ndigits=1)
-        print percentfan
         if not night:
             wind.speed(percentfan)
+            logger.debug('fans ON and set to speed %s' %percentfan)
         else:
             wind.speed(0)
+            logger.debug('fans OFF')
         sleep(60)
 
 def data_capture(url):
@@ -97,28 +100,8 @@ def data_capture(url):
         'fanspeed': wind.tach,  # float
         'pic_dir': '/tmp/placeholder'  # replace this with an actual directory when pictures are working
             }
-    testsinktempts = [16.937, 17.437, 16.687, 17.187, 16.687, 17.437]
-    testtimestamp = datetime.datetime.utcnow()
 
-    testdata = {'fanspeed': 29.6,
-            'timestamp': testtimestamp.isoformat(),
-            'lights': 1,
-            'pic_dir':'fake',
-            'sinktemps': testsinktempts,
-            'sensors': {
-                        'internal': {
-                            'timestamp': datetime.datetime(2016, 11, 19, 7, 26, 34, 715252).isoformat(),
-						    'temp': 14.8,
-						    'humidity': 59.7
-						            },
-				        'external': {
-                            'timestamp': datetime.datetime(2016, 11, 19, 7, 26, 35, 240868).isoformat(),
-						    'temp': 17.2,
-						    'humidity': 48.9
-						            }
-				        },
 
-            }
     files = {
         'metadata': ('metadata.json', json.dumps(data), 'application/json'),
             }
@@ -126,30 +109,37 @@ def data_capture(url):
     if camera:
         camera.capture(PHOTO_LOC)
         files.update({'photo': (PHOTO_LOC, open(PHOTO_LOC, 'rb'), 'image/jpg')})
-        print 'image taken.  Files for upload: ', files
+        logger.debug('Files for upload: %s' %json.dumps(files))
     r = requests.post(url, files=files)
     return r
 
-print "setting up lights, and fans"
+# setting up lights
 sun = Sun(lights,settings,MAXTEMP)
+lighting = Thread(target=sun.lightcontrol)
+lighting.daemon = True
+lighting.start()
+
+# setting up fans
 wind = Wind(13,18)
 hvac = Thread(target=thermostat, args=(lights, wind, in_sense))
 hvac.daemon = True
 hvac.start()
-print "waiting for first heatsink reading..."
+
+
+# print "waiting for first heatsink reading..."
 sleep(30)
 
 try:
     while True:
         settings.update()
-        print "settings updated"
-        sun.lightcontrol()
-        print "lights updated"
+        logger.debug('settings updated')
+        # sun.lightcontrol()
+        # print "lights updated"
 
         url = DATAPOST_URL + str(BARREL_ID)
-        print 'the URL where the data is headed: \n\n',url,'\n\n'
+        logger.debug('the URL where the data is headed: %s' % url)
         response = data_capture(url)
-        print response
+        logger.debug(response.text)
         # data_json = json.dumps(data)
         # print data_json
         # r = requests.post(url, headers=headers, data=data_json)  # data

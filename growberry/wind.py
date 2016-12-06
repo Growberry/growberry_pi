@@ -1,6 +1,10 @@
 import RPi.GPIO as GPIO
+import logging
+
 GPIO.setmode(GPIO.BCM)  # for using the names of the pins
 GPIO.setwarnings(True)  # set to false if the warnings bother you, helps troubleshooting
+
+logger = logging.getLogger(__name__)
 
 class Wind:
     """This will house all of functions used to control the fans"""
@@ -11,7 +15,7 @@ class Wind:
         self.pwm = GPIO.PWM(speedpin, 25000) # 25 Kilohertz is inaudible to human ears
         self.pwm.start(speed)
         self.tach = speed
-        # self.lights = lights
+        logger.debug('fans initiated')
 
 
     def speed(self, value):
@@ -22,18 +26,22 @@ class Wind:
             GPIO.output(self.powerpin, GPIO.LOW) # power on
             # self.on()
             self.tach = value
+            logger.debug('fans set to speed: %s' %str(self.tach))
             # print "ON"
         elif value == 0:
             # self.off()
             GPIO.output(self.powerpin, GPIO.HIGH)  # power off
             self.tach = 0
+            logger.debug('fans set to speed: %s' % str(self.tach))
             # print "OFF"
             # if self.lights.state:  #lights.state = 1 means lights are off
             #     GPIO.output(self.powerpin, GPIO.HIGH)  # power off
             # else:
             #     raise ValueError("cannot set speed to 0 when lights are on")
         else:
+            logger.critical('non-valid fan speed submitted.')
             raise ValueError("Speed must be between 0.0-100.0")
+
 
     # def on(self):
     #     """switches GPIO pin to LOW/0 - in open state relays, this turns the relay ON."""

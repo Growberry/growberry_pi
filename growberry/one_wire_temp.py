@@ -9,8 +9,9 @@ from datetime import datetime
 import os
 from threading import Thread
 import time
+import logging
 
-
+logger = logging.getLogger(__name__)
 
 class w1therm:
     """finds all 1-wire sensors currently plugged into the Pi.  Has methods to read sensors, and return a dictionary with each sensor's reading"""
@@ -18,7 +19,7 @@ class w1therm:
         self.sensorroot = '/sys/bus/w1/devices/'
         #find all sensors
         self.sensors = open(self.sensorroot + 'w1_bus_master1/w1_master_slaves').read().splitlines()
-
+        logger.info('%s w1therm sensors detected: %s' %(len(self.sensors),','.join(self.sensors)))
 
 
     def Read(self,id):

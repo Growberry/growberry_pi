@@ -2,6 +2,9 @@ import datetime
 from one_wire_temp import w1therm
 from threading import Thread
 from time import sleep
+import logging
+
+logger = logging.getLogger(__name__)
 
 class Sun:
     """the sun class handles all tasks related to turning the lights on and off"""
@@ -16,6 +19,7 @@ class Sun:
         t1 = Thread(target=self.safetyvalve, args=(self.lights,self.mt))
         t1.daemon = True
         t1.start()
+        logger.info('Let there be light!')
 
 
     def safetyvalve(self, lights, mt):
@@ -32,27 +36,23 @@ class Sun:
                     if tempfloat > mt:
                         lights.off()
                         # somehow notify the user.. email maybe?
-                        # also should log these alerts, not just print
-                        print 'ALERT: heatsink temp exceeded set value(%s).' % str(mt)
-                        print 'current temps: ', temps, "Temp that caused the problem: ", temp, str(temps[temp])
+                        logger.warning('ALERT: heatsink temp exceeded set value(%s).' % str(mt))
+                        logger.warning('current temps: ', temps, "Temp that caused the problem: ", temp, str(temps[temp]))
             sleep(10)
 
 
     def lightcontrol(self):
         """see if the lights should be on/off, and make them that way"""
-        sunrise = datetime.datetime.combine(datetime.date.today(), self.settings.sunrise)
-        sunset = sunrise + self.settings.daylength
-        # testing print statement:
-        # print "rise: ", sunrise
-        # print "set", sunset
-        # print datetime.datetime.now()
-        if sunrise <= datetime.datetime.now() <= sunset:
-            self.lights.on()
-            # print "\n<turning lights on>\n"
-        else:
-            self.lights.off()
-            # print "\n<turning lights off>\n"
-
+        while self:
+            sunrise = datetime.datetime.combine(datetime.date.today(), self.settings.sunrise)
+            sunset = sunrise + self.settings.daylength
+            if sunrise <= datetime.datetime.now() <= sunset:
+                self.lights.on()
+                logger.debug('it is after sunrise (%s) and before sunset (%s), lights ON.'%(sunrise,sunset))
+            else:
+                self.lights.off()
+                logger.debug('it is after sunset (%s), lights OFF.' % sunset)
+        sleep(60)
 
         # return lenth of time lights have been on
     @property
