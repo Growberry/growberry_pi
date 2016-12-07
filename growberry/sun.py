@@ -48,11 +48,11 @@ class Sun:
             sunset = sunrise + self.settings.daylength
             if sunrise <= datetime.datetime.now() <= sunset:
                 self.lights.on()
-                logger.debug('it is after sunrise (%s) and before sunset (%s), lights ON.'%(sunrise,sunset))
+                logger.debug(' lights ON.  It is after sunrise (%s) and before sunset (%s).'%(sunrise,sunset))
             else:
                 self.lights.off()
-                logger.debug('it is after sunset (%s), lights OFF.' % sunset)
-        sleep(60)
+                logger.debug('lights OFF.  It is after sunset (%s).' % sunset)
+            sleep(60)
 
         # return lenth of time lights have been on
     @property
