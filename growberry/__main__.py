@@ -110,7 +110,7 @@ def data_capture(url):
     if camera:
         camera.capture(PHOTO_LOC)
         files.update({'photo': (PHOTO_LOC, open(PHOTO_LOC, 'rb'), 'image/jpg')})
-    files_json = json.dumps(files)
+    files_json = ','.join(str(x) for x in files.keys()) 
     logger.debug('Files for upload: %s' % files_json)
     r = requests.post(url, files=files)
     logger.debug('request made')
