@@ -36,7 +36,7 @@ fans = None
 settings = None
 
 logger = logging.getLogger(__name__)
-logging_format = "[%(levelname)s] %(asctime)s %(message)s"
+logging_format = "[%(levelname)s] %(name)s %(asctime)s %(message)s"
 logging.basicConfig(filename='log_growberry.log',format=logging_format, level=logging.DEBUG)
 
 
@@ -100,7 +100,8 @@ def data_capture(url):
         'fanspeed': wind.tach,  # float
         'pic_dir': '/tmp/placeholder'  # replace this with an actual directory when pictures are working
             }
-
+    sun.sinktemps = []
+    logger.debug('sinktemp list reset.')
 
     files = {
         'metadata': ('metadata.json', json.dumps(data), 'application/json'),
@@ -109,8 +110,10 @@ def data_capture(url):
     if camera:
         camera.capture(PHOTO_LOC)
         files.update({'photo': (PHOTO_LOC, open(PHOTO_LOC, 'rb'), 'image/jpg')})
-        logger.debug('Files for upload: %s' %json.dumps(files))
+    files_json = json.dumps(files)
+    logger.debug('Files for upload: %s' % files_json)
     r = requests.post(url, files=files)
+    logger.debug('request made')
     return r
 
 # setting up lights
@@ -172,8 +175,9 @@ try:
 
         sleep(MEASUREMENT_INT)
 except(KeyboardInterrupt):
-    print "growberry canceled manually."
+    logger.info('growberry canceled manually.')
+
 
 finally:
     GPIO.cleanup()
-    print "Pins are cleaned up, threads are killed.  Goodbye."
+    logger.info("Pins are cleaned up, threads are killed.  Goodbye.")
