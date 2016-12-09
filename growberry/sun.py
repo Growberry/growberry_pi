@@ -37,7 +37,7 @@ class Sun:
                         lights.off()
                         # somehow notify the user.. email maybe?
                         logger.warning('ALERT: heatsink temp exceeded set value(%s).' % str(mt))
-                        logger.warning('current temps: ', temps, "Temp that caused the problem: ", temp, str(temps[temp]))
+                        logger.warning('current temps: %s. Temp that caused the problem: %s' % (','.join([str(x) for x in temps]), str(max(temps))))
             sleep(10)
 
 

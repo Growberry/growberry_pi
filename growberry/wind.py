@@ -39,7 +39,7 @@ class Wind:
             # else:
             #     raise ValueError("cannot set speed to 0 when lights are on")
         else:
-            logger.critical('non-valid fan speed submitted.')
+            logger.critical('non-valid fan speed submitted: %s' % str(value))
             raise ValueError("Speed must be between 0.0-100.0")
 
 
