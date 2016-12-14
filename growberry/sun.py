@@ -12,18 +12,18 @@ class Sun:
     def __init__(self,lights,settings,maxtemp):
         self.settings = settings  # this is a Settings class
         self.lights = lights  # Relay class
-        self.mt = maxtemp
+        self.maxtemp = maxtemp
         self.heatsinksensor = w1therm()
         self.sinktemps = []
         # start monitoring heatsinks
-        t1 = Thread(target=self.safetyvalve, args=(self.lights,self.mt))
-        t1.daemon = True
-        t1.start()
+        # t1 = Thread(target=self.safetyvalve, args=(self.lights,self.maxtemp))
+        # t1.daemon = True
+        # t1.start()
         logger.info('Let there be light!')
 
 
-    def safetyvalve(self, lights, mt):
-        """Monitor the temp of the heatsinks.  If any of them exceed 55*C, power lights off. mt = maxtemp"""
+    def safetyvalve(self, lights, maxtemp):
+        """Monitor the temp of the heatsinks.  If any of them exceed 55*C, power lights off. maxtemp = maxtemp"""
         while self:
             temps = self.heatsinksensor.gettemps()
             for temp in temps:  # temps is a dict: {'28-031655df8bff': 18.625, 'timestamp': datetime.datetime(2016, 11, 11, 22, 47, 35, 344949)}
@@ -33,10 +33,10 @@ class Sun:
                     tempfloat = float(temps[temp])
                     self.sinktemps.append(tempfloat)
                     # check if heatsinks are hotter than 50, if so, turn the lights off!
-                    if tempfloat > mt:
+                    if tempfloat > maxtemp:
                         lights.off()
                         # somehow notify the user.. email maybe?
-                        logger.warning('ALERT: heatsink temp exceeded set value(%s).' % str(mt))
+                        logger.warning('ALERT: heatsink temp exceeded set value(%s).' % str(maxtemp))
                         logger.warning('current temps: %s. Temp that caused the problem: %s' % (','.join([str(x) for x in temps]), str(max(temps))))
             sleep(10)
 
