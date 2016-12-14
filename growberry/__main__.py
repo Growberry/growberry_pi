@@ -86,46 +86,52 @@ wind = Wind(13,18)
 # hvac.start()
 
 def thermostat(lights, wind, sensor):
-    while True:
-        night = lights.state  # when the lights.state is 1, the lights are off
-        fanspeed = wind.tach
-        # the max temp I'd expect is 50C, so if you divide by 50, and times 100, you get a percentage
-        percentfan = round(((sensor.read[sensor.name]['temp']) / 50) * 100, ndigits=1)
-        if not night:
-            wind.speed(percentfan)
-            logger.debug('fans ON and set to speed %s' %percentfan)
-        else:
-            wind.speed(0)
-            logger.debug('fans OFF')
-        sleep(60)
+    try:
+        while True:
+            night = lights.state  # when the lights.state is 1, the lights are off
+            fanspeed = wind.tach
+            # the max temp I'd expect is 50C, so if you divide by 50, and times 100, you get a percentage
+            percentfan = round(((sensor.read[sensor.name]['temp']) / 50) * 100, ndigits=1)
+            if not night:
+                wind.speed(percentfan)
+                logger.debug('fans ON and set to speed %s' %percentfan)
+            else:
+                wind.speed(0)
+                logger.debug('fans OFF')
+            sleep(60)
+    except:
+        logger.exception('thermostat broke')
 
 def data_capture(url):
-    sensor_data = {}
-    for sensor in Sensor.array:
-        sensor_data.update(sensor.read)
-    data = {
-        'timestamp': datetime.datetime.utcnow().isoformat(),  # datetime
-        'sinktemps': sun.sinktemps,  # list of float object
-        'sensors': sensor_data,  # dict {'name':{'timestamp','temp','humidity'}}
-        'lights': lights.state,  # bool
-        'fanspeed': wind.tach,  # float
-        'pic_dir': '/tmp/placeholder'  # replace this with an actual directory when pictures are working
-            }
-    sun.sinktemps = []
-    logger.debug('sinktemp list reset.')
+    try:
+        sensor_data = {}
+        for sensor in Sensor.array:
+            sensor_data.update(sensor.read)
+        data = {
+            'timestamp': datetime.datetime.utcnow().isoformat(),  # datetime
+            'sinktemps': sun.sinktemps,  # list of float object
+            'sensors': sensor_data,  # dict {'name':{'timestamp','temp','humidity'}}
+            'lights': lights.state,  # bool
+            'fanspeed': wind.tach,  # float
+            'pic_dir': '/tmp/placeholder'  # replace this with an actual directory when pictures are working
+                }
+        sun.sinktemps = []
+        logger.debug('sinktemp list reset.')
 
-    files = {
-        'metadata': ('metadata.json', json.dumps(data), 'application/json'),
-            }
+        files = {
+            'metadata': ('metadata.json', json.dumps(data), 'application/json'),
+                }
 
-    if camera:
-        camera.capture(PHOTO_LOC)
-        files.update({'photo': (PHOTO_LOC, open(PHOTO_LOC, 'rb'), 'image/jpg')})
-    files_json = ','.join(str(x) for x in files.keys()) 
-    logger.debug('Files for upload: %s' % files_json)
-    r = requests.post(url, files=files)
-    logger.info(r.text)
-    # return r
+        if camera:
+            camera.capture(PHOTO_LOC)
+            files.update({'photo': (PHOTO_LOC, open(PHOTO_LOC, 'rb'), 'image/jpg')})
+        files_json = ','.join(str(x) for x in files.keys())
+        logger.debug('Files for upload: %s' % files_json)
+        r = requests.post(url, files=files)
+        logger.info(r.text)
+        # return r
+    except:
+        logger.exception('the upload failed')
 
 def settings_fetcher():
     try:
