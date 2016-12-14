@@ -128,17 +128,22 @@ def data_capture(url):
     # return r
 
 def settings_fetcher():
-    while True:
-        settings.update()
-        sleep(MEASUREMENT_INT)
+    try:
+        while True:
+            settings.update()
+            sleep(MEASUREMENT_INT)
+    except:
+        logger.exception('settings not updated.')
 
 def data_logger():
-    while True:
-        url = DATAPOST_URL + str(BARREL_ID)
-        logger.debug('the URL where the data is headed: %s' % url)
-        data_capture(url)
-        sleep(MEASUREMENT_INT)
-
+    try:
+        while True:
+            url = DATAPOST_URL + str(BARREL_ID)
+            logger.debug('the URL where the data is headed: %s' % url)
+            data_capture(url)
+            sleep(MEASUREMENT_INT)
+    except:
+        logger.exception('Data failed to be uploaded')
 
 
 workers = {
