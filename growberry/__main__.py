@@ -91,7 +91,12 @@ def thermostat(lights, wind, sensor):
             night = lights.state  # when the lights.state is 1, the lights are off
             fanspeed = wind.tach
             # the max temp I'd expect is 50C, so if you divide by 50, and times 100, you get a percentage
-            percentfan = round(((sensor.read[sensor.name]['temp']) / 50) * 100, ndigits=1)
+            try:
+                current_temp = sensor.read[sensor.name]['temp']
+                percentfan = round((current_temp / 50) * 100, ndigits=1)
+            except TypeError:
+                percentfan = 50
+                logger.error('{} could not be read, setting fans to default 50%'.format(sensor.name))
             if not night:
                 wind.speed(percentfan)
                 logger.debug('fans ON and set to speed %s' %percentfan)

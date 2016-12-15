@@ -2,8 +2,9 @@ import time
 import RPi.GPIO as GPIO
 import Adafruit_DHT
 import datetime
+import logging
 
-
+logger = logging.getLogger(__name__)
 
 GPIO.setmode(GPIO.BCM)  # for using the names of the pins
 GPIO.setwarnings(True)  # set to false if the warnings bother you, helps troubleshooting
@@ -78,8 +79,21 @@ class Sensor:
 
     @property
     def read(self):
-        humidity, temp = Adafruit_DHT.read(self.sens_type, self.pin)
-
+        """attempts to read the dht22 3 times"""
+        attempts = 0
+        while attempts < 3:
+            try:
+                humidity, temp = Adafruit_DHT.read(self.sens_type, self.pin)
+                if humidity and temp:
+                    return {"%s" % self.name: {"temp": round(float(temp), 1), "humidity": round(float(humidity), 1),
+                                               "timestamp": datetime.datetime.utcnow().isoformat()}}
+                logger.warning('DHT22 sensor read failed!')
+                raise TypeError('could not read sensor.')
+            except TypeError:
+                attempts += 1
+                time.sleep(2)
+        logger.error('{}-DHT22 sensor could not be reached after 3 attempts.  Make sure sensor is connected to GPIO {}'.format(self.name,str(self.pin)))
+        return {"%s" % self.name: {"temp": 'NA', "humidity": 'NA',"timestamp": datetime.datetime.utcnow().isoformat()}}
         #print 'Temperature: {0:0.1f} C'.format(temp)       #prints Temp formated
         #print 'Humidity:    {0:0.1f} %'.format(humidity)   #prints Humidity formatted
 
@@ -91,8 +105,8 @@ class Sensor:
         # can't be reliably read (timing is critical to read the sensor).$
         # the following loop will read the sensor every 2 seconds until both temp and humidity are not "None"
 
-        while humidity is None or temp is None:  #this should prevent errors when rounding, but could cause a hang-up...
+        while humidity is None or temp is None and attempts > 0:  #this should prevent errors when rounding, but could cause a hang-up...
             time.sleep(2)
+            attempts -= 1
             humidity, temp = Adafruit_DHT.read(self.sens_type, self.pin)
 
-        return {"%s"%self.name: {"temp": round(float(temp),1), "humidity": round(float(humidity),1), "timestamp": datetime.datetime.utcnow().isoformat()}}
