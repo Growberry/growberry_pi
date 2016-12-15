@@ -1,4 +1,6 @@
 import os
+import logging
+
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
@@ -11,8 +13,8 @@ DHT22 = [ #(pin number, 'name')
 
 # a list containing all relays.  The names must be 'lights' and 'fans'
 RELAYS = [ # (pin number, 'name')
-    (6, 'lights')
-    # ,(13, 'fans')
+    (6, 'lights'),  # dev lights
+    #(19, 'lights'), # proto lights
 ]
 
 SETTINGS_URL = 'http://192.168.0.42:8000/get_settings/'
@@ -31,7 +33,7 @@ BARREL_ID = 4
 CAMERA = False
 
 # Maximum temp for heatsinks before safetycheck shuts the lights off
-MAXTEMP = 30
+MAXTEMP = 40
 
 # Measurement interval (in seconds)
 MEASUREMENT_INT = 1800
@@ -41,3 +43,8 @@ TEST_OUT = 'testout.txt'
 
 # location where picture is writen before upload
 PHOTO_LOC = 'testpic123.jpg'
+
+# location where log file will be written.
+LOG_FILENAME = 'logs/growberry.log'
+# the level at which to record logs:
+LOG_LVL = logging.INFO

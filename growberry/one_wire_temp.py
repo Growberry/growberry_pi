@@ -19,7 +19,10 @@ class w1therm:
         self.sensorroot = '/sys/bus/w1/devices/'
         #find all sensors
         self.sensors = open(self.sensorroot + 'w1_bus_master1/w1_master_slaves').read().splitlines()
-        logger.info('%s w1therm sensors detected: %s' %(len(self.sensors),','.join(self.sensors)))
+        if len(self.sensors) == 0:
+            logger.warning('No w1 thermal sensors detected! SAFETY COMPROMISED!')
+        elif len(self.sensors) > 0:
+            logger.info('%s w1therm sensors detected: %s' %(len(self.sensors),','.join(self.sensors)))
 
 
     def Read(self,id):
@@ -36,8 +39,10 @@ class w1therm:
 
     def Retrieve(self, sensor, result):
         """this just iterates over sensors, and adds the results to a single dictionary"""
-        result.update(self.Read(sensor))
-
+        try:
+            result.update(self.Read(sensor))
+        except TypeError:
+            logger.error('Previously existing sensor no longer is recognized.')
 
     def gettemps(self):
         temps = {}
@@ -48,6 +53,7 @@ class w1therm:
         # For 4 sensors we go from 3.5~4.0 seconds to 0.8~1.0 seconds
 
         for s in self.sensors:
+            # for every sensor detected on __init__: retrieve --> Read
             process = Thread(target=self.Retrieve, args=[s,temps])
             process.start()
             threads.append(process)

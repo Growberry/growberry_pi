@@ -36,11 +36,13 @@ class Relay:
         """switches GPIO pin to LOW/0 - in open state relays, this turns the relay ON. (does nothing if relay already on (0))"""
         if self.state:
             GPIO.output(self.pin, GPIO.LOW)
+            logger.info('{} turned ON'.format(self.name))
 
     def off(self):
         """ switches GPIO pin to HIGH/1 - in open state relays, this turns the relay OFF.(does nothing if relay already off (1))"""
         if not self.state:
             GPIO.output(self.pin, GPIO.HIGH)
+            logger.info('{} turned OFF'.format(self.name))
 
     def blink(self, *args):
         """this should not be used for actual relays, just LEDs"""
@@ -67,8 +69,6 @@ class Relay:
 
 
 
-
-
 class Sensor:
     array = []
     def __init__(self, pin, sens_type, name):
@@ -87,7 +87,7 @@ class Sensor:
                 if humidity and temp:
                     return {"%s" % self.name: {"temp": round(float(temp), 1), "humidity": round(float(humidity), 1),
                                                "timestamp": datetime.datetime.utcnow().isoformat()}}
-                logger.warning('DHT22 sensor read failed!')
+                logger.warning('DHT22 sensor read failed! Attempts remaining: {}'.format(2-attempts))
                 raise TypeError('could not read sensor.')
             except TypeError:
                 attempts += 1
@@ -105,8 +105,8 @@ class Sensor:
         # can't be reliably read (timing is critical to read the sensor).$
         # the following loop will read the sensor every 2 seconds until both temp and humidity are not "None"
 
-        while humidity is None or temp is None and attempts > 0:  #this should prevent errors when rounding, but could cause a hang-up...
-            time.sleep(2)
-            attempts -= 1
-            humidity, temp = Adafruit_DHT.read(self.sens_type, self.pin)
+        # while humidity is None or temp is None and attempts > 0:  #this should prevent errors when rounding, but could cause a hang-up...
+        #     time.sleep(2)
+        #     attempts -= 1
+        #     humidity, temp = Adafruit_DHT.read(self.sens_type, self.pin)
 

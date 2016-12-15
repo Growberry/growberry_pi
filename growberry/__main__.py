@@ -1,5 +1,6 @@
 
-from config import DHT22, RELAYS, SETTINGS_JSON, SETTINGS_URL, BARREL_ID, CAMERA, MAXTEMP,MEASUREMENT_INT, TEST_OUT, DATAPOST_URL, PHOTO_LOC
+from config import DHT22, RELAYS, SETTINGS_JSON, SETTINGS_URL, BARREL_ID, CAMERA, MAXTEMP,MEASUREMENT_INT,\
+    TEST_OUT, DATAPOST_URL, PHOTO_LOC, LOG_FILENAME, LOG_LVL
 import RPi.GPIO as GPIO
 from threading import Thread
 import json
@@ -35,10 +36,29 @@ fans = None
 #settings
 settings = None
 
-logger = logging.getLogger(__name__)
-logging_format = "[%(levelname)s] %(name)s %(asctime)s %(message)s"
-logging.basicConfig(filename='log_growberry.log',format=logging_format, level=logging.DEBUG)
+# logger = logging.getLogger(__name__)
+# logging_format = "[%(levelname)s] %(name)s %(asctime)s %(message)s"
+# logging.basicConfig(filename='log_growberry.log',format=logging_format, level=logging.DEBUG)
 
+logging_format = "[%(levelname)s] %(name)s %(asctime)s %(message)s"
+
+# Set up a specific logger with our desired output level
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+
+# Add the log message handler to the logger
+handler = logging.handlers.RotatingFileHandler(
+              LOG_FILENAME, maxBytes=1 * 1024 * 1024, backupCount=5)
+handler.setLevel(logging.INFO)
+ch = logging.StreamHandler()
+ch.setLevel(logging.ERROR)
+
+# Add a formatter
+formatter = logging.Formatter(logging_format)
+handler.setFormatter(formatter)
+ch.setFormatter(formatter)
+logger.addHandler(handler)
+logger.addHandler(ch)
 
 
 """import all the configured DH22 sensors, and set them up with names"""
@@ -96,7 +116,7 @@ def thermostat(lights, wind, sensor):
                 percentfan = round((current_temp / 50) * 100, ndigits=1)
             except TypeError:
                 percentfan = 50
-                logger.error('{} could not be read, setting fans to default 50%'.format(sensor.name))
+                logger.exception('{} could not be read, setting fans to default 50%'.format(sensor.name))
             if not night:
                 wind.speed(percentfan)
                 logger.debug('fans ON and set to speed %s' %percentfan)
@@ -121,7 +141,7 @@ def data_capture(url):
             'pic_dir': '/tmp/placeholder'  # replace this with an actual directory when pictures are working
                 }
         sun.sinktemps = []
-        logger.debug('sinktemp list reset.')
+        logger.debug('data has been read. sinktemp list reset.')
 
         files = {
             'metadata': ('metadata.json', json.dumps(data), 'application/json'),
@@ -134,9 +154,9 @@ def data_capture(url):
         logger.debug('Files for upload: %s' % files_json)
         r = requests.post(url, files=files)
         logger.info(r.text)
-        # return r
+
     except:
-        logger.exception('the upload failed')
+        logger.exception('data_capture() failed.  data has was not uploaded')
 
 def settings_fetcher():
     try:
@@ -144,7 +164,7 @@ def settings_fetcher():
             settings.update()
             sleep(MEASUREMENT_INT)
     except:
-        logger.exception('settings not updated.')
+        logger.exception('settings_fetcher() failed. settings not updated.')
 
 def data_logger():
     try:
@@ -154,7 +174,7 @@ def data_logger():
             data_capture(url)
             sleep(MEASUREMENT_INT)
     except:
-        logger.exception('Data failed to be uploaded')
+        logger.exception('data_logger() failed. Data failed to be uploaded')
 
 
 workers = {

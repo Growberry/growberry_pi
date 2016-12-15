@@ -15,7 +15,7 @@ class Wind:
         self.pwm = GPIO.PWM(speedpin, 25000) # 25 Kilohertz is inaudible to human ears
         self.pwm.start(speed)
         self.tach = speed
-        logger.debug('fans initiated')
+        logger.info('fans initiated.  Power on pin {}, speed control PWM on pin {}'.format(self.powerpin,self.pwm))
 
 
     def speed(self, value):
@@ -39,7 +39,7 @@ class Wind:
             # else:
             #     raise ValueError("cannot set speed to 0 when lights are on")
         else:
-            logger.critical('non-valid fan speed submitted: %s' % str(value))
+            logger.error('non-valid fan speed submitted: %s' % str(value))
             raise ValueError("Speed must be between 0.0-100.0")
 
 

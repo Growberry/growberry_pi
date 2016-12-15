@@ -17,7 +17,7 @@ class Settings(object):
         self.daylength = None
         self.pic_dir = None
         self.settemp = None
-        logger.debug('Settings instance created.')
+        logger.info('Settings instance created.')
 
     def update(self):
         try:
@@ -33,7 +33,7 @@ class Settings(object):
         except Exception,e:
             error = {'online':False, 'error':e}
             self.settings.update(error)
-            logger.error('Settings could not be obtained from growberry_web: %s' % e)
+            logger.warning('Settings could not be obtained from growberry_web: %s' % e)
         finally:
             try:
                 with open(self.file_loc, 'r') as infile:
