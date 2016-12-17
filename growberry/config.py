@@ -48,3 +48,5 @@ PHOTO_LOC = 'testpic123.jpg'
 LOG_FILENAME = 'logs/growberry.log'
 # the level at which to record logs:
 LOG_LVL = logging.INFO
+# logging format
+LOG_FORMAT = "[%(levelname)s] %(name)s %(asctime)s %(message)s"

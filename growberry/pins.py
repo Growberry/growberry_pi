@@ -42,7 +42,7 @@ class Relay:
         """ switches GPIO pin to HIGH/1 - in open state relays, this turns the relay OFF.(does nothing if relay already off (1))"""
         if not self.state:
             GPIO.output(self.pin, GPIO.HIGH)
-            logger.info('{} turned OFF'.format(self.name))
+            logger.info('{} turned OFF\n'.format(self.name))
 
     def blink(self, *args):
         """this should not be used for actual relays, just LEDs"""
@@ -79,7 +79,12 @@ class Sensor:
 
     @property
     def read(self):
-        """attempts to read the dht22 3 times"""
+        """
+        Sometimes the sensor will return "None"
+        This might happen if the CPU is under a lot of load and the sensor
+        this property method attempts to read the dht22 3 times before logging an error
+        will return 'NA' for failed values.
+        """
         attempts = 0
         while attempts < 3:
             try:
@@ -87,26 +92,13 @@ class Sensor:
                 if humidity and temp:
                     return {"%s" % self.name: {"temp": round(float(temp), 1), "humidity": round(float(humidity), 1),
                                                "timestamp": datetime.datetime.utcnow().isoformat()}}
-                logger.warning('DHT22 sensor read failed! Attempts remaining: {}'.format(2-attempts))
+                logger.debug('%s DHT22 sensor read failed! Attempts remaining: {}'.format(self.name, 2-attempts))
                 raise TypeError('could not read sensor.')
             except TypeError:
                 attempts += 1
                 time.sleep(2)
         logger.error('{}-DHT22 sensor could not be reached after 3 attempts.  Make sure sensor is connected to GPIO {}'.format(self.name,str(self.pin)))
         return {"%s" % self.name: {"temp": 'NA', "humidity": 'NA',"timestamp": datetime.datetime.utcnow().isoformat()}}
+
         #print 'Temperature: {0:0.1f} C'.format(temp)       #prints Temp formated
         #print 'Humidity:    {0:0.1f} %'.format(humidity)   #prints Humidity formatted
-
-        #print temp         #prints temp unformated
-        #print humidity     #prints humidity unformated
-
-        # Sometimes the sensor will return "None"
-        # This might happen if the CPU is under a lot of load and the sensor$
-        # can't be reliably read (timing is critical to read the sensor).$
-        # the following loop will read the sensor every 2 seconds until both temp and humidity are not "None"
-
-        # while humidity is None or temp is None and attempts > 0:  #this should prevent errors when rounding, but could cause a hang-up...
-        #     time.sleep(2)
-        #     attempts -= 1
-        #     humidity, temp = Adafruit_DHT.read(self.sens_type, self.pin)
-

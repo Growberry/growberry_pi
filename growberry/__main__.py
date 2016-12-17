@@ -1,6 +1,6 @@
 
 from config import DHT22, RELAYS, SETTINGS_JSON, SETTINGS_URL, BARREL_ID, CAMERA, MAXTEMP,MEASUREMENT_INT,\
-    TEST_OUT, DATAPOST_URL, PHOTO_LOC, LOG_FILENAME, LOG_LVL
+    TEST_OUT, DATAPOST_URL, PHOTO_LOC, LOG_FILENAME, LOG_LVL, LOG_FORMAT
 import RPi.GPIO as GPIO
 from threading import Thread
 import json
@@ -36,29 +36,31 @@ fans = None
 #settings
 settings = None
 
+global_logger = logging.getLogger()
+global_logger.setLevel(logging.DEBUG)
+
 # logger = logging.getLogger(__name__)
 # logging_format = "[%(levelname)s] %(name)s %(asctime)s %(message)s"
-# logging.basicConfig(filename='log_growberry.log',format=logging_format, level=logging.DEBUG)
-
-logging_format = "[%(levelname)s] %(name)s %(asctime)s %(message)s"
+# logging.basicConfig(filename='log_growberry.log',format=logging_format, level=LOG_LVL)
 
 # Set up a specific logger with our desired output level
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 
 # Add the log message handler to the logger
-handler = logging.handlers.RotatingFileHandler(
-              LOG_FILENAME, maxBytes=1 * 1024 * 1024, backupCount=5)
-handler.setLevel(logging.INFO)
-ch = logging.StreamHandler()
-ch.setLevel(logging.ERROR)
+file_handler = logging.handlers.RotatingFileHandler(
+              LOG_FILENAME, maxBytes=1 * 1024 * 1024, backupCount=2)
+file_handler.setLevel(LOG_LVL)
 
 # Add a formatter
-formatter = logging.Formatter(logging_format)
-handler.setFormatter(formatter)
-ch.setFormatter(formatter)
-logger.addHandler(handler)
-logger.addHandler(ch)
+formatter = logging.Formatter(LOG_FORMAT)
+file_handler.setFormatter(formatter)
+
+global_logger.addHandler(file_handler)
+
+# # Add another handler that will stream to output
+# stream_handler = logging.StreamHandler()
+# stream_handler.setLevel(logging.ERROR)
+# logger.addHandler(stream_handler)
 
 
 """import all the configured DH22 sensors, and set them up with names"""
