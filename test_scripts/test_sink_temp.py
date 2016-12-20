@@ -11,18 +11,21 @@ import RPi.GPIO as GPIO
 logger = logging.getLogger()
 logging.basicConfig()
 
-lights = Relay(19.,'lights')
+lights = Relay(19,'lights')
 # sun = Sun(lights,settings,MAXTEMP)
-
+print 'lights set up on pin 19'
 heatsinksensor = w1therm()
 
-fans = Wind(19,18)
-
+fans = Wind(13,18)
+print 'fans set up on pin 13'
 p = PID(2, 0, 1,0,0,100,0)
+print 'PID set up'
 p.setPoint(50.0)
-
+print 'PID set point to 50.0'
 def main():
     try:
+        lights.on()
+        print 'lights on'
         while True:
             # read heatsink temps, return max
             listoftemps = []
@@ -51,11 +54,14 @@ def main():
             # wait
             sleep(10)
     except:
+        logger.exception('stuff')
+        lights.off()
         GPIO.cleanup()
         logger.warning("canceled, pins cleaned up")
 
 
-
+if __name__ == '__main__':
+    main()
 
 
 
