@@ -7,6 +7,7 @@ import logging
 from threading import Thread
 from time import sleep
 import RPi.GPIO as GPIO
+import datetime
 
 logger = logging.getLogger()
 logging.basicConfig()
@@ -43,7 +44,7 @@ def main():
             # get back PID value
             logger.info('fans need to change speed %s amount', str(speed_adjustment))
             # adjust fanspeed
-            new_speed = float(fans.tach) + float(speed_adjustment)
+            new_speed = float(fans.tach) - float(speed_adjustment)
             logger.info('speed before adjustment: %s', new_speed)
             if new_speed > 100:
                 new_speed = 100
@@ -51,6 +52,8 @@ def main():
                 new_speed = 0
             fans.speed(new_speed)
             logger.info('fan speed: %s',str(new_speed))
+            # print the status:
+            logger.warning('%s\tmaxtemp: %s\tchangespeed: %s\tnewspeed: %s', (datetime.datetime.now(), str(highest_temp),str(-1*speed_adjustment),str(new_speed)))
             # wait
             sleep(10)
     except:
