@@ -9,8 +9,11 @@ from time import sleep
 import RPi.GPIO as GPIO
 import datetime
 
+
+SETPOINT = 35.7
+
 logger = logging.getLogger()
-logging.basicConfig()
+logging.basicConfig(level=logging.INFO)
 
 lights = Relay(19,'lights')
 # sun = Sun(lights,settings,MAXTEMP)
@@ -19,14 +22,16 @@ heatsinksensor = w1therm()
 
 fans = Wind(13,18)
 print 'fans set up on pin 13'
-p = PID(2, 0, 1,0,0,100,0)
+p = PID(1, 0, 0.5,0,0,100,0)
 print 'PID set up'
-p.setPoint(50.0)
-print 'PID set point to 50.0'
+p.setPoint(SETPOINT)
+print 'PID set point to {}'.format(SETPOINT)
 def main():
     try:
         lights.on()
         print 'lights on'
+        fans.speed(50)
+        sleep(60)
         while True:
             # read heatsink temps, return max
             listoftemps = []
@@ -39,21 +44,21 @@ def main():
                     listoftemps.append(tempfloat)
             # feed max temp into PID
             highest_temp = max(listoftemps)
-            logger.info('the max temp: %s', str(highest_temp))
+            logger.debug('the max temp: %s', str(highest_temp))
             speed_adjustment = p.update(max(listoftemps))
             # get back PID value
-            logger.info('fans need to change speed %s amount', str(speed_adjustment))
+            logger.debug('fans need to change speed %s amount', str(speed_adjustment))
             # adjust fanspeed
             new_speed = float(fans.tach) - float(speed_adjustment)
-            logger.info('speed before adjustment: %s', new_speed)
+            logger.debug('speed before adjustment: %s', new_speed)
             if new_speed > 100:
                 new_speed = 100
             elif new_speed < 0:
                 new_speed = 0
             fans.speed(new_speed)
-            logger.info('fan speed: %s',str(new_speed))
+            logger.debug('fan speed: %s',str(new_speed))
             # print the status:
-            logger.warning('%s\tmaxtemp: %s\tchangespeed: %s\tnewspeed: %s', (datetime.datetime.now(), str(highest_temp),str(-1*speed_adjustment),str(new_speed)))
+            logger.info('{}\tmaxtemp: {}\tchangespeed: {}\tnewspeed: {}'.format(datetime.datetime.now(), str(highest_temp),str(-1*speed_adjustment),str(new_speed)))
             # wait
             sleep(10)
     except:
