@@ -60,7 +60,7 @@ class w1therm:
 
         for process in threads:
             process.join()
-        temps.update({'timestamp':datetime.utcnow()})
+        #temps.update({'timestamp':datetime.utcnow()})
         return(temps)
 
 

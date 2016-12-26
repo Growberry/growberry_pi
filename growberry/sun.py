@@ -27,18 +27,15 @@ class Sun:
         logger.info('Heatsink safety monitor activated. Lights will be powered down if temps exceed {} C.'.format(maxtemp))
         while self:
             temps = self.heatsinksensor.gettemps()
-            for temp in temps:  # temps is a dict: {'28-031655df8bff': 18.625, 'timestamp': datetime.datetime(2016, 11, 11, 22, 47, 35, 344949)}
-                if temp == 'timestamp':
-                    continue
-                else:
-                    tempfloat = float(temps[temp])
-                    self.sinktemps.append(tempfloat)
-                    # check if heatsinks are hotter than 50, if so, turn the lights off!
-                    if tempfloat > maxtemp:
-                        lights.off()
-                        # somehow notify the user.. email maybe?
-                        logger.warning('ALERT: heatsink temp exceeded set value(%s).' % str(maxtemp))
-                        logger.debug('current temps: %s. Temp that caused the problem: %s' % (','.join([str(x) for x in temps]), str(max(temps))))
+            for temp in temps:  # temps is a dict: {'28-031655df8bff': 18.625, }
+                tempfloat = float(temps[temp])
+                self.sinktemps.append(tempfloat)
+                # check if heatsinks are hotter than 50, if so, turn the lights off!
+                if tempfloat > maxtemp:
+                    lights.off()
+                    # somehow notify the user.. email maybe?
+                    logger.warning('ALERT: heatsink temp exceeded set value(%s).' % str(maxtemp))
+                    logger.debug('current temps: %s. Temp that caused the problem: %s' % (','.join([str(x) for x in temps]), str(max(temps))))
             sleep(10)
 
 

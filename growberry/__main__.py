@@ -107,24 +107,82 @@ wind = Wind(13,18)
 # hvac.daemon = True
 # hvac.start()
 
-def thermostat(lights, wind, sensor):
+
+def fancontrol(set_temp, i_temp, i_humidity, o_temp, sinktemp, lightstate):
+    """
+    returns the speed the fan should be set to.
+    If the lights are on, the fan cannot go any slower than 5.
+
+    :param set_temp:
+    :param i_temp:
+    :param i_humidity:
+    :param o_temp:
+    :param sinktemp:
+    :param lightstate:
+    :return:
+    """
+    alpha = -5 * lightstate
+    beta = 0
+    if i_humidity > 85:
+        beta = 5
+    io_delta = o_temp - i_temp  #
+    delta_t = set_temp - i_temp  # pos values means we want the temp to go up, neg = want temps to go down.
+    temp_coef = io_delta * delta_t  # will return positive values if both match
+    gamma = 0
+    if temp_coef > 0:
+        gamma = temp_coef/10
+    epsilon = (sinktemp * 1.7) + i_temp
+
+    omega = alpha + beta + gamma + epsilon
+    logger.debug('omega = alpha + beta + gamma + epsilon\n{} = {} + {} + {} + {}'.format(omega,alpha,beta,gamma,epsilon))
+    fanspeed = int(round(omega/5)*5)
+    if fanspeed > 100:
+        fanspeed = 100
+    return fanspeed
+
+
+
+def thermostat(sun, wind, in_sensor, out_sensor, settings):
+    """
+    fan speed model:  fanspeed = alpha*(lightstatus) + beta*(heatsink_max) + gamma*(internal_temp) + delta*(internal_humidity)
+    """
     try:
         while True:
-            night = lights.state  # when the lights.state is 1, the lights are off
-            fanspeed = wind.tach
-            # the max temp I'd expect is 50C, so if you divide by 50, and times 100, you get a percentage
+            lightstatus = sun.lights.state
+            heatsink_max = 45.0  # default
             try:
-                current_temp = sensor.read[sensor.name]['temp']
-                percentfan = round((current_temp / 50) * 100, ndigits=1)
+                heatsink_max = max(sun.heatsinksensor.gettemps().values())
+            except:
+                logger.exception("couldn't read heatsink sensor. Default 45.0 used.")
+            internal_temp = 25.0  # default
+            internal_humidity = 50.0  # default
+            external_temp = 25.0  # default
+            try:
+                internal_temp = float(in_sensor.read[in_sensor.name]['temp'])
+                internal_humidity = float(in_sensor.read[in_sensor.name]['humidty'])
+                external_temp = float(out_sensor.read[out_sensor.name]['temp'])
             except TypeError:
-                percentfan = 50
-                logger.exception('{} could not be read, setting fans to default 50%'.format(sensor.name))
-            if not night:
-                wind.speed(percentfan)
-                logger.debug('fans ON and set to speed %s' %percentfan)
-            else:
-                wind.speed(0)
-                logger.debug('fans OFF')
+                logger.exception("couldn't read DHT22, defaults used.")
+
+            fspeed = fancontrol(settings.settemp, internal_temp, internal_humidity, external_temp, heatsink_max, lightstatus)
+            wind.speed(fspeed)
+
+            #
+            # night = lights.state  # when the lights.state is 1, the lights are off
+            # fanspeed = wind.tach
+            # # the max temp I'd expect is 50C, so if you divide by 50, and times 100, you get a percentage
+            # try:
+            #     current_temp = sensor.read[sensor.name]['temp']
+            #     percentfan = round((current_temp / 50) * 100, ndigits=1)
+            # except TypeError:
+            #     percentfan = 50
+            #     logger.exception('{} could not be read, setting fans to default 50%'.format(sensor.name))
+            # if not night:
+            #     wind.speed(percentfan)
+            #     logger.debug('fans ON and set to speed %s' %percentfan)
+            # else:
+            #     wind.speed(0)
+            #     logger.debug('fans OFF')
             sleep(60)
     except:
         logger.exception('thermostat broke')
