@@ -42,7 +42,7 @@ class Settings(object):
                     self.sunrise = datetime.strptime(self.settings['sunrise'],'%H%M').time()
                     self.daylength = timedelta(hours=float(self.settings['daylength']))
                     self.pic_dir = self.settings.get('pic_dir', '/fake/pic_dir/')
-                    self.settemp = self.settings.get('settemp', 25)
+                    self.settemp = float(self.settings.get('settemp', 25))
                 logger.debug('settings.json sucessfully loaded.')
             except Exception,e:
                 logger.critical('settings.json could not be loaded: %s' %e)

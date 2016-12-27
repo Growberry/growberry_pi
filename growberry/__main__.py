@@ -161,7 +161,7 @@ def thermostat(sun, wind, in_sensor, out_sensor, settings):
                 internal_temp = float(in_sensor.read[in_sensor.name]['temp'])
                 internal_humidity = float(in_sensor.read[in_sensor.name]['humidty'])
                 external_temp = float(out_sensor.read[out_sensor.name]['temp'])
-            except TypeError:
+            except:
                 logger.exception("couldn't read DHT22, defaults used.")
 
             fspeed = fancontrol(settings.settemp, internal_temp, internal_humidity, external_temp, heatsink_max, lightstatus)
@@ -240,7 +240,7 @@ def data_logger():
 workers = {
     'heatink_safety_monitor': Thread(target=sun.safetyvalve, args=(sun.lights,sun.maxtemp)),
     'lighting': Thread(target=sun.lightcontrol),
-    'hvac': Thread(target=thermostat, args=(lights, wind, in_sense)),
+    'hvac': Thread(target=thermostat, args=(sun, wind, in_sense, ext_sense, settings)),
     'settings_fetcher': Thread(target=settings_fetcher),
     'data_logger': Thread(target=data_logger)
 }
@@ -260,7 +260,7 @@ try:
                 elif name == 'lighting':
                     workers[name] = Thread(target=sun.lightcontrol)
                 elif name == 'hvac':
-                    workers[name] = Thread(target=thermostat, args=(lights, wind, in_sense))
+                    workers[name] = Thread(target=thermostat, args=(sun, wind, in_sense, ext_sense, settings)) #sun, wind, in_sensor, out_sensor, settings
                 elif name == 'settings_fetcher':
                     workers[name] = Thread(target=settings_fetcher)
                 elif name == 'data_logger':
