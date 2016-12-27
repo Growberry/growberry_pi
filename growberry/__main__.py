@@ -110,18 +110,16 @@ wind = Wind(13,18)
 
 def fancontrol(set_temp, i_temp, i_humidity, o_temp, sinktemp, lightstate):
     """
-    returns the speed the fan should be set to.
-    If the lights are on, the fan cannot go any slower than 5.
+    fan speed model:  fanspeed = alpha(lightstatus) + beta(heatsink_max) + gamma(internal_temp) + delta(internal_humidity)
 
-    :param set_temp:
-    :param i_temp:
-    :param i_humidity:
-    :param o_temp:
-    :param sinktemp:
-    :param lightstate:
-    :return:
+    :alpha: +5 if lights ON
+    :beta: +5 if humidity is over 85
+    :gamma: delta(settemp - in_temp) * delta(out_temp - in_temp) / 10
+    :epsilon: (sinktemp-30) * 6.34
+
+    :return: speed at which to set the fan (0-100) in multiples of 5.
     """
-    alpha = 5 * (lightstate - 1)
+    alpha = -5 * (lightstate - 1)
     beta = 0
     if i_humidity > 85:
         beta = 5
@@ -131,20 +129,18 @@ def fancontrol(set_temp, i_temp, i_humidity, o_temp, sinktemp, lightstate):
     gamma = 0
     if temp_coef > 0:
         gamma = temp_coef/10
-    epsilon = (sinktemp * 1.7) + i_temp
+    epsilon = max(0,(sinktemp - 30) * 6.34)
 
     omega = alpha + beta + gamma + epsilon
-    logger.debug('omega = alpha + beta + gamma + epsilon\n{}(fanspeed) = {}(lights) + {}humidity + {}(temp_coef) + {}(heatsink)'.format(omega,alpha,beta,gamma,epsilon))
-    fanspeed = int(round(omega/5)*5)
-    if fanspeed > 100:
-        fanspeed = 100
+    logger.debug('omega = alpha + beta + gamma + epsilon\n{}(fanspeed) = {}(lights) + {}(humidity) + {}(temp_coef) + {}(heatsink)'.format(omega,alpha,beta,gamma,epsilon))
+    fanspeed = min(100, int(round(omega/5)*5))
     return fanspeed
 
 
 
 def thermostat(sun, wind, in_sensor, out_sensor, settings):
     """
-    fan speed model:  fanspeed = alpha*(lightstatus) + beta*(heatsink_max) + gamma*(internal_temp) + delta*(internal_humidity)
+
     """
     try:
         while True:
