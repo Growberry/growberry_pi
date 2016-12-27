@@ -121,7 +121,7 @@ def fancontrol(set_temp, i_temp, i_humidity, o_temp, sinktemp, lightstate):
     :param lightstate:
     :return:
     """
-    alpha = -5 * lightstate
+    alpha = 5 * (lightstate - 1)
     beta = 0
     if i_humidity > 85:
         beta = 5
@@ -134,7 +134,7 @@ def fancontrol(set_temp, i_temp, i_humidity, o_temp, sinktemp, lightstate):
     epsilon = (sinktemp * 1.7) + i_temp
 
     omega = alpha + beta + gamma + epsilon
-    logger.debug('omega = alpha + beta + gamma + epsilon\n{} = {} + {} + {} + {}'.format(omega,alpha,beta,gamma,epsilon))
+    logger.debug('omega = alpha + beta + gamma + epsilon\n{}(fanspeed) = {}(lights) + {}humidity + {}(temp_coef) + {}(heatsink)'.format(omega,alpha,beta,gamma,epsilon))
     fanspeed = int(round(omega/5)*5)
     if fanspeed > 100:
         fanspeed = 100
@@ -161,8 +161,10 @@ def thermostat(sun, wind, in_sensor, out_sensor, settings):
                 internal_temp = float(in_sensor.read[in_sensor.name]['temp'])
                 internal_humidity = float(in_sensor.read[in_sensor.name]['humidty'])
                 external_temp = float(out_sensor.read[out_sensor.name]['temp'])
+            except ValueError:
+                logger.warning('one of the sensors could not be read, defaults used.')
             except:
-                logger.exception("couldn't read DHT22, defaults used.")
+                logger.exception("unknown error, defaults used.")
 
             fspeed = fancontrol(settings.settemp, internal_temp, internal_humidity, external_temp, heatsink_max, lightstatus)
             wind.speed(fspeed)
