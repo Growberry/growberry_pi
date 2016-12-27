@@ -236,9 +236,9 @@ def data_logger():
 
 
 workers = {
-    'heatink_safety_monitor': Thread(target=sun.safetyvalve, args=(sun.lights,sun.maxtemp)),
     'lighting': Thread(target=sun.lightcontrol),
     'hvac': Thread(target=thermostat, args=(sun, wind, in_sense, ext_sense, settings)),
+    'heatink_safety_monitor': Thread(target=sun.safetyvalve, args=(sun.lights,sun.maxtemp)),
     'settings_fetcher': Thread(target=settings_fetcher),
     'data_logger': Thread(target=data_logger)
 }
@@ -246,6 +246,7 @@ workers = {
 for name in workers:
     workers[name].daemon = True
     workers[name].start()
+    sleep(1)
 
 try:
     while True:
