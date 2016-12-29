@@ -39,20 +39,56 @@ class Sun:
             sleep(10)
 
 
+    # def lightcontrol(self):
+    #     """see if the lights should be on/off, and make them that way"""
+    #     while self:
+    #         sunrise = datetime.datetime.combine(datetime.date.today(), self.settings.sunrise)
+    #         sunset = sunrise + self.settings.daylength
+    #         if sunrise <= datetime.datetime.now() <= sunset:
+    #             self.lights.on()
+    #             logger.debug(' lights ON.  It is after sunrise (%s) and before sunset (%s).'%(sunrise,sunset))
+    #         else:
+    #             self.lights.off()
+    #             logger.debug('lights OFF.  It is after sunset (%s).' % sunset)
+    #         sleep(60)
+
     def lightcontrol(self):
-        """see if the lights should be on/off, and make them that way"""
+        """
+        determines if artificial lights should be on, or off.
+        :param rise: datetime.time(h,m,s)
+        :param length: integer number of hours
+        :return: lights activate or deactivate.
+        """
         while self:
-            sunrise = datetime.datetime.combine(datetime.date.today(), self.settings.sunrise)
+            rise = self.settings.sunrise
+            sunrise = datetime.datetime.combine(datetime.date.today(), rise)
             sunset = sunrise + self.settings.daylength
-            if sunrise <= datetime.datetime.now() <= sunset:
-                self.lights.on()
-                logger.debug(' lights ON.  It is after sunrise (%s) and before sunset (%s).'%(sunrise,sunset))
+            set = sunset.time()
+            now = datetime.datetime.now()
+            tomorrow = now.date() + datetime.timedelta(hours=24)
+            midnight = datetime.datetime.combine(tomorrow.date(), datetime.time(0, 0, 0))
+            if sunrise <= midnight <= sunset:
+                logger.debug('day spans midnight')
+                if set <= now.time() <= rise:
+                    self.lights.off()
+                    logger.debug('\nsunrise:  {}\nsunset: {}\nnow: {}\nlights OFF.'.format(rise, set,
+                                                                                  datetime.datetime.now().time()))
+                else:
+                    self.lights.on()
+                    logger.debug('\nsunrise:  {}\nsunset: {}\nnow: {}\nlights ON.'.format(rise, set,
+                                                                                 datetime.datetime.now().time()))
             else:
-                self.lights.off()
-                logger.debug('lights OFF.  It is after sunset (%s).' % sunset)
+                if rise <= now.time() <= set:
+                    self.lights.on()
+                    logger.debug('\nsunrise:  {}\nsunset: {}\nnow: {}\nlights ON.'.format(sunrise, sunset,
+                                                                                           datetime.datetime.now()))
+                else:
+                    self.lights.off()
+                    logger.debug('\nsunrise:  {}\nsunset: {}\nnow: {}\nlights OFF.'.format(sunrise, sunset,
+                                                                                            datetime.datetime.now()))
             sleep(60)
 
-        # return lenth of time lights have been on
+                        # return lenth of time lights have been on
     @property
     def status(self):
         lightstatus = {'lights':self.lights.state,'heatsinksensor':self.heatsinksensor.gettemps()}

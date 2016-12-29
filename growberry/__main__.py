@@ -155,7 +155,7 @@ def thermostat(sun, wind, in_sensor, out_sensor, settings):
             external_temp = 25.0  # default
             try:
                 internal_temp = float(in_sensor.read[in_sensor.name]['temp'])
-                internal_humidity = float(in_sensor.read[in_sensor.name]['humidty'])
+                internal_humidity = float(in_sensor.read[in_sensor.name]['humidity'])
                 external_temp = float(out_sensor.read[out_sensor.name]['temp'])
             except ValueError:
                 logger.warning('one of the sensors could not be read, defaults used.')
@@ -164,23 +164,6 @@ def thermostat(sun, wind, in_sensor, out_sensor, settings):
 
             fspeed = fancontrol(settings.settemp, internal_temp, internal_humidity, external_temp, heatsink_max, lightstatus)
             wind.speed(fspeed)
-
-            #
-            # night = lights.state  # when the lights.state is 1, the lights are off
-            # fanspeed = wind.tach
-            # # the max temp I'd expect is 50C, so if you divide by 50, and times 100, you get a percentage
-            # try:
-            #     current_temp = sensor.read[sensor.name]['temp']
-            #     percentfan = round((current_temp / 50) * 100, ndigits=1)
-            # except TypeError:
-            #     percentfan = 50
-            #     logger.exception('{} could not be read, setting fans to default 50%'.format(sensor.name))
-            # if not night:
-            #     wind.speed(percentfan)
-            #     logger.debug('fans ON and set to speed %s' %percentfan)
-            # else:
-            #     wind.speed(0)
-            #     logger.debug('fans OFF')
             sleep(60)
     except:
         logger.exception('thermostat broke')
