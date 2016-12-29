@@ -66,7 +66,7 @@ class Sun:
             set = sunset.time()
             now = datetime.datetime.now()
             tomorrow = now.date() + datetime.timedelta(hours=24)
-            midnight = datetime.datetime.combine(tomorrow.date(), datetime.time(0, 0, 0))
+            midnight = datetime.datetime.combine(tomorrow, datetime.time(0, 0, 0))
             if sunrise <= midnight <= sunset:
                 logger.debug('day spans midnight')
                 if set <= now.time() <= rise:
