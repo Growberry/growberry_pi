@@ -1,6 +1,6 @@
 
-from config import DHT22, RELAYS, SETTINGS_JSON, SETTINGS_URL, BARREL_ID, CAMERA, MAXTEMP,MEASUREMENT_INT,\
-    TEST_OUT, DATAPOST_URL, PHOTO_LOC, LOG_FILENAME, LOG_LVL, LOG_FORMAT
+from config import DHT22, RELAYS, SETTINGS_JSON, SETTINGS_URL, BARREL_ID, CAMERA, CAMERA_RES, MAXTEMP, MEASUREMENT_INT,\
+    TEST_OUT, DATAPOST_URL, PHOTO_LOC, LOG_FILENAME, LOG_LVL, LOG_FORMAT, FANS
 import RPi.GPIO as GPIO
 from threading import Thread
 import json
@@ -79,6 +79,7 @@ for relay in RELAYS:
     if relay[1] == 'lights':
         lights = Relay(relay[0],relay[1])
     elif relay[1] == 'fans':
+        # wind = Wind(13, 18)
         fans = Relay(relay[0], relay[1])
 str_relays = ','.join([str(x) for x in Relay.dictionary.items()])
 logger.info('Relays configured: %s' %str_relays)
@@ -93,20 +94,26 @@ settings.update()
 """set up camera"""
 if CAMERA:
     camera = PiCamera()
+    camera.resolution = CAMERA_RES
     logger.info('camera configured.')
 
-# setting up lights
+"""setting up lights"""
 sun = Sun(lights,settings,MAXTEMP)
-# lighting = Thread(target=sun.lightcontrol)
-# lighting.daemon = True
-# lighting.start()
 
-# setting up fans
-wind = Wind(13,18)
-# hvac = Thread(target=thermostat, args=(lights, wind, in_sense))
-# hvac.daemon = True
-# hvac.start()
+"""setting up fans"""
+# wind = Wind(13,18)
+wind = Wind(FANS[0],FANS[1])
 
+
+
+def fancontrol_binary(set_temp, i_temp, i_humidity, o_temp, sinktemp, lightstate):
+    """used for simple on/off fans"""
+    fanspeed = 0
+    if i_humidity > 70:
+        fanspeed = 1
+    if i_temp > set_temp:
+        fanspeed = 1
+    return fanspeed
 
 def fancontrol(set_temp, i_temp, i_humidity, o_temp, sinktemp, lightstate):
     """
@@ -260,45 +267,3 @@ finally:
     logger.info("Pins are cleaned up, threads are killed.  Goodbye.")
 
 
-
-    # while True:
-    #     settings.update()
-    #     logger.debug('settings updated')
-    #     # sun.lightcontrol()
-    #     # print "lights updated"
-    #
-    #     url = DATAPOST_URL + str(BARREL_ID)
-    #     logger.debug('the URL where the data is headed: %s' % url)
-    #     data_capture(url)
-
-    # data_json = json.dumps(data)
-    # print data_json
-    # r = requests.post(url, headers=headers, data=data_json)  # data
-    # returned_headers = str(r.headers)
-    # print 'returned: ', r, 'of type: ', type(r)
-    # print '\nthe text of which is: ', r.text
-    # # print data
-    # sun.sinktemps = []
-    # #str_sinks = '|'.join([str(x) for x in data['sinktemps']])
-    # # FIX THIS SO IT CAN MAKE A STRING DYNAMICALLY, and print the HEADERS
-    # data_str = '\t'.join([str(x) for x in [data['timestamp'],
-    #                                        data['lights'],
-    #                                        data['fanspeed'],
-    #                                        sensor_data['internal']['temp'],
-    # #                                       sensor_data['external']['temp'],
-    #                                        sensor_data['internal']['humidity'],
-    # #                                       sensor_data['external']['humidity'],
-    # #                                       str_sinks,
-    #                                        ]])
-    # print data_str
-    # data = [insense_report['timestamp'].isoformat(), lights.state, insense_report['temp'],insense_report['humidity'],sun.sinktemps]
-
-    # print data
-    # d = "%s\t%s\tlights:%s\t%s\t%s\n" % (str(data[0]), str(data[1]), str(data[2]), str(data[3]))
-
-
-    # with open(TEST_OUT,'a') as outfile:
-    #     outfile.write(data_str)
-    #     outfile.write('\n')
-
-    # sleep(MEASUREMENT_INT)

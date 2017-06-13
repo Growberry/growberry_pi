@@ -17,6 +17,8 @@ RELAYS = [ # (pin number, 'name')
     #(19, 'lights'), # proto lights
 ]
 
+FANS = [13,18]
+
 SETTINGS_URL = 'http://192.168.0.42:8000/get_settings/'
 #SETTINGS_URL = 'http://ec2-54-244-205-179.us-west-2.compute.amazonaws.com/get_settings/'
 
@@ -31,6 +33,7 @@ BARREL_ID = 4
 
 # able to toggle camera on/off
 CAMERA = False
+CAMERA_RES = (1640,1232)
 
 # Maximum temp for heatsinks before safetycheck shuts the lights off
 MAXTEMP = 40
