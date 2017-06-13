@@ -106,16 +106,16 @@ wind = Wind(FANS[0],FANS[1])
 
 
 
-def fancontrol_binary(set_temp, i_temp, i_humidity, o_temp, sinktemp, lightstate):
+def fancontrol_binary(settings, i_temp, i_humidity, o_temp, sinktemp, lightstate):
     """used for simple on/off fans"""
     fanspeed = 0
-    if i_humidity > 70:
+    if i_humidity > settings.sethumid:
         fanspeed = 1
-    if i_temp > set_temp:
+    if i_temp > settings.settemp:
         fanspeed = 1
     return fanspeed
 
-def fancontrol(set_temp, i_temp, i_humidity, o_temp, sinktemp, lightstate):
+def fancontrol(settings, i_temp, i_humidity, o_temp, sinktemp, lightstate):
     """
     fan speed model:  fanspeed = alpha(lightstatus) + beta(heatsink_max) + gamma(internal_temp) + delta(internal_humidity)
 
@@ -128,10 +128,10 @@ def fancontrol(set_temp, i_temp, i_humidity, o_temp, sinktemp, lightstate):
     """
     alpha = -5 * (lightstate - 1)
     beta = 0
-    if i_humidity > 85:
+    if i_humidity > settings.sethumid:
         beta = 5
     io_delta = o_temp - i_temp  #
-    delta_t = set_temp - i_temp  # pos values means we want the temp to go up, neg = want temps to go down.
+    delta_t = settings.settemp - i_temp  # pos values means we want the temp to go up, neg = want temps to go down.
     temp_coef = io_delta * delta_t  # will return positive values if both match
     gamma = 0
     if temp_coef > 0:
@@ -169,7 +169,7 @@ def thermostat(sun, wind, in_sensor, out_sensor, settings):
             except:
                 logger.exception("unknown error, defaults used.")
 
-            fspeed = fancontrol(settings.settemp, internal_temp, internal_humidity, external_temp, heatsink_max, lightstatus)
+            fspeed = fancontrol(settings, internal_temp, internal_humidity, external_temp, heatsink_max, lightstatus)
             wind.speed(fspeed)
             sleep(60)
     except:
@@ -186,7 +186,6 @@ def data_capture(url):
             'sensors': sensor_data,  # dict {'name':{'timestamp','temp','humidity'}}
             'lights': lights.state,  # bool
             'fanspeed': wind.tach,  # float
-            'pic_dir': '/tmp/placeholder'  # replace this with an actual directory when pictures are working
                 }
         sun.sinktemps = []
         logger.debug('data has been read. sinktemp list reset.')
