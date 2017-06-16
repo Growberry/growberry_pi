@@ -32,17 +32,17 @@ class Wind:
             raise ValueError("wrong number of arguments")
         self.powerpin = args[0]
         GPIO.setup(self.powerpin, GPIO.OUT, initial=1)
-        logger.info('Wind instance configured using {} fans.  Power on pin {}'.format(self.fantype,self.powerpin))
+        logger.info('Wind instance configured using {} fans.  Power on pin {}'.format(self.fantype, self.powerpin))
 
 
-    def fancontrol_binary(self, settings, i_temp, i_humidity, o_temp, sinktemp, lightstate):
-        """used for simple on/off fans"""
-        fanspeed = 0
-        if i_humidity > settings.sethumid:
-            fanspeed = 1
-        if i_temp > settings.settemp:
-            fanspeed = 1
-        return fanspeed
+    # def fancontrol_binary(self, settings, i_temp, i_humidity, o_temp, sinktemp, lightstate):
+    #     """used for simple on/off fans"""
+    #     fanspeed = 0
+    #     if i_humidity > settings.sethumid:
+    #         fanspeed = 1
+    #     if i_temp > settings.settemp:
+    #         fanspeed = 1
+    #     return fanspeed
 
     def fancontrol(self, settings, i_temp, i_humidity, o_temp, sinktemp, lightstate):
         """
@@ -92,13 +92,13 @@ class Wind:
             GPIO.output(self.powerpin, GPIO.LOW) # power on
             # self.on()
             self.tach = value
-            logger.debug('fans set to speed: %s' %str(self.tach))
+            logger.debug('fans set to speed: {}'.format(self.tach))
             # print "ON"
         elif value == 0:
             # self.off()
             GPIO.output(self.powerpin, GPIO.HIGH)  # power off
             self.tach = 0
-            logger.debug('fans set to speed: %s' % str(self.tach))
+            logger.debug('fans set to speed: {}'.format(self.tach))
             # print "OFF"
             # if self.lights.state:  #lights.state = 1 means lights are off
             #     GPIO.output(self.powerpin, GPIO.HIGH)  # power off
@@ -147,7 +147,7 @@ if __name__ == "__main__":
                 print "something went wrong."
                 break
             else:
-                print "New duty cycle = %s"%inputspeed
+                print "New duty cycle = {}".format(inputspeed)
 
     finally:
         wind.pwm.stop()
