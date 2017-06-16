@@ -18,8 +18,8 @@ RELAYS = [ # (pin number, 'name')
     #(19, 'lights'), # proto lights
 ]
 
-# Fans power pin, and speed pin
-FANS = [13,18]
+# FANS = [13]  # if using a binary fan (without PWM speed control)
+FANS = [13,18]  # Fans power pin, and PWM speed pin
 
 SETTINGS_URL = 'http://192.168.0.42:8000/get_settings/'
 #SETTINGS_URL = 'http://ec2-54-244-205-179.us-west-2.compute.amazonaws.com/get_settings/'
@@ -55,7 +55,7 @@ LOG_FORMAT = "[%(levelname)s] %(name)s %(asctime)s %(message)s"
 
 
 # CharacterLCD
-LCD = True
+# LCD_PINS = False  # Make False if no LCD
 LCD_PINS = { # Keys must all be here and unchanged.
 # Raspberry Pi pin configuration:
     'lcd_rs':27,  # Note this might need to be changed to 21 for older revision Pi's.
@@ -67,5 +67,5 @@ LCD_PINS = { # Keys must all be here and unchanged.
     'lcd_backlight':4,
     'lcd_columns':16,
     'lcd_rows':2
-}
+    }
 

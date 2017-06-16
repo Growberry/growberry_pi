@@ -11,7 +11,7 @@ import RPi.GPIO as GPIO
 from picamera import PiCamera
 
 from config import DHT22, RELAYS, SETTINGS_JSON, SETTINGS_URL, BARREL_ID, CAMERA, CAMERA_RES, MAXTEMP, MEASUREMENT_INT,\
-    DATAPOST_URL, PHOTO_LOC, LOG_FILENAME, LOG_LVL, LOG_FORMAT, FANS, LCD_TRUE, LCD_PINS
+    DATAPOST_URL, PHOTO_LOC, LOG_FILENAME, LOG_LVL, LOG_FORMAT, FANS, LCD_PINS
 
 from settings import Settings
 from sun import Sun
@@ -23,7 +23,7 @@ if RELAYS: # if no Relays configured, don't need Relay module
     from pins import Relay
 if CAMERA:
     from picamera import PiCamera
-if LCD_TRUE:
+if LCD_PINS:
     import Adafruit_CharLCD as LCD
 
 
@@ -99,11 +99,10 @@ if CAMERA:
 sun = Sun(lights,settings,MAXTEMP)
 
 """setting up fans"""
-# wind = Wind(13,18)
-wind = Wind(FANS[0],FANS[1])
+wind = Wind(FANS)
 
 """setting up LCD display"""
-if LCD_TRUE:
+if LCD_PINS:
     # Initialize the LCD using the pins from LCD_PINS.
     lcd = LCD.Adafruit_CharLCD(
         LCD_PINS['lcd_rs'], LCD_PINS['lcd_en'], LCD_PINS['lcd_d4'],
@@ -111,45 +110,6 @@ if LCD_TRUE:
         LCD_PINS['lcd_columns'], LCD_PINS['lcd_rows'], LCD_PINS['lcd_backlight'])
 LCD_TOP = 'Nothing to'
 LCD_BOT = 'display yet.'
-
-
-def fancontrol_binary(settings, i_temp, i_humidity, o_temp, sinktemp, lightstate):
-    """used for simple on/off fans"""
-    fanspeed = 0
-    if i_humidity > settings.sethumid:
-        fanspeed = 1
-    if i_temp > settings.settemp:
-        fanspeed = 1
-    return fanspeed
-
-def fancontrol(settings, i_temp, i_humidity, o_temp, sinktemp, lightstate):
-    """
-    fan speed model:  fanspeed = alpha(lightstatus) + beta(heatsink_max) + gamma(internal_temp) + delta(internal_humidity)
-
-    :alpha: +5 if lights ON
-    :beta: +5 if humidity is over 85
-    :gamma: delta(settemp - in_temp) * delta(out_temp - in_temp) / 10
-    :epsilon: (sinktemp-30) * 6.34
-
-    :return: speed at which to set the fan (0-100) in multiples of 5.
-    """
-    alpha = -5 * (lightstate - 1)
-    beta = 0
-    if i_humidity > settings.sethumid:
-        beta = 5
-    io_delta = o_temp - i_temp  #
-    delta_t = settings.settemp - i_temp  # pos values means we want the temp to go up, neg = want temps to go down.
-    temp_coef = io_delta * delta_t  # will return positive values if both match
-    gamma = 0
-    if temp_coef > 0:
-        gamma = temp_coef/10
-    epsilon = max(0,(sinktemp - 30) * 6.34)
-
-    omega = alpha + beta + gamma + epsilon
-    logger.debug('omega = alpha + beta + gamma + epsilon\n{}(fanspeed) = {}(lights) + {}(humidity) + {}(temp_coef) + {}(heatsink)'.format(omega,alpha,beta,gamma,epsilon))
-    fanspeed = min(100, int(round(omega/5)*5))
-    return fanspeed
-
 
 
 def thermostat(sun, wind, in_sensor, out_sensor, settings):
@@ -180,9 +140,9 @@ def thermostat(sun, wind, in_sensor, out_sensor, settings):
                 LCD_BOT = 'DEFAULTS USED'
             except:
                 logger.exception("unknown error, defaults used.")
-            fspeed = fancontrol(settings, internal_temp, internal_humidity, external_temp, heatsink_max, lightstatus)
+            fspeed = wind.fancontrol(settings, internal_temp, internal_humidity, external_temp, heatsink_max, lightstatus)
             wind.speed(fspeed)
-            if LCD_TRUE:
+            if LCD_PINS:
                 lcd.message('{}\n{}'.format(LCD_TOP,LCD_BOT))
             sleep(60)
     except:
@@ -275,7 +235,7 @@ except(KeyboardInterrupt):
 
 
 finally:
-    if LCD_TRUE:
+    if LCD_PINS:
         lcd.clear()
     GPIO.cleanup()
     logger.info("Pins are cleaned up, threads are killed.  Goodbye.")
