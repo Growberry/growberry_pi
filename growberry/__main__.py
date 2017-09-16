@@ -108,12 +108,15 @@ if LCD_PINS:
         LCD_PINS['lcd_rs'], LCD_PINS['lcd_en'], LCD_PINS['lcd_d4'],
         LCD_PINS['lcd_d5'], LCD_PINS['lcd_d6'], LCD_PINS['lcd_d7'],
         LCD_PINS['lcd_columns'], LCD_PINS['lcd_rows'], LCD_PINS['lcd_backlight'])
-LCD_TOP = 'Nothing to'
+
+# these will be the variables that get displayed on the LCD
+LCD_TOP = 'Nothing to' # 16 chars max
 LCD_BOT = 'display yet.'
 
 
 def thermostat(sun, wind, in_sensor, out_sensor, settings):
     """
+
     Literally only deterimines what speed the fan should be.  Pass in the lights, fans, and all inputs.
     reads the inputs, and passes them to the correct fanspeed function (binary or PWM)
     """
@@ -130,18 +133,21 @@ def thermostat(sun, wind, in_sensor, out_sensor, settings):
             internal_temp = 25.0  # default
             internal_humidity = 50.0  # default
             external_temp = 25.0  # default
-            try:
+            try: # read dht22s
                 internal_temp = float(in_sensor.read[in_sensor.name]['temp'])
                 internal_humidity = float(in_sensor.read[in_sensor.name]['humidity'])
                 external_temp = float(out_sensor.read[out_sensor.name]['temp'])
-                LCD_BOT = 'online:{}'.format(settings['online'])
+                LCD_TOP = 'TMP:{} RH:{}'.format(internal_temp, internal_humidity)
             except ValueError:
                 logger.warning('one of the sensors could not be read, defaults used.')
-                LCD_BOT = 'DEFAULTS USED'
+                LCD_TOP = 'SENSOR ERROR'
+                LCD_BOT = 'Pin: {}'.format(in_sensor.pin)
             except:
                 logger.exception("unknown error, defaults used.")
+            ## The fancontrol() function needs these variables to determine the needed fan speed.
             fspeed = wind.fancontrol(settings, internal_temp, internal_humidity, external_temp, heatsink_max, lightstatus)
             wind.speed(fspeed)
+            LCD_BOT = 'Fan speed: {}'.format(fspeed)
             if LCD_PINS:
                 lcd.message('{}\n{}'.format(LCD_TOP,LCD_BOT))
             sleep(60)
@@ -196,10 +202,10 @@ def data_logger():
     except:
         logger.exception('data_logger() failed. Data failed to be uploaded')
 
-
+# These are the threads that will be running
 workers = {
-    'lighting': Thread(target=sun.lightcontrol),
-    'hvac': Thread(target=thermostat, args=(sun, wind, in_sense, ext_sense, settings)),
+    'lighting': Thread(target=sun.lightcontrol), # checks time, turns lights on or off.
+    'hvac': Thread(target=thermostat, args=(sun, wind, in_sense, ext_sense, settings)), #
     'heatink_safety_monitor': Thread(target=sun.safetyvalve, args=(sun.lights,sun.maxtemp)),
     'settings_fetcher': Thread(target=settings_fetcher),
     'data_logger': Thread(target=data_logger)
