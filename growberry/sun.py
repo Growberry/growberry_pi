@@ -57,7 +57,7 @@ class Sun:
         determines if artificial lights should be on, or off.
         :param rise: datetime.time(h,m,s)
         :param length: integer number of hours
-        :return: lights activate or deactivate.
+        :return: returns nothing. This actually turns lights on or off.
         """
         while self:
             rise = self.settings.sunrise
