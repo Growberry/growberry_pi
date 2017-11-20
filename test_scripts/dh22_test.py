@@ -5,7 +5,7 @@ from time import sleep
 
 GPIO.setmode(GPIO.BCM)
 
-ext_sense = Sensor(22, Adafruit_DHT.DHT22, 'external')
+ext_sense = Sensor(23, Adafruit_DHT.DHT22, 'external')
 in_sense = Sensor(17, Adafruit_DHT.DHT22, 'internal')
 
 try:
