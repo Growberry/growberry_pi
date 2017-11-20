@@ -1,14 +1,17 @@
 
-from config import DHT22, RELAYS, SETTINGS_JSON, SETTINGS_URL, BARREL_ID, CAMERA, MAXTEMP,MEASUREMENT_INT,\
-    TEST_OUT, DATAPOST_URL, PHOTO_LOC, LOG_FILENAME, LOG_LVL, LOG_FORMAT
-import RPi.GPIO as GPIO
+from time import sleep
+import datetime
 from threading import Thread
 import json
 import requests
-from picamera import PiCamera
 import logging
 import logging.handlers
 
+import RPi.GPIO as GPIO
+from picamera import PiCamera
+
+from config import DHT22, RELAYS, SETTINGS_JSON, SETTINGS_URL, BARREL_ID, CAMERA, CAMERA_RES, MAXTEMP, MEASUREMENT_INT,\
+    DATAPOST_URL, PHOTO_LOC, LOG_FILENAME, LOG_LVL, LOG_FORMAT, FANS, LCD_PINS
 
 from settings import Settings
 from sun import Sun
@@ -20,9 +23,8 @@ if RELAYS: # if no Relays configured, don't need Relay module
     from pins import Relay
 if CAMERA:
     from picamera import PiCamera
-from one_wire_temp import w1therm
-from time import sleep
-import datetime
+if LCD_PINS:
+    import Adafruit_CharLCD as LCD
 
 
 #set up all variables as None
@@ -38,10 +40,6 @@ settings = None
 
 global_logger = logging.getLogger()
 global_logger.setLevel(logging.DEBUG)
-
-# logger = logging.getLogger(__name__)
-# logging_format = "[%(levelname)s] %(name)s %(asctime)s %(message)s"
-# logging.basicConfig(filename='log_growberry.log',format=logging_format, level=LOG_LVL)
 
 # Set up a specific logger with our desired output level
 logger = logging.getLogger(__name__)
@@ -70,7 +68,7 @@ for dht22_sensor in DHT22:
     elif dht22_sensor[1] == 'external':
         ext_sense = Sensor(dht22_sensor[0], Adafruit_DHT.DHT22, dht22_sensor[1])
 str_sensor = ','.join([str(x) for x in Sensor.array])
-logger.info("DHT22 sensors configured: %s" %str_sensor)
+logger.info("DHT22 sensors configured: {}".format(str_sensor))
 
 
 """import all the relays, and give them names"""
@@ -79,9 +77,10 @@ for relay in RELAYS:
     if relay[1] == 'lights':
         lights = Relay(relay[0],relay[1])
     elif relay[1] == 'fans':
+        # wind = Wind(13, 18)
         fans = Relay(relay[0], relay[1])
 str_relays = ','.join([str(x) for x in Relay.dictionary.items()])
-logger.info('Relays configured: %s' %str_relays)
+logger.info('Relays configured: {}'.format(str_relays))
 
 
 """set up the Settings object that will handle all the settings"""
@@ -93,55 +92,36 @@ settings.update()
 """set up camera"""
 if CAMERA:
     camera = PiCamera()
+    camera.resolution = CAMERA_RES
     logger.info('camera configured.')
 
-# setting up lights
+"""setting up lights"""
 sun = Sun(lights,settings,MAXTEMP)
-# lighting = Thread(target=sun.lightcontrol)
-# lighting.daemon = True
-# lighting.start()
 
-# setting up fans
-wind = Wind(13,18)
-# hvac = Thread(target=thermostat, args=(lights, wind, in_sense))
-# hvac.daemon = True
-# hvac.start()
+"""setting up fans"""
+wind = Wind(FANS)
 
+"""setting up LCD display"""
+if LCD_PINS:
+    # Initialize the LCD using the pins from LCD_PINS.
+    lcd = LCD.Adafruit_CharLCD(
+        LCD_PINS['lcd_rs'], LCD_PINS['lcd_en'], LCD_PINS['lcd_d4'],
+        LCD_PINS['lcd_d5'], LCD_PINS['lcd_d6'], LCD_PINS['lcd_d7'],
+        LCD_PINS['lcd_columns'], LCD_PINS['lcd_rows'], LCD_PINS['lcd_backlight'])
 
-def fancontrol(set_temp, i_temp, i_humidity, o_temp, sinktemp, lightstate):
-    """
-    fan speed model:  fanspeed = alpha(lightstatus) + beta(heatsink_max) + gamma(internal_temp) + delta(internal_humidity)
-
-    :alpha: +5 if lights ON
-    :beta: +5 if humidity is over 85
-    :gamma: delta(settemp - in_temp) * delta(out_temp - in_temp) / 10
-    :epsilon: (sinktemp-30) * 6.34
-
-    :return: speed at which to set the fan (0-100) in multiples of 5.
-    """
-    alpha = -5 * (lightstate - 1)
-    beta = 0
-    if i_humidity > 85:
-        beta = 5
-    io_delta = o_temp - i_temp  #
-    delta_t = set_temp - i_temp  # pos values means we want the temp to go up, neg = want temps to go down.
-    temp_coef = io_delta * delta_t  # will return positive values if both match
-    gamma = 0
-    if temp_coef > 0:
-        gamma = temp_coef/10
-    epsilon = max(0,(sinktemp - 30) * 6.34)
-
-    omega = alpha + beta + gamma + epsilon
-    logger.debug('omega = alpha + beta + gamma + epsilon\n{}(fanspeed) = {}(lights) + {}(humidity) + {}(temp_coef) + {}(heatsink)'.format(omega,alpha,beta,gamma,epsilon))
-    fanspeed = min(100, int(round(omega/5)*5))
-    return fanspeed
-
+# these will be the variables that get displayed on the LCD
+LCD_TOP = 'Nothing to' # 16 chars max
+LCD_BOT = 'display yet.'
 
 
 def thermostat(sun, wind, in_sensor, out_sensor, settings):
     """
 
+    Literally only deterimines what speed the fan should be.  Pass in the lights, fans, and all inputs.
+    reads the inputs, and passes them to the correct fanspeed function (binary or PWM)
     """
+    global LCD_TOP
+    global LCD_BOT
     try:
         while True:
             lightstatus = sun.lights.state
@@ -153,17 +133,23 @@ def thermostat(sun, wind, in_sensor, out_sensor, settings):
             internal_temp = 25.0  # default
             internal_humidity = 50.0  # default
             external_temp = 25.0  # default
-            try:
+            try: # read dht22s
                 internal_temp = float(in_sensor.read[in_sensor.name]['temp'])
                 internal_humidity = float(in_sensor.read[in_sensor.name]['humidity'])
                 external_temp = float(out_sensor.read[out_sensor.name]['temp'])
+                LCD_TOP = 'TMP:{} RH:{}'.format(internal_temp, internal_humidity)
             except ValueError:
                 logger.warning('one of the sensors could not be read, defaults used.')
+                LCD_TOP = 'SENSOR ERROR'
+                LCD_BOT = 'Pin: {}'.format(in_sensor.pin)
             except:
                 logger.exception("unknown error, defaults used.")
-
-            fspeed = fancontrol(settings.settemp, internal_temp, internal_humidity, external_temp, heatsink_max, lightstatus)
+            ## The fancontrol() function needs these variables to determine the needed fan speed.
+            fspeed = wind.fancontrol(settings, internal_temp, internal_humidity, external_temp, heatsink_max, lightstatus)
             wind.speed(fspeed)
+            LCD_BOT = 'Fan speed: {}'.format(fspeed)
+            if LCD_PINS:
+                lcd.message('{}\n{}'.format(LCD_TOP,LCD_BOT))
             sleep(60)
     except:
         logger.exception('thermostat broke')
@@ -179,7 +165,6 @@ def data_capture(url):
             'sensors': sensor_data,  # dict {'name':{'timestamp','temp','humidity'}}
             'lights': lights.state,  # bool
             'fanspeed': wind.tach,  # float
-            'pic_dir': '/tmp/placeholder'  # replace this with an actual directory when pictures are working
                 }
         sun.sinktemps = []
         logger.debug('data has been read. sinktemp list reset.')
@@ -192,7 +177,7 @@ def data_capture(url):
             camera.capture(PHOTO_LOC)
             files.update({'photo': (PHOTO_LOC, open(PHOTO_LOC, 'rb'), 'image/jpg')})
         files_json = ','.join(str(x) for x in files.keys())
-        logger.debug('Files for upload: %s' % files_json)
+        logger.debug('Files for upload: {}'.format(files_json))
         r = requests.post(url, files=files)
         logger.info(r.text)
 
@@ -211,16 +196,16 @@ def data_logger():
     try:
         while True:
             url = DATAPOST_URL + str(BARREL_ID)
-            logger.debug('the URL where the data is headed: %s' % url)
+            logger.debug('the URL where the data is headed: {}'.format(url))
             data_capture(url)
             sleep(MEASUREMENT_INT)
     except:
         logger.exception('data_logger() failed. Data failed to be uploaded')
 
-
+# These are the threads that will be running
 workers = {
-    'lighting': Thread(target=sun.lightcontrol),
-    'hvac': Thread(target=thermostat, args=(sun, wind, in_sense, ext_sense, settings)),
+    'lighting': Thread(target=sun.lightcontrol), # checks time, turns lights on or off.
+    'hvac': Thread(target=thermostat, args=(sun, wind, in_sense, ext_sense, settings)), #
     'heatink_safety_monitor': Thread(target=sun.safetyvalve, args=(sun.lights,sun.maxtemp)),
     'settings_fetcher': Thread(target=settings_fetcher),
     'data_logger': Thread(target=data_logger)
@@ -256,49 +241,9 @@ except(KeyboardInterrupt):
 
 
 finally:
+    if LCD_PINS:
+        lcd.clear()
     GPIO.cleanup()
     logger.info("Pins are cleaned up, threads are killed.  Goodbye.")
 
 
-
-    # while True:
-    #     settings.update()
-    #     logger.debug('settings updated')
-    #     # sun.lightcontrol()
-    #     # print "lights updated"
-    #
-    #     url = DATAPOST_URL + str(BARREL_ID)
-    #     logger.debug('the URL where the data is headed: %s' % url)
-    #     data_capture(url)
-
-    # data_json = json.dumps(data)
-    # print data_json
-    # r = requests.post(url, headers=headers, data=data_json)  # data
-    # returned_headers = str(r.headers)
-    # print 'returned: ', r, 'of type: ', type(r)
-    # print '\nthe text of which is: ', r.text
-    # # print data
-    # sun.sinktemps = []
-    # #str_sinks = '|'.join([str(x) for x in data['sinktemps']])
-    # # FIX THIS SO IT CAN MAKE A STRING DYNAMICALLY, and print the HEADERS
-    # data_str = '\t'.join([str(x) for x in [data['timestamp'],
-    #                                        data['lights'],
-    #                                        data['fanspeed'],
-    #                                        sensor_data['internal']['temp'],
-    # #                                       sensor_data['external']['temp'],
-    #                                        sensor_data['internal']['humidity'],
-    # #                                       sensor_data['external']['humidity'],
-    # #                                       str_sinks,
-    #                                        ]])
-    # print data_str
-    # data = [insense_report['timestamp'].isoformat(), lights.state, insense_report['temp'],insense_report['humidity'],sun.sinktemps]
-
-    # print data
-    # d = "%s\t%s\tlights:%s\t%s\t%s\n" % (str(data[0]), str(data[1]), str(data[2]), str(data[3]))
-
-
-    # with open(TEST_OUT,'a') as outfile:
-    #     outfile.write(data_str)
-    #     outfile.write('\n')
-
-    # sleep(MEASUREMENT_INT)

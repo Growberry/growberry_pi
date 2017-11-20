@@ -3,20 +3,23 @@ import time
 import json
 import random
 import datetime
-
+import sys
 
 # url = 'http://127.0.0.1:5000/multi/4'
-url = 'http://192.168.0.42:8000/multi/2'
+base_url = 'http://192.168.0.42:8000/multi/{}'
 # url = 'http://ec2-54-244-205-179.us-west-2.compute.amazonaws.com/multi/4'
 
+if len(sys.argv) != 3:
+    print("This script requires 2 arguments: arg1 is the path to the picture you want to uplod, arg2 is the grow number you want the picture to be uploaded to.\n\n\nexample: ./test_api_POST.py ~/growberry_pi/testpic123.jpg 1")
+
+grownum = sys.argv[2]
+picture = sys.argv[1]
 
 
-
-
-photopath = '/home/nimrod337/growberry_pi/testpic123.jpg'
+url = base_url.format(grownum)
+photopath = picture
 
 testtimestamp = datetime.datetime.utcnow()
-
 
 f = "post.log"
 # headers = {'Content-Type': 'application/json',}

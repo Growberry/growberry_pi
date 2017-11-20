@@ -17,6 +17,7 @@ class Settings(object):
         self.daylength = None
         self.pic_dir = None
         self.settemp = None
+        self.sethumid = None
         logger.info('Settings instance created.')
 
     def update(self):
@@ -43,6 +44,7 @@ class Settings(object):
                     self.daylength = timedelta(hours=float(self.settings['daylength']))
                     self.pic_dir = self.settings.get('pic_dir', '/fake/pic_dir/')
                     self.settemp = float(self.settings.get('settemp', 25))
+                    self.sethumid = float(self.settings.get('sethumid', 75))
                 logger.debug('settings.json sucessfully loaded.')
             except Exception,e:
                 logger.critical('settings.json could not be loaded: %s' %e)
@@ -51,9 +53,8 @@ class Settings(object):
 if __name__ == '__main__':
     test_grow_id = 2
     test_url = 'http://localhost:5000/get_settings/'
-    test_url2 = 'http://ec2-54-244-205-179.us-west-2.compute.amazonaws.com/get_settings/'
     fl = 'settings.json'
-    settings = Settings(test_url2,fl,test_grow_id)
+    settings = Settings(test_url,fl,test_grow_id)
 
     settings.update()
     print settings.settings
