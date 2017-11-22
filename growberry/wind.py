@@ -8,15 +8,6 @@ logger = logging.getLogger(__name__)
 
 class Wind:
     """This will house all of functions used to control the fans"""
-    # def __init__(self, powerpin, speedpin, speed = 0):
-    #     self.powerpin = powerpin
-    #     GPIO.setup(powerpin, GPIO.OUT, initial=1)
-    #     GPIO.setup(speedpin, GPIO.OUT)
-    #     self.pwm = GPIO.PWM(speedpin, 25000) # 25 Kilohertz is inaudible to human ears
-    #     self.pwm.start(speed)
-    #     self.tach = speed
-    #     logger.info('fans initiated.  Power on pin {}, speed control PWM on pin {}'.format(self.powerpin,self.pwm))
-
     def __init__(self, *args):
         if len(args) == 1:
             self.fantype = 'Binary'
@@ -34,15 +25,6 @@ class Wind:
         GPIO.setup(self.powerpin, GPIO.OUT, initial=1)
         logger.info('Wind instance configured using {} fans.  Power on pin {}'.format(self.fantype, self.powerpin))
 
-
-    # def fancontrol_binary(self, settings, i_temp, i_humidity, o_temp, sinktemp, lightstate):
-    #     """used for simple on/off fans"""
-    #     fanspeed = 0
-    #     if i_humidity > settings.sethumid:
-    #         fanspeed = 1
-    #     if i_temp > settings.settemp:
-    #         fanspeed = 1
-    #     return fanspeed
 
     def fancontrol(self, settings, i_temp, i_humidity, o_temp, sinktemp, lightstate):
         """
@@ -85,46 +67,26 @@ class Wind:
             return fanspeed
 
     def speed(self, value):
-        """Handles the speed of the fans, including master power, on/off."""
-        dutycycle = 100.0 - value  # 100 is slow, 0 is fast
+        """
+        Handles the speed of the fans, including master power, on/off.
+        Takes a speed value from 0-100, and sets PWM cycle.
+        Also sets self.tach to reflect the current speed.
+        """
+        dutycycle = 100.0 - value  # 100 is slow, 0 is fast so we invert it.
         if 0 < value <= 100:
             self.pwm.ChangeDutyCycle(dutycycle)
-            GPIO.output(self.powerpin, GPIO.LOW) # power on
-            # self.on()
+            GPIO.output(self.powerpin, GPIO.LOW)  # power on
             self.tach = value
             logger.debug('fans set to speed: {}'.format(self.tach))
-            # print "ON"
         elif value == 0:
-            # self.off()
             GPIO.output(self.powerpin, GPIO.HIGH)  # power off
             self.tach = 0
             logger.debug('fans set to speed: {}'.format(self.tach))
-            # print "OFF"
-            # if self.lights.state:  #lights.state = 1 means lights are off
-            #     GPIO.output(self.powerpin, GPIO.HIGH)  # power off
-            # else:
-            #     raise ValueError("cannot set speed to 0 when lights are on")
+
         else:
             logger.error('non-valid fan speed submitted: {}}'.format(value))
             raise ValueError("Speed must be between 0.0-100.0")
 
-
-    # def on(self):
-    #     """switches GPIO pin to LOW/0 - in open state relays, this turns the relay ON."""
-    #     GPIO.output(self.powerpin, GPIO.LOW)
-    #
-    #
-    # def off(self):
-    #     """ switches GPIO pin to HIGH/1 - in open state relays, this turns the relay OFF."""
-    #     GPIO.output(self.powerpin, GPIO.HIGH)
-
-    # def tempcontrol(self, settemp):
-    #     while True:
-    #         # send temp measurement to PID
-    #         # inside PID there will be an if/else clause that sets the min fanspeed if the lights are on
-    #         newfanspeed = pid(temp)
-    #         self.speed(newfanspeed)
-    #
 
     @property
     def state(self):
@@ -142,12 +104,13 @@ if __name__ == "__main__":
             try:
                 wind.speed(inputspeed)
             except ValueError:
-                print "invalid set speed"
+                print("invalid set speed")
             except:
-                print "something went wrong."
+                print("something went wrong.")
                 break
             else:
-                print "New duty cycle = {}".format(inputspeed)
+                print("New duty cycle = {}\nCurrent fan status is: {}".format(inputspeed, wind.state))
+
 
     finally:
         wind.pwm.stop()
