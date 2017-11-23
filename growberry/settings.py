@@ -57,7 +57,7 @@ if __name__ == '__main__':
     settings = Settings(test_url,fl,test_grow_id)
 
     settings.update()
-    print settings.settings
-    print settings.startdate
-    print settings.sunrise
-    print settings.daylength
+    print(settings.settings)
+    print(settings.startdate)
+    print(settings.sunrise)
+    print(settings.daylength)

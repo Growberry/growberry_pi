@@ -1,7 +1,12 @@
 import datetime
+import sys
+import RPi.GPIO as GPIO
 from one_wire_temp import w1therm
 from time import sleep
 import logging
+
+GPIO.setmode(GPIO.BCM)  # for using the names of the pins
+GPIO.setwarnings(True)  # set to false if the warnings bother you, helps troubleshooting
 
 logger = logging.getLogger(__name__)
 
@@ -76,7 +81,7 @@ class Sun:
         """
         while self:
             decider = []
-            for interval in light_intervals:
+            for interval in light_intervals:  # interval should be a tuple of length 2.
                 if isinstance(interval[0], datetime.time):
                     sunrise = datetime.datetime.combine(datetime.date.today(), interval[0])  #The day changes, but the time doesnt
                 elif isinstance(interval[0], str) and len(interval[0]) == 4:
@@ -91,7 +96,7 @@ class Sun:
                 elif isinstance(interval[1], int) or isinstance(interval[1], float):
                     daylength = datetime.timedelta(hours=interval[1])
                 else:
-                    logger.error('The entered daylength ({}) is not of datetime.timedelta, or int/float.'.format(interval[0]))
+                    logger.error('The entered daylength ({}) is not of datetime.timedelta, or int/float.'.format(interval[1]))
                     break
                 sunset = sunrise + daylength
 
@@ -135,19 +140,30 @@ class Sun:
         return lightstatus
 
 
+# Manual mode:
+
 if __name__ == '__main__':
-    power = raw_input("Which GPIO pin powers the lights?\n>>>")
-    pwm = raw_input("Which pin controls the brightness (this doesn't do anything yet)?\n>>>")
-    sun = Sun(int(power),int(pwm))
-    print('lights are currently: {}'.format(sun.state))
+    out_hdlr = logging.StreamHandler(sys.stdout)
+    out_hdlr.setLevel(logging.DEBUG)
+    logger.addHandler(out_hdlr)
+
+    power = input("Which GPIO pin powers the lights?\n>>>")
+    pwm = input("Which pin controls the brightness (this doesn't do anything yet)?\n>>>")
+    sun = Sun(int(power), int(pwm))
+    logger.debug('lights are currently: {}'.format(sun.state))
     sun.sunup()
-    print('lights are currently: {}'.format(sun.state))
+    sleep(3)
+    logger.debug('lights are currently: {}'.format(sun.state))
     sun.sundown()
-    print('lights are currently: {}'.format(sun.state))
+    logger.debug('lights are currently: {}'.format(sun.state))
 
     while True:
-        user_sunrise = raw_input("what time does the sun come up (HHMM)?\n>>>")
-        user_daylenth = raw_input("how long is the sun up for (in hours)?\n>>>")
-        user_interval = (user_sunrise, user_daylenth)
+        user_sunrise = input("what time does the sun come up (HHMM)?\n>>>")
+        user_daylenth = float(input("how long is the sun up for (in hours)?\n>>>"))
+        user_interval = [(user_sunrise, user_daylenth)]
+        logger.debug(user_interval)
         sun.lightcontrol(user_interval)
-        print('lights are currently: {}'.format(sun.state))
+        logger.debug('lights are currently: {}'.format(sun.state))
+    sun.sundown()
+    GPIO.cleanup()
+    logger.debug('Sun has set, GPIO pins have been cleaned up. Goodbye.')

@@ -95,8 +95,14 @@ class Wind:
 
 """Manual control mode"""
 if __name__ == "__main__":
-    power = raw_input("Which GPIO pin powers the fan (13)?\n>>>")
-    pwm = raw_input("Which pin controls the speed (18)?\n>>>")
+
+    # put in a handler to print errors to the standard output
+    out_hdlr = logging.StreamHandler(sys.stdout)
+    out_hdlr.setLevel(logging.DEBUG)
+    logger.addHandler(out_hdlr)
+
+    power = input("Which GPIO pin powers the fan (13)?\n>>>")
+    pwm = input("Which pin controls the speed (18)?\n>>>")
     wind = Wind(int(power),int(pwm))
     try:
         while True:
@@ -104,16 +110,16 @@ if __name__ == "__main__":
             try:
                 wind.speed(inputspeed)
             except ValueError:
-                print("invalid set speed")
+                logger.debug("invalid set speed")
             except:
-                print("something went wrong.")
+                logger.debug("something went wrong.")
                 break
             else:
-                print("New duty cycle = {}\nCurrent fan status is: {}".format(inputspeed, wind.state))
+                logger.debug("New duty cycle = {}\nCurrent fan status is: {}".format(inputspeed, wind.state))
 
 
     finally:
         wind.pwm.stop()
         GPIO.cleanup()
-        print('PWM stopped, GPIO pins have been cleaned up. Goodbye.')
+        logger.debug('PWM stopped, GPIO pins have been cleaned up. Goodbye.')
 
