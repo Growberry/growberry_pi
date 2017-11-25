@@ -1,4 +1,5 @@
 import time
+import sys
 from time import sleep
 import RPi.GPIO as GPIO
 import Adafruit_DHT
@@ -122,7 +123,7 @@ if __name__=="__main__":
     except ValueError:
         logger.error('all values entered must be integers!')
 
-    manual_sensors = None
+    manual_sensors = []
     for sensor in sensor_pins:  # create a list containing all the sensor objects
         manual_sensors.append(Sensor(sensor, Adafruit_DHT.DHT22, 'DHT22 on pin:{}'.format(sensor)))
 
