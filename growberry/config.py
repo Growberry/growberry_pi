@@ -12,11 +12,9 @@ DHT22 = [ #(pin number, 'name')
 #    (22,'external')
 ]
 
-# a list containing all relays.  The names must be 'lights' and 'fans'
-RELAYS = [ # (pin number, 'name')
-    (6, 'lights'),  # dev lights
-    #(19, 'lights'), # proto lights
-]
+LIGHTS = [19]  # if using binary lights (without PWM dimming)
+# LIGHTS = [22, 5]  # use this line for [power pin, pwm pin]
+
 
 # FANS = [13]  # if using a binary fan (without PWM speed control)
 FANS = [13,18]  # Fans power pin, and PWM speed pin

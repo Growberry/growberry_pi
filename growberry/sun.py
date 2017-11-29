@@ -20,7 +20,7 @@ class Sun:
 
     def __init__(self, powerpin, dim_pin=False):
         self.powerpin = int(powerpin)  # this is the GPIO pin number (will depend on GPIO config)
-        GPIO.setup(powerpin, GPIO.OUT, initial=1)
+        GPIO.setup(int(powerpin), GPIO.OUT, initial=1)
         self.mode = 'binary'
         if dim_pin:
             self.dimpin = dim_pin

@@ -10,8 +10,8 @@ import logging.handlers
 import RPi.GPIO as GPIO
 from picamera import PiCamera
 
-from config import DHT22, RELAYS, SETTINGS_JSON, SETTINGS_URL, BARREL_ID, CAMERA, CAMERA_RES, MAXTEMP, MEASUREMENT_INT,\
-    DATAPOST_URL, PHOTO_LOC, LOG_FILENAME, LOG_LVL, LOG_FORMAT, FANS, LCD_PINS
+from config import DHT22, SETTINGS_JSON, SETTINGS_URL, BARREL_ID, CAMERA, CAMERA_RES, MAXTEMP, MEASUREMENT_INT,\
+    DATAPOST_URL, PHOTO_LOC, LOG_FILENAME, LOG_LVL, LOG_FORMAT, FANS, LIGHTS, LCD_PINS
 
 from settings import Settings
 from sun import Sun
@@ -19,8 +19,6 @@ from wind import Wind
 if DHT22:  # if there are no sensors in config, don't need to import Adafruit (can cause trouble)
     import Adafruit_DHT
     from pins import Sensor
-if RELAYS: # if no Relays configured, don't need Relay module
-    from pins import Relay
 if CAMERA:
     from picamera import PiCamera
 if LCD_PINS:
@@ -71,22 +69,10 @@ str_sensor = ','.join([str(x) for x in Sensor.array])
 logger.info("DHT22 sensors configured: {}".format(str_sensor))
 
 
-"""import all the relays, and give them names"""
-for relay in RELAYS:
-    GPIO.setup(relay[0], GPIO.OUT, initial=1)
-    if relay[1] == 'lights':
-        lights = Relay(relay[0],relay[1])
-    elif relay[1] == 'fans':
-        # wind = Wind(13, 18)
-        fans = Relay(relay[0], relay[1])
-str_relays = ','.join([str(x) for x in Relay.dictionary.items()])
-logger.info('Relays configured: {}'.format(str_relays))
-
 
 """set up the Settings object that will handle all the settings"""
 settings = Settings(SETTINGS_URL,SETTINGS_JSON,BARREL_ID)
 settings.update()
-
 
 
 """set up camera"""
@@ -95,8 +81,9 @@ if CAMERA:
     camera.resolution = CAMERA_RES
     logger.info('camera configured.')
 
+
 """setting up lights"""
-sun = Sun(lights,settings,MAXTEMP)
+sun = Sun(LIGHTS)
 
 """setting up fans"""
 wind = Wind(FANS)
@@ -124,16 +111,20 @@ def thermostat(sun, wind, in_sensor, out_sensor, settings):
     global LCD_BOT
     try:
         while True:
-            lightstatus = sun.lights.state
+            # check if the lights are on/off
+            lightstatus = sun.state
             heatsink_max = 45.0  # default
             try:
+                # Check for the hottest current heatsenk temp
                 heatsink_max = max(sun.heatsinksensor.gettemps().values())
             except:
-                logger.exception("couldn't read heatsink sensor. Default 45.0 used.")
+                # if there are no heatsink temps, the default will be used.
+                logger.exception("couldn't read heatsink sensor. Default {} used.".format(heatsink_max))
+
             internal_temp = 25.0  # default
             internal_humidity = 50.0  # default
             external_temp = 25.0  # default
-            try: # read dht22s
+            try:  # read dht22s -
                 internal_temp = float(in_sensor.read[in_sensor.name]['temp'])
                 internal_humidity = float(in_sensor.read[in_sensor.name]['humidity'])
                 external_temp = float(out_sensor.read[out_sensor.name]['temp'])
@@ -145,7 +136,7 @@ def thermostat(sun, wind, in_sensor, out_sensor, settings):
             except:
                 logger.exception("unknown error, defaults used.")
             ## The fancontrol() function needs these variables to determine the needed fan speed.
-            fspeed = wind.fancontrol(settings, internal_temp, internal_humidity, external_temp, heatsink_max, lightstatus)
+            fspeed = wind.fancontrol(settings, internal_temp, internal_humidity, external_temp, heatsink_max, sun.state)
             wind.speed(fspeed)
             LCD_BOT = 'Fan speed: {}'.format(fspeed)
             if LCD_PINS:
@@ -163,7 +154,7 @@ def data_capture(url):
             'timestamp': datetime.datetime.utcnow().isoformat(),  # datetime
             'sinktemps': sun.sinktemps,  # list of float object
             'sensors': sensor_data,  # dict {'name':{'timestamp','temp','humidity'}}
-            'lights': lights.state,  # bool
+            'lights': sun.state,  # bool
             'fanspeed': wind.tach,  # float
                 }
         sun.sinktemps = []
@@ -204,9 +195,9 @@ def data_logger():
 
 # These are the threads that will be running
 workers = {
-    'lighting': Thread(target=sun.lightcontrol), # checks time, turns lights on or off.
+    'lighting': Thread(target=sun.lightcontrol, args=([(settings.sunrise, settings.daylength)])), # checks time, turns lights on or off.
     'hvac': Thread(target=thermostat, args=(sun, wind, in_sense, ext_sense, settings)), #
-    'heatink_safety_monitor': Thread(target=sun.safetyvalve, args=(sun.lights,sun.maxtemp)),
+    'heatink_safety_monitor': Thread(target=sun.safetyvalve, args=(MAXTEMP)),
     'settings_fetcher': Thread(target=settings_fetcher),
     'data_logger': Thread(target=data_logger)
 }
@@ -223,9 +214,9 @@ try:
             if not workers[name].is_alive():
                 logger.warning('{} encountered an error! Restarting...'.format(name))
                 if name == 'heatink_safety_monitor':
-                    workers[name] = Thread(target=sun.safetyvalve, args=(sun.lights,sun.maxtemp))
+                    workers[name] = Thread(target=sun.safetyvalve, args=(MAXTEMP))
                 elif name == 'lighting':
-                    workers[name] = Thread(target=sun.lightcontrol)
+                    workers[name] = Thread(target=sun.lightcontrol, args=([(settings.sunrise, settings.daylength)]))
                 elif name == 'hvac':
                     workers[name] = Thread(target=thermostat, args=(sun, wind, in_sense, ext_sense, settings)) #sun, wind, in_sensor, out_sensor, settings
                 elif name == 'settings_fetcher':
