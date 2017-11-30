@@ -84,7 +84,7 @@ if __name__ == "__main__":
         row = []
         for s in order:
              row.append(str(data[s]) + '\t')
-        print '\t'.join(row)
+        print('\t'.join(row))
         time.sleep(4)
 
 

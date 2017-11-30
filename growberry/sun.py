@@ -18,15 +18,15 @@ class Sun:
     need to uncouple this from the settings class.  (done?)
     """
 
-    def __init__(self, powerpin, dim_pin=False):
-        self.powerpin = int(powerpin)  # this is the GPIO pin number (will depend on GPIO config)
-        GPIO.setup(int(powerpin), GPIO.OUT, initial=1)
+    def __init__(self, pins):
+        self.powerpin = int(pins[0])  # this is the GPIO pin number (will depend on GPIO config)
+        GPIO.setup(int(self.powerpin), GPIO.OUT, initial=1)
         self.mode = 'binary'
-        if dim_pin:
-            self.dimpin = dim_pin
+        if len(pins) == 2:
+            self.dimpin = pins[1]
             self.mode = 'PWM'
-            GPIO.setup(dim_pin, GPIO.OUT)
-            self.pwm = GPIO.PWM(dim_pin, 25000)  # need to pick a frequency that doesn't flicker the lights.
+            GPIO.setup(self.dimpin, GPIO.OUT)
+            self.pwm = GPIO.PWM(self.dimpin, 25000)  # need to pick a frequency that doesn't flicker the lights.
             self.pwm.start(0)
             self.brighness = 0
         logger.info('Let there be light!')
@@ -61,7 +61,7 @@ class Sun:
         # read all heatsink sensors, make sure there is one
         logger.info('Heatsink safety monitor activated. Lights will be powered down if temps exceed {} C.'.format(maxtemp))
         while self:
-            self.sinktemps = w1therm().gettemps()  # temps is a dict: {'28-031655df8bff': 18.625, }
+            # self.sinktemps = w1therm().gettemps()  # temps is a dict: {'28-031655df8bff': 18.625, }
             for sensor_id, temp in self.heatsinksensor.gettemps().items():
                 self.sinktemps.append(float(temp))
                 if float(temp) > maxtemp:  # check if any sensor is hotter than the maxtemp
@@ -89,14 +89,14 @@ class Sun:
                     sunrise = datetime.datetime.combine(datetime.date.today(), risetime)
                 else:
                     logger.error(
-                        'The entered sunrise ({}) is not of datetime.time, or 4-digit string.'.format(interval[0]))
+                        'The entered sunrise ({}) is not of datetime.time, or 4-digit string.\nIt appears to be of type: {}'.format(interval[0], type(interval[0])))
                     break
                 if isinstance(interval[1], datetime.timedelta):
                     daylength = interval[1]
                 elif isinstance(interval[1], int) or isinstance(interval[1], float):
                     daylength = datetime.timedelta(hours=interval[1])
                 else:
-                    logger.error('The entered daylength ({}) is not of datetime.timedelta, or int/float.'.format(interval[1]))
+                    logger.error('The entered daylength ({}) is not of datetime.timedelta, or int/float.\nIt appears to be of type: {}'.format(interval[1], type(interval[1])))
                     break
                 sunset = sunrise + daylength
 
@@ -158,12 +158,27 @@ if __name__ == '__main__':
     logger.debug('lights are currently: {}'.format(sun.state))
 
     while True:
-        user_sunrise = input("what time does the sun come up (HHMM)?\n>>>")
+        user_sunrise = str(input("what time does the sun come up (HHMM)?\n>>>"))
         user_daylenth = float(input("how long is the sun up for (in hours)?\n>>>"))
         user_interval = [(user_sunrise, user_daylenth)]
-        logger.debug(user_interval)
+        logger.debug('Entered interval: {}'.format(user_interval))
+        print('length of interval: {}'.format(len(user_interval)))
+        print('type of interval: {}'.format(type(user_interval)))
         sun.lightcontrol(user_interval)
         logger.debug('lights are currently: {}'.format(sun.state))
     sun.sundown()
     GPIO.cleanup()
     logger.debug('Sun has set, GPIO pins have been cleaned up. Goodbye.')
+
+
+    """
+Exception in thread Thread-15:
+Traceback (most recent call last):
+  File "/usr/lib/python2.7/threading.py", line 810, in __bootstrap_inner
+    self.run()
+  File "/usr/lib/python2.7/threading.py", line 763, in run
+    self.__target(*self.__args, **self.__kwargs)
+  File "growberry/sun.py", line 85, in lightcontrol
+    if isinstance(interval[0], datetime.time):
+TypeError: 'datetime.time' object has no attribute '__getitem__'
+"""

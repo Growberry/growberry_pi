@@ -195,9 +195,9 @@ def data_logger():
 
 # These are the threads that will be running
 workers = {
-    'lighting': Thread(target=sun.lightcontrol, args=([(settings.sunrise, settings.daylength)])), # checks time, turns lights on or off.
+    'lighting': Thread(target=sun.lightcontrol, args=([(settings.sunrise, settings.daylength)],)), # checks time, turns lights on or off.
     'hvac': Thread(target=thermostat, args=(sun, wind, in_sense, ext_sense, settings)), #
-    'heatink_safety_monitor': Thread(target=sun.safetyvalve, args=(MAXTEMP)),
+    'heatink_safety_monitor': Thread(target=sun.safetyvalve, args=(MAXTEMP,)),
     'settings_fetcher': Thread(target=settings_fetcher),
     'data_logger': Thread(target=data_logger)
 }
@@ -214,9 +214,9 @@ try:
             if not workers[name].is_alive():
                 logger.warning('{} encountered an error! Restarting...'.format(name))
                 if name == 'heatink_safety_monitor':
-                    workers[name] = Thread(target=sun.safetyvalve, args=(MAXTEMP))
+                    workers[name] = Thread(target=sun.safetyvalve, args=(MAXTEMP,))
                 elif name == 'lighting':
-                    workers[name] = Thread(target=sun.lightcontrol, args=([(settings.sunrise, settings.daylength)]))
+                    workers[name] = Thread(target=sun.lightcontrol, args=([(settings.sunrise, settings.daylength)]),)
                 elif name == 'hvac':
                     workers[name] = Thread(target=thermostat, args=(sun, wind, in_sense, ext_sense, settings)) #sun, wind, in_sensor, out_sensor, settings
                 elif name == 'settings_fetcher':
