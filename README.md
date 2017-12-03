@@ -63,6 +63,32 @@ move message of the day to /etc/ to give custom ssh login welcome message
 
     vi growberry_pi/growberry/config.py
 
+## Notes about getting supervisor to work... This is tricky sometimes.
+this works for now (dec 2016)
+the file is made according to the docs:
+http://supervisord.org/installing.html
+but add the [your program name] section:
+[program:growberry_pi]
+command = python /home/pi/growberry_pi/growberry
+directory = /home/pi/growberry_pi/
+user = pi
+logfile=/var/log/supervisor/supervisord.log
+redirect_stderr = True                                                                  
+environment = PRODUCTION=1
+pay special attention to the log file.  It must be in a supervisor log location.
+make the correct path exist:
+mkdir /var/log/supervisor/
+make sure the owner of the log files match that of the <user=> section of the conf file
+sudo chown youuser:youuser -R /var/log/supervisor/
+modify permissions on supervisord.conf
+section under [unix_http_server]
+chmod = 0766  (the default is 0700)
+once changed, do a sudo reboot to make the changes take effect
+enter supervisorctl, and start the process:
+sudo supervisorctl
+reread
+update
+
 ## Reboot the pi.  Supervisor should start the growberry process
 
     sudo apt reboot
