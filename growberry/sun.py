@@ -1,7 +1,12 @@
 import datetime
+import sys
+import RPi.GPIO as GPIO
 from one_wire_temp import w1therm
 from time import sleep
 import logging
+
+GPIO.setmode(GPIO.BCM)  # for using the names of the pins
+GPIO.setwarnings(True)  # set to false if the warnings bother you, helps troubleshooting
 
 logger = logging.getLogger(__name__)
 
@@ -136,11 +141,16 @@ class Sun:
 
 
 if __name__ == '__main__':
+    out_hdlr = logging.StreamHandler(sys.stdout)
+    out_hdlr.setLevel(logging.DEBUG)
+    logger.addHandler(out_hdlr)
+
     power = raw_input("Which GPIO pin powers the lights?\n>>>")
     pwm = raw_input("Which pin controls the brightness (this doesn't do anything yet)?\n>>>")
     sun = Sun(int(power),int(pwm))
     print('lights are currently: {}'.format(sun.state))
     sun.sunup()
+    sleep(3)
     print('lights are currently: {}'.format(sun.state))
     sun.sundown()
     print('lights are currently: {}'.format(sun.state))
@@ -148,6 +158,10 @@ if __name__ == '__main__':
     while True:
         user_sunrise = raw_input("what time does the sun come up (HHMM)?\n>>>")
         user_daylenth = raw_input("how long is the sun up for (in hours)?\n>>>")
-        user_interval = (user_sunrise, user_daylenth)
+        user_interval = [(user_sunrise, user_daylenth)]
+        print(user_interval)
         sun.lightcontrol(user_interval)
         print('lights are currently: {}'.format(sun.state))
+    sun.sundown()
+    GPIO.cleanup()
+    print('Sun has set, GPIO pins have been cleaned up. Goodbye.')
