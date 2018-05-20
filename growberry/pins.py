@@ -1,4 +1,6 @@
 import time
+import sys
+from time import sleep
 import RPi.GPIO as GPIO
 import Adafruit_DHT
 import datetime
@@ -102,3 +104,32 @@ class Sensor:
 
         #print 'Temperature: {0:0.1f} C'.format(temp)       #prints Temp formated
         #print 'Humidity:    {0:0.1f} %'.format(humidity)   #prints Humidity formatted
+
+
+if __name__=="__main__":
+    print('Entering manual mode:  Currently only supporting DHT22 sensors.')
+    sleep(1)
+    # put in a handler to print errors to the standard output
+    out_hdlr = logging.StreamHandler(sys.stdout)
+    out_hdlr.setLevel(logging.DEBUG)
+    logger.addHandler(out_hdlr)
+    sensor_pins = None
+
+    # take any number of DHT22 sensors, and the pins they are on.
+    try:
+        sensor_number = int(input('how many DHT22 sensors are connected?\n>>>'))
+        sensor_pins = [int(input('which pin is connected to your DHT22?\n>>>')) for x in range(sensor_number)]
+
+    except ValueError:
+        logger.error('all values entered must be integers!')
+
+    manual_sensors = []
+    for sensor in sensor_pins:  # create a list containing all the sensor objects
+        manual_sensors.append(Sensor(sensor, Adafruit_DHT.DHT22, 'DHT22 on pin:{}'.format(sensor)))
+
+    while True:
+        sensor_data = {}
+        for s in manual_sensors:
+            sensor_data.update(s.read)
+
+        print(sensor_data)

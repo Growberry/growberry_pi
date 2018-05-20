@@ -1,5 +1,6 @@
 import RPi.GPIO as GPIO
 import logging
+import sys
 
 GPIO.setmode(GPIO.BCM)  # for using the names of the pins
 GPIO.setwarnings(True)  # set to false if the warnings bother you, helps troubleshooting
@@ -8,20 +9,19 @@ logger = logging.getLogger(__name__)
 
 class Wind:
     """This will house all of functions used to control the fans"""
-    def __init__(self, *args):
-        if len(args) == 1:
-            self.fantype = 'Binary'
-        elif len(args) == 2:
-            self.speedpin = args[1]
+    def __init__(self, pins):
+        self.fantype = 'Binary'
+        if len(pins) == 2:
+            self.speedpin = pins[1]
             GPIO.setup(self.speedpin, GPIO.OUT)
             self.pwm = GPIO.PWM(self.speedpin, 25000) # 25 Kilohertz is inaudible to human ears
             self.pwm.start(0)
             self.tach = 0
             self.fantype = 'PWM'
         else:
-            logger.error('Wind class accepts only 1-2 arguments')
+            logger.error('Wind class accepts a list containing 1-2 numbers: eg [powerpin, dim_pin]')
             raise ValueError("wrong number of arguments")
-        self.powerpin = args[0]
+        self.powerpin = pins[0]
         GPIO.setup(self.powerpin, GPIO.OUT, initial=1)
         logger.info('Wind instance configured using {} fans.  Power on pin {}'.format(self.fantype, self.powerpin))
 
@@ -95,8 +95,14 @@ class Wind:
 
 """Manual control mode"""
 if __name__ == "__main__":
-    power = raw_input("Which GPIO pin powers the fan (13)?\n>>>")
-    pwm = raw_input("Which pin controls the speed (18)?\n>>>")
+
+    # put in a handler to print errors to the standard output
+    out_hdlr = logging.StreamHandler(sys.stdout)
+    out_hdlr.setLevel(logging.DEBUG)
+    logger.addHandler(out_hdlr)
+
+    power = input("Which GPIO pin powers the fan (13)?\n>>>")
+    pwm = input("Which pin controls the speed (18)?\n>>>")
     wind = Wind(int(power),int(pwm))
     try:
         while True:
@@ -104,16 +110,16 @@ if __name__ == "__main__":
             try:
                 wind.speed(inputspeed)
             except ValueError:
-                print("invalid set speed")
+                logger.debug("invalid set speed")
             except:
-                print("something went wrong.")
+                logger.debug("something went wrong.")
                 break
             else:
-                print("New duty cycle = {}\nCurrent fan status is: {}".format(inputspeed, wind.state))
+                logger.debug("New duty cycle = {}\nCurrent fan status is: {}".format(inputspeed, wind.state))
 
 
     finally:
         wind.pwm.stop()
         GPIO.cleanup()
-        print('PWM stopped, GPIO pins have been cleaned up. Goodbye.')
+        logger.debug('PWM stopped, GPIO pins have been cleaned up. Goodbye.')
 

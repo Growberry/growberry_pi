@@ -82,9 +82,9 @@ class LED:
 
     def fake(self):
         if GPIO.output(self.pin):           # if self.pin == 1  
-            print "%s on port %s is 1/GPIO.HIGH/True"%(self.name,self.pin)
+            print("%s on port %s is 1/GPIO.HIGH/True"%(self.name,self.pin))
         else:
-            print "%s on port %s is 0/GPIO.LOW/False"%(self.name,self.pin)
+            print("%s on port %s is 0/GPIO.LOW/False"%(self.name,self.pin))
 
     def on(self):
         GPIO.output(self.pin,GPIO.HIGH)
@@ -136,9 +136,9 @@ class Relay:
 
     def fake(self):
         if GPIO.output(self.pin):           # if self.pin == 1  
-            print "%s on port %s is 1/GPIO.HIGH/True"%(self.name,self.pin)
+            print("%s on port %s is 1/GPIO.HIGH/True"%(self.name,self.pin))
         else:
-            print "%s on port %s is 0/GPIO.LOW/False"%(self.name,self.pin)
+            print("%s on port %s is 0/GPIO.LOW/False"%(self.name,self.pin))
 
     def on(self):
         GPIO.output(self.pin,GPIO.LOW)
@@ -189,7 +189,7 @@ def main():
     while True:
         result = activitycode(LED.dictionary)
         if result == False:
-            print "[--system--] powering down."
+            print("[--system--] powering down.")
             GPIO.cleanup()
             break
 
@@ -229,14 +229,14 @@ if __name__ == '__main__':
             setpin = raw_input('Enter GPIO pin number, or enter "done" to begin testing. ')
             if str(setpin) == 'done':
                 main()
-                print '\n\nSet more pins, or ctr+c to shut down.'
+                print('\n\nSet more pins, or ctr+c to shut down.')
             else: 
                 GPIO.setup(int(setpin),GPIO.OUT, initial = 1)
-                setname = raw_input('Name of this relay: ')
+                setname = input('Name of this relay: ')
                 relaydict[setname] = Relay(setpin,setname)
     
     except KeyboardInterrupt:
-        print '\n\n\n[--system--] powering down.'
+        print('\n\n\n[--system--] powering down.')
     finally:
         GPIO.cleanup()
-        print "GPIO pins have been cleaned up.  Goodbye!"
+        print("GPIO pins have been cleaned up.  Goodbye!")
