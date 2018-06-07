@@ -1,3 +1,5 @@
+![Alternate image text](https://github.com/Growberry/growberry_pi/blob/master/growberry_icon_sqare_gimp_125.png)
+
 # growberry_pi
 Here is where I will work on code for my raspberry pi controlled growth chamber
 
