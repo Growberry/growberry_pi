@@ -70,66 +70,99 @@ class Sun:
             sleep(10)
 
 
+
+
+
     def lightcontrol(self, light_intervals):
         """
         determines if artificial lights should be on, or off.
         light_intervals is a list of tuples, consisting of (rise, daylength)
-            :param rise: datetime.time(h,m,s)
-            :param length: float or int number of hours
+            :param rise: Can either be datetime.time(h,m,s), or
+            :param length: Can be a datetime.timedelta, or float or int number of hours
         :return: returns nothing. This actually turns lights on or off.
-        eventually this will take any number of rises and lengths.  Perhaps in tuples
         """
         while self:
-            decider = []
-            for interval in light_intervals:
-                if isinstance(interval[0], datetime.time):
+            on_flag = False # every loop assumes the lights should be off.
+            decider = [] # this list will get filled with "on" or "off" values for each interval.  this is deprecated?
+            for interval in light_intervals: # for every tuple in the list
+                _rise = interval[0] #the rise is the first object in the tuple
+                _daylength = interval[1] #daylength is the second object
+                if isinstance(_rise, datetime.time): #check that the rise is a datetime.time object
                     sunrise = datetime.datetime.combine(datetime.date.today(), interval[0])  #The day changes, but the time doesnt
-                elif isinstance(interval[0], str) and len(interval[0]) == 4:
-                    risetime = datetime.datetime.strptime(interval[0], '%H%M').time()
+                elif isinstance(_rise, str) and len(_rise) == 4:
+                    risetime = datetime.datetime.strptime(_rise, '%H%M').time()
                     sunrise = datetime.datetime.combine(datetime.date.today(), risetime)
                 else:
                     logger.error(
-                        'The entered sunrise ({}) is not of datetime.time, or 4-digit string.'.format(interval[0]))
+                        'The entered sunrise ({}) is not of datetime.time, or 4-digit string.'.format(_rise))
                     break
-                if isinstance(interval[1], datetime.timedelta):
+                if isinstance(_daylength, datetime.timedelta):
                     daylength = interval[1]
-                elif isinstance(interval[1], int) or isinstance(interval[1], float):
-                    daylength = datetime.timedelta(hours=interval[1])
+                elif isinstance(_daylength, int) or isinstance(_daylength, float):
+                    daylength = datetime.timedelta(hours=_daylength)
                 else:
-                    logger.error('The entered daylength ({}) is not of datetime.timedelta, or int/float.'.format(interval[0]))
+                    logger.error('The entered daylength ({}) is not of datetime.timedelta, or int/float.'.format(_daylength))
                     break
-                sunset = sunrise + daylength
+                sunset = sunrise + daylength  # Now you have sunrise and sunset, both as datetimes
 
                 now = datetime.datetime.now()
-                tomorrow = now.date() + datetime.timedelta(hours=24)
-                midnight = datetime.datetime.combine(tomorrow, datetime.time(0, 0, 0))
-                if sunrise <= midnight <= sunset:
-                    logger.debug('day spans midnight')
-                    if sunset.time() <= now.time() <= sunrise.time():
-                        decider.append('off')  # The current time is NOT within this lighting interval
-                        logger.debug('\nsunrise:  {}\nsunset: {}\nnow: {}\nlights OFF.'.format(sunrise, sunset,
-                                                                                      datetime.datetime.now().time()))
-                    else:
-                        decider.append('on')  # The current time is within this lighting interval
-                        logger.debug('\nsunrise:  {}\nsunset: {}\nnow: {}\nlights ON.'.format(sunrise, sunrise,
-                                                                                     datetime.datetime.now().time()))
-                else:
-                    if sunrise.time() <= now.time() <= sunset.time():
-                        decider.append('on')  # The current time is within this lighting interval
-                        logger.debug('\nsunrise:  {}\nsunset: {}\nnow: {}\nlights ON.'.format(sunrise, sunset,
-                                                                                               datetime.datetime.now()))
-                    else:
-                        decider.append('off')  # The current time is NOT within this lighting interval
-                        logger.debug('\nsunrise:  {}\nsunset: {}\nnow: {}\nlights OFF.'.format(sunrise, sunset,
-                                                                                       datetime.datetime.now()))
+                if sunrise <= now < sunset:
+                    on_flag = True
 
-                # if the decider list has any 'on' values, the current time falls within one of the intervals, so the lights should be on!
-                if 'on' in decider:
-                    self.sunup()
-                else:
-                    self.sundown()
+
+            if on_flag:
+                self.sunup()
+            else:
+                self.sundown()
+                #
+                # now = datetime.datetime.now()
+                # tomorrow = now.date() + datetime.timedelta(hours=24)
+                # midnight = datetime.datetime.combine(tomorrow, datetime.time(0, 0, 0))
+                # if sunrise <= midnight <= sunset:
+                #     logger.debug('day spans midnight')
+                #     if sunset.time() <= now.time() <= sunrise.time():
+                #         decider.append('off')  # The current time is NOT within this lighting interval
+                #         logger.debug('\nsunrise:  {}\nsunset: {}\nnow: {}\nlights OFF.'.format(sunrise, sunset,
+                #                                                                       datetime.datetime.now().time()))
+                #     else:
+                #         decider.append('on')  # The current time is within this lighting interval
+                #         logger.debug('\nsunrise:  {}\nsunset: {}\nnow: {}\nlights ON.'.format(sunrise, sunrise,
+                #                                                                      datetime.datetime.now().time()))
+                # else:
+                #     if sunrise.time() <= now.time() <= sunset.time():
+                #         decider.append('on')  # The current time is within this lighting interval
+                #         logger.debug('\nsunrise:  {}\nsunset: {}\nnow: {}\nlights ON.'.format(sunrise, sunset,
+                #                                                                                datetime.datetime.now()))
+                #     else:
+                #         decider.append('off')  # The current time is NOT within this lighting interval
+                #         logger.debug('\nsunrise:  {}\nsunset: {}\nnow: {}\nlights OFF.'.format(sunrise, sunset,
+                #                                                                        datetime.datetime.now()))
+                #
+                # # if the decider list has any 'on' values, the current time falls within one of the intervals, so the lights should be on!
+                # if 'on' in decider:
+                #     self.sunup()
+                # else:
+                #     self.sundown()
+
+
 
                 sleep(60)
+
+    def light_loop(self,light_intervals):
+        # create a list of (on, off) intervals where on/off are datetimes
+        on_off_intervals = []
+        for input_interval in light_intervals:
+
+        # Make the time a datetime
+
+        # loop through the interval list, check if now is in any of them
+        on_flag = False
+        while self():
+            for interval in on_off_intervals:
+
+        #my_event.start_time < current_time < my_event.end_time
+
+
 
                         # return lenth of time lights have been on
     @property
