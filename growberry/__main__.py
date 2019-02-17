@@ -1,3 +1,7 @@
+#######################
+#   BASIC IMPORTS
+#######################
+
 
 from time import sleep
 import datetime
@@ -7,12 +11,20 @@ import requests
 import logging
 import logging.handlers
 import sys
-
 import RPi.GPIO as GPIO
-from picamera import PiCamera
 
+#######################
+#   CONFIG IMPORTS
+#######################
+"""
+These variables are coming from the 'config.py' python file.
+"""
 from config import DHT22, SETTINGS_JSON, SETTINGS_URL, BARREL_ID, CAMERA, CAMERA_RES, MAXTEMP, MEASUREMENT_INT,\
     DATAPOST_URL, PHOTO_LOC, LOG_FILENAME, LOG_LVL, LOG_FORMAT, FANS, LIGHTS, LCD_PINS, HEATSINK_SAFETY
+
+#######################
+# Classes setup
+#######################
 
 from settings import Settings
 from sun import Sun
