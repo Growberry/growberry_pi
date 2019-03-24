@@ -26,6 +26,8 @@ Add to bottom of the config file - the <pin#> for my device is 20
 
     sudo echo "dtoverlay=w1-gpio,gpiopin=<pin#>"  >> /boot/config.txt
 
+You can check that this worked by rebooting the pi, and navigating to `/sys/bus/w1/devices`  There should exist a directory for every w1 therm device connected.  You can check the temps by `cat ./*/w1_slave`
+
 ## Clone the Adafruit respositories to interface with the 16x2 LCD
 
     git clone https://github.com/adafruit/Adafruit_Python_CharLCD.git
