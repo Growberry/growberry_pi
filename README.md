@@ -28,18 +28,6 @@ Add to bottom of the config file - the <pin#> for my device is 20
 
 You can check that this worked by rebooting the pi, and navigating to `/sys/bus/w1/devices`  There should exist a directory for every w1 therm device connected.  You can check the temps by `cat ./*/w1_slave`
 
-## Clone the Adafruit respositories to interface with the 16x2 LCD
-
-    git clone https://github.com/adafruit/Adafruit_Python_CharLCD.git
-    cd Adafruit_Python_charLCD/
-    sudo python setup.py install
-
-## Clone the Adafruit respositories to interface with the DNT22 temperature/humidity sensor
-
-    git clone https://github.com/adafruit/Adafruit_Python_DHT.git
-    cd Adafruit_Python_DHT/
-    sudo python setup.py install
-
 ## Clone this repository:
 
     git clone https://github.com/Growberry/growberry_pi.git
@@ -53,7 +41,12 @@ move message of the day to /etc/ to give custom ssh login welcome message
     
 ## Make a virtual environment to keep the system python safe
 
+    # old
     virtualenv venv
+    
+    # new
+    python3 venv growberry_pi/venv
+
 
 ## activate the virtual-env
 
@@ -62,6 +55,19 @@ move message of the day to /etc/ to give custom ssh login welcome message
 ## Install requirements
 
     pip install -r requirements.txt
+
+## Clone the Adafruit respositories to interface with the 16x2 LCD
+
+    git clone https://github.com/adafruit/Adafruit_Python_CharLCD.git
+    cd Adafruit_Python_charLCD/
+    sudo python setup.py install
+
+## Clone the Adafruit respositories to interface with the DNT22 temperature/humidity sensor
+
+    git clone https://github.com/adafruit/Adafruit_Python_DHT.git
+    cd Adafruit_Python_DHT/
+    sudo python setup.py install
+
 
 ## Edit your config file to represent your hardware situation
 
